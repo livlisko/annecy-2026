@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annecy 2026 - The Sibling Trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --teal: #1B7A6E;
+  --teal-dark: #145C54;
+  --teal-light: #E0F5F1;
+  --lake: #2A9D8F;
+  --east: #E07A5F;
+  --east-light: #FFF0EB;
+  --west: #457B9D;
+  --west-light: #EBF2F7;
+  --cream: #FFFBF5;
+  --sand: #F4E8D5;
+  --text: #2D3436;
+  --text-light: #636E72;
+  --white: #FFFFFF;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4 { font-family: 'Fraunces', serif; font-weight: 600; }
+h2 { font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--teal-dark); }
+h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+p { margin-bottom: 0.8rem; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(255,251,245,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.6rem 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+nav a {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  margin-right: 0.3rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+nav a:hover, nav a:focus { background: var(--teal-light); color: var(--teal); }
+
+/* SECTIONS */
+section { padding: 2.5rem 1.2rem; max-width: 800px; margin: 0 auto; }
+.section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--sand), transparent); margin: 0 auto; max-width: 600px; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--teal) 0%, var(--west) 50%, var(--east) 100%);
+  color: white; text-align: center;
+  padding: 3.5rem 1.5rem 3rem;
+}
+.hero h1 { font-size: 2.4rem; margin-bottom: 0.3rem; font-weight: 700; }
+.hero .subtitle { font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+.hero .dates { display: inline-block; margin-top: 1rem; padding: 0.4rem 1.2rem; background: rgba(255,255,255,0.18); border-radius: 20px; font-size: 0.9rem; }
+
+/* STATS BAR */
+.stats-bar {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 1.2rem;
+  padding: 1.2rem; background: var(--white);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.stat { text-align: center; }
+.stat .num { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--teal); }
+.stat .label { font-size: 0.72rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* MAP */
+#map { height: 380px; border-radius: var(--radius); margin: 1rem 0; box-shadow: var(--shadow); }
+
+/* CARDS */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--teal);
+}
+.card.east { border-left-color: var(--east); }
+.card.west { border-left-color: var(--west); }
+.card .tagline { font-style: italic; color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.5rem; }
+.card .meta { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.6rem; }
+
+/* TAGS */
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.tag {
+  display: inline-block; padding: 0.2rem 0.6rem;
+  border-radius: 12px; font-size: 0.72rem; font-weight: 500;
+  background: var(--teal-light); color: var(--teal);
+}
+.tag.east-tag { background: var(--east-light); color: var(--east); }
+.tag.west-tag { background: var(--west-light); color: var(--west); }
+.tag.hot { background: #FFF3CD; color: #856404; }
+
+/* COMPARISON */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.8rem; margin: 1.2rem 0;
+}
+.compare-col { background: var(--white); border-radius: var(--radius); padding: 1.2rem; box-shadow: var(--shadow); }
+.compare-col.east-col { border-top: 3px solid var(--east); }
+.compare-col.west-col { border-top: 3px solid var(--west); }
+.compare-col h3 { font-size: 1.1rem; margin-bottom: 0.8rem; }
+.compare-row { margin-bottom: 0.7rem; }
+.compare-row .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); font-weight: 500; }
+.compare-row .val { font-size: 0.9rem; margin-top: 0.1rem; }
+
+/* PERSON TABS */
+.person-tabs {
+  display: flex; overflow-x: auto; gap: 0.4rem;
+  margin-bottom: 1.2rem; padding-bottom: 0.3rem;
+  -webkit-overflow-scrolling: touch;
+}
+.person-tab {
+  padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem;
+  font-weight: 500; cursor: pointer; white-space: nowrap;
+  background: var(--white); color: var(--text-light);
+  border: 1px solid rgba(0,0,0,0.08); transition: all 0.2s;
+}
+.person-tab.active { background: var(--teal); color: white; border-color: var(--teal); }
+.person-content { display: none; }
+.person-content.active { display: block; }
+
+/* DAY TRIPS SCROLL */
+.scroll-container {
+  display: flex; overflow-x: auto; gap: 1rem;
+  padding: 0.5rem 0 1rem; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.scroll-card {
+  min-width: 260px; max-width: 280px;
+  flex-shrink: 0; scroll-snap-align: start;
+  background: var(--white); border-radius: var(--radius);
+  padding: 1.2rem; box-shadow: var(--shadow);
+}
+.scroll-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+.scroll-card h4 { font-size: 1rem; }
+.scroll-card .drive { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem; }
+.scroll-card p { font-size: 0.88rem; }
+
+/* FOOD */
+.food-tier { margin-bottom: 1.5rem; }
+.food-tier h3 { display: flex; align-items: center; gap: 0.5rem; }
+.food-item { padding: 0.8rem 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
+.food-item:last-child { border-bottom: none; }
+.food-item .name { font-weight: 600; }
+.food-item .desc { font-size: 0.88rem; color: var(--text-light); }
+
+/* VOTE */
+.vote-section { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+.vote-option {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.8rem; margin-bottom: 0.5rem;
+  border: 2px solid rgba(0,0,0,0.06); border-radius: var(--radius);
+  cursor: pointer; transition: all 0.2s;
+}
+.vote-option:hover { border-color: var(--teal); background: var(--teal-light); }
+.vote-option.selected { border-color: var(--teal); background: var(--teal-light); }
+.vote-option input { display: none; }
+.vote-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid #ccc; flex-shrink: 0; transition: all 0.2s;
+}
+.vote-option.selected .vote-dot { background: var(--teal); border-color: var(--teal); }
+.vote-btn {
+  display: block; width: 100%; padding: 0.8rem;
+  margin-top: 1rem; border: none; border-radius: var(--radius);
+  background: var(--teal); color: white;
+  font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.vote-btn:hover { background: var(--teal-dark); }
+.vote-input {
+  width: 100%; padding: 0.7rem; margin-bottom: 1rem;
+  border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+}
+.results-bar {
+  display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.results-bar .bar-label { font-size: 0.82rem; min-width: 140px; }
+.results-bar .bar-track {
+  flex: 1; height: 24px; background: rgba(0,0,0,0.04);
+  border-radius: 12px; overflow: hidden;
+}
+.results-bar .bar-fill {
+  height: 100%; border-radius: 12px;
+  transition: width 0.5s ease;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 8px; font-size: 0.72rem; color: white; font-weight: 600;
+}
+
+/* FOOTER */
+footer {
+  text-align: center; padding: 2rem 1.5rem;
+  color: var(--text-light); font-size: 0.85rem;
+}
+footer .heart { color: var(--east); }
+
+/* ACTIVITY ITEM */
+.activity-item {
+  padding: 0.8rem 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-item .act-name { font-weight: 600; font-size: 0.95rem; }
+.activity-item .act-meta { font-size: 0.78rem; color: var(--text-light); margin-top: 0.15rem; }
+.activity-item .act-desc { font-size: 0.88rem; margin-top: 0.25rem; }
+.tier-label {
+  display: inline-block; padding: 0.15rem 0.5rem;
+  border-radius: 8px; font-size: 0.7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 0.8rem;
+}
+.tier-must { background: #D4EDDA; color: #155724; }
+.tier-worth { background: #FFF3CD; color: #856404; }
+.tier-know { background: #E2E3E5; color: #383D41; }
+
+/* BOTTOM LINE */
+.bottom-line {
+  background: var(--sand); padding: 1.2rem;
+  border-radius: var(--radius); margin-top: 1rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  section { padding: 2rem 1rem; }
+  .compare-grid { grid-template-columns: 1fr; }
+  #map { height: 300px; }
+  .stats-bar { gap: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <a href="#map-section">Map</a>
+  <a href="#shores">East vs West</a>
+  <a href="#towns">Towns</a>
+  <a href="#activities">Activities</a>
+  <a href="#daytrips">Day Trips</a>
+  <a href="#food">Food</a>
+  <a href="#vote">Vote</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Lac d'Annecy 2026</h1>
+  <div class="subtitle">The first ever sibs-only trip. No parents. No rules.*</div>
+  <div class="dates">Aug 15 - 29, 2026 &middot; 14 nights &middot; 5 of us</div>
+  <div style="font-size:0.72rem; opacity:0.6; margin-top:0.8rem;">*Some rules. Andrew's driving.</div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><div class="num">14.6 km</div><div class="label">Lake Length</div></div>
+  <div class="stat"><div class="num">22-24&deg;C</div><div class="label">Water Temp (Aug)</div></div>
+  <div class="stat"><div class="num">42 km</div><div class="label">Voie Verte Loop</div></div>
+  <div class="stat"><div class="num">2,351 m</div><div class="label">La Tournette Peak</div></div>
+  <div class="stat"><div class="num">#1</div><div class="label">Cleanest Lake in Europe</div></div>
+</div>
+
+<!-- MAP -->
+<section id="map-section">
+  <h2>The Lake</h2>
+  <p>Lac d'Annecy is shaped like a bent finger pointing south: the wider <strong>Grand Lac</strong> in the north (with Annecy at the tip), the narrower <strong>Petit Lac</strong> curving southwest, and the pinch point at Duingt where a castle sits on a tiny peninsula.</p>
+  <div id="map"></div>
+  <p style="font-size:0.78rem; color:var(--text-light); margin-top:0.5rem;">Tap markers for town details. <span style="color:var(--east);">Orange = East Shore</span> &middot; <span style="color:var(--west);">Blue = West Shore</span> &middot; <span style="color:var(--teal);">Teal = Annecy</span></p>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- EAST VS WEST -->
+<section id="shores">
+  <h2>East Shore vs. West Shore</h2>
+  <p>The eternal debate. Here's the honest breakdown.</p>
+  <div class="compare-grid">
+    <div class="compare-col east-col">
+      <h3 style="color:var(--east);">East Shore</h3>
+      <div class="compare-row"><div class="label">Morning Sun</div><div class="val">Yes. Gorgeous sunrise on the water.</div></div>
+      <div class="compare-row"><div class="label">Vibe</div><div class="val">Quieter, more upscale, slightly "French countryside estate" energy.</div></div>
+      <div class="compare-row"><div class="label">Walkability</div><div class="val">Low. Narrow roads, need a car for most things.</div></div>
+      <div class="compare-row"><div class="label">Bike Path</div><div class="val">No Voie Verte. Narrow road with traffic. Not great for casual cycling.</div></div>
+      <div class="compare-row"><div class="label">Dining</div><div class="val">Fewer but fancier. Home of the Michelin stars.</div></div>
+      <div class="compare-row"><div class="label">Adventure</div><div class="val">Closer to Talloires, paragliding, canyoning, Roc de Chère.</div></div>
+      <div class="compare-row"><div class="label">Grocery Run</div><div class="val">Small shops only. Serious shopping = drive to Annecy.</div></div>
+    </div>
+    <div class="compare-col west-col">
+      <h3 style="color:var(--west);">West Shore</h3>
+      <div class="compare-row"><div class="label">Afternoon Sun</div><div class="val">Yes. Golden hour on the water. Shadier mornings.</div></div>
+      <div class="compare-row"><div class="label">Vibe</div><div class="val">More practical, family-friendly, lived-in. Think "locals actually live here."</div></div>
+      <div class="compare-row"><div class="label">Walkability</div><div class="val">High in Sévrier/St-Jorioz. Bakeries, restaurants, markets on foot.</div></div>
+      <div class="compare-row"><div class="label">Bike Path</div><div class="val">Voie Verte runs right through. 42km car-free path. This is the one.</div></div>
+      <div class="compare-row"><div class="label">Dining</div><div class="val">More casual variety. Crêperies, lakefront cafés, market food.</div></div>
+      <div class="compare-row"><div class="label">Adventure</div><div class="val">Slightly further from the big-ticket stuff, but bike path is unbeatable.</div></div>
+      <div class="compare-row"><div class="label">Grocery Run</div><div class="val">Carrefour in Sévrier. You're set.</div></div>
+    </div>
+  </div>
+  <div class="bottom-line">
+    <strong>The honest bottom line:</strong> West Shore is the more practical call for 5 people splitting one car. You can walk to shops, bike everywhere, and get to Annecy in 10 minutes. East Shore is prettier in the morning and closer to the adventure hubs, but you'll drive for everything. If a killer East Shore property appears at the right price, take it. Otherwise, West Shore is the safer bet for how this group actually operates.
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TOWNS -->
+<section id="towns">
+  <h2>Town by Town</h2>
+
+  <h3 style="color:var(--east); margin-top:1.5rem; margin-bottom:1rem;">East Shore</h3>
+
+  <div class="card east">
+    <h3>Veyrier-du-Lac</h3>
+    <div class="meta">5 min drive to Annecy &middot; East Shore</div>
+    <div class="tagline">"The quiet money town. If Annecy is the star, Veyrier is its private garden."</div>
+    <p>The closest East Shore town to Annecy. Beautiful residential area with some of the best lake views. Home to upscale villas with private docks. Limited shops but gorgeous setting. The lakefront road between Veyrier and Menthon is one of the most scenic drives in the area.</p>
+    <div class="tags">
+      <span class="tag east-tag">Morning sun</span>
+      <span class="tag east-tag">Lake views</span>
+      <span class="tag">Private docks</span>
+      <span class="tag">Quiet</span>
+    </div>
+  </div>
+
+  <div class="card east">
+    <h3>Menthon-Saint-Bernard</h3>
+    <div class="meta">12 min drive to Annecy &middot; East Shore</div>
+    <div class="tagline">"The castle town. Yes, the one that inspired Sleeping Beauty."</div>
+    <p>Postcard village dominated by the Château de Menthon, which has stood for nearly 1,000 years and reportedly inspired Disney's castle design. Great beach (Plage de Menthon), a handful of restaurants, and access to the Roc de Chère nature reserve. More village-feel than Veyrier.</p>
+    <div class="tags">
+      <span class="tag east-tag">Castle</span>
+      <span class="tag east-tag">Morning sun</span>
+      <span class="tag">Good beach</span>
+      <span class="tag">Roc de Chère access</span>
+      <span class="tag">Restaurants</span>
+    </div>
+  </div>
+
+  <div class="card east">
+    <h3>Talloires-Montmin</h3>
+    <div class="meta">18 min drive to Annecy &middot; East Shore</div>
+    <div class="tagline">"Adventure HQ. Also where the fancy people eat."</div>
+    <p>Tucked into a bay on the east shore, Talloires is the gateway to serious adventure: Canyon d'Angon, La Tournette summit, paragliding from Col de la Forclaz, and the Roc de Chère trails. Also home to two Michelin-starred restaurants. New gravel-bike café "Basecamp" just opened lakeside. The bay itself is stunning for kayaking.</p>
+    <div class="tags">
+      <span class="tag east-tag">Adventure hub</span>
+      <span class="tag hot">Paragliding</span>
+      <span class="tag">Canyon d'Angon</span>
+      <span class="tag">Michelin dining</span>
+      <span class="tag">Basecamp café</span>
+    </div>
+  </div>
+
+  <h3 style="color:var(--west); margin-top:2rem; margin-bottom:1rem;">West Shore</h3>
+
+  <div class="card west">
+    <h3>Sévrier</h3>
+    <div class="meta">8 min drive to Annecy &middot; West Shore</div>
+    <div class="tagline">"The practical one. Carrefour, bike path, beaches, bakeries. What more do you want?"</div>
+    <p>The most practical base on the west shore. Walk to a supermarket (Carrefour), multiple bakeries, restaurants, and the beach. The Voie Verte bike path runs straight through town. Sévrier beach is popular but there are quieter spots along the shore. The most "livable" option for a 2-week stay.</p>
+    <div class="tags">
+      <span class="tag west-tag">Voie Verte</span>
+      <span class="tag west-tag">Walkable</span>
+      <span class="tag">Carrefour</span>
+      <span class="tag">Multiple beaches</span>
+      <span class="tag">Bakeries</span>
+    </div>
+  </div>
+
+  <div class="card west">
+    <h3>Saint-Jorioz</h3>
+    <div class="meta">12 min drive to Annecy &middot; West Shore</div>
+    <div class="tagline">"Sévrier's slightly more laid-back neighbor with the best public beach on the lake."</div>
+    <p>One town south of Sévrier with a gorgeous sandy public beach (Plage de Saint-Jorioz), a small port, and a village center with shops and restaurants. The Voie Verte runs through here too. Slightly less commercial than Sévrier, slightly more vacation-town feel. Great farmers market.</p>
+    <div class="tags">
+      <span class="tag west-tag">Voie Verte</span>
+      <span class="tag west-tag">Best beach</span>
+      <span class="tag">Small port</span>
+      <span class="tag">Farmers market</span>
+      <span class="tag">Village center</span>
+    </div>
+  </div>
+
+  <div class="card west">
+    <h3>Duingt</h3>
+    <div class="meta">15 min drive to Annecy &middot; West Shore (at the pinch)</div>
+    <div class="tagline">"The charming pinch point. Castle on a peninsula. Cycling café. Pump track. Chef's kiss."</div>
+    <p>Duingt sits where the Grand Lac narrows into the Petit Lac, marked by the photogenic Château de Duingt on its tiny peninsula. Home to Le Bon Wagon (the cycling café), a 1,000m² pump track with three circuits, and a couple of excellent restaurants. Small and quiet, but perfectly positioned between both shores.</p>
+    <div class="tags">
+      <span class="tag west-tag">Voie Verte</span>
+      <span class="tag hot">Pump track</span>
+      <span class="tag">Castle</span>
+      <span class="tag">Le Bon Wagon café</span>
+      <span class="tag">Petit Lac access</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ACTIVITIES -->
+<section id="activities">
+  <h2>What We're Doing</h2>
+  <p>Organized by who's going to be most excited about what.</p>
+
+  <div class="person-tabs">
+    <div class="person-tab active" onclick="showPerson('everyone')">Everyone</div>
+    <div class="person-tab" onclick="showPerson('liv-ian')">Liv + Ian</div>
+    <div class="person-tab" onclick="showPerson('ian')">Ian (Adrenaline)</div>
+    <div class="person-tab" onclick="showPerson('andrew')">Andrew</div>
+    <div class="person-tab" onclick="showPerson('chip-mk')">Chip + MK</div>
+  </div>
+
+  <!-- EVERYONE -->
+  <div class="person-content active" id="everyone">
+    <span class="tier-label tier-must">Must-Do</span>
+
+    <div class="activity-item">
+      <div class="act-name">Voie Verte Loop (42km)</div>
+      <div class="act-meta">Cycling &middot; 3-4 hours &middot; Free &middot; All levels</div>
+      <div class="act-desc">The flat, car-free bike path circling the entire lake. Rent bikes and do the full loop. Non-negotiable group activity. Stop for ice cream in Saint-Jorioz, beer (or Orangina) in Duingt, swim in Talloires.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Kayak/SUP to Hidden Coves</div>
+      <div class="act-meta">Water &middot; 2-3 hours &middot; ~€20-30/person rental &middot; Easy</div>
+      <div class="act-desc">Paddle from any beach toward the Petit Lac (south end) to find hidden coves inaccessible by land. The water is absurdly clear. Bring snacks. Doussard end has the quietest, least-discovered spots.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Annecy Old Town + Market</div>
+      <div class="act-meta">Culture &middot; Half day &middot; Free (minus the cheese you'll buy) &middot; Tuesday/Friday/Sunday market</div>
+      <div class="act-desc">Canals, pastel buildings, the Palais de l'Île. Sunday market is huge. Friday is the smaller local one (better vibes). Reblochon from the fromagerie, bread from the boulangerie, and a glass of Roussette on the canal.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Col de la Forclaz Sunset</div>
+      <div class="act-meta">Scenic &middot; 30 min drive from west shore &middot; Free &middot; Go after 7pm</div>
+      <div class="act-desc">Drive up to the Col de la Forclaz for the most iconic viewpoint over the lake. Watch paragliders launch at golden hour. Bring wine (or Pellegrino for Andrew). This is the one that'll make everyone understand why Liv wouldn't shut up about this trip.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Château de Menthon Visit</div>
+      <div class="act-meta">Culture &middot; 1.5 hours &middot; ~€10/person &middot; The Disney castle</div>
+      <div class="act-desc">Nearly 1,000-year-old castle overlooking the lake. Reportedly inspired the Sleeping Beauty castle. Guided tours available. Go in the late afternoon for the best light on the exterior.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Accrobranche (Treetop Course)</div>
+      <div class="act-meta">Adventure &middot; 2-3 hours &middot; ~€25-35/person &middot; Talloires or Semnoz</div>
+      <div class="act-desc">Acro'Aventures in Talloires has courses perched above the lake with zip lines. The one at Semnoz Mountain is also excellent. Good group activity when you want adventure without the full-day commitment.</div>
+    </div>
+
+    <span class="tier-label tier-worth" style="margin-top:1rem;">Highly Worthwhile</span>
+
+    <div class="activity-item">
+      <div class="act-name">Tahiti Plage by SUP</div>
+      <div class="act-meta">Water &middot; Half day &middot; Board rental ~€20 &middot; Easy</div>
+      <div class="act-desc">Paddle to Plage de l'Impérial or find the smaller beaches between Veyrier and Menthon. Pack lunch. Stay for hours.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Duingt Pump Track + Le Bon Wagon</div>
+      <div class="act-meta">Cycling &middot; 1-2 hours &middot; Free (pump track) &middot; All levels</div>
+      <div class="act-desc">1,000m² pump track with three circuits right by the lake. Then coffee (or something stronger) at Le Bon Wagon, the cycling café. Chip will love the pump track. Everyone will love the café.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Group Cooking Night with Market Haul</div>
+      <div class="act-meta">Food &middot; Evening &middot; Budget varies &middot; Liv is cooking, you're helping</div>
+      <div class="act-desc">Hit the market, buy everything, and let Liv go full chef mode. Tartiflette, raclette, or a full Savoyard spread. Pair with local Roussette or Mondeuse wine. Andrew gets the fancy Pellegrino.</div>
+    </div>
+  </div>
+
+  <!-- LIV + IAN -->
+  <div class="person-content" id="liv-ian">
+    <span class="tier-label tier-must">Must-Do</span>
+
+    <div class="activity-item">
+      <div class="act-name">La Tournette Summit (2,351m)</div>
+      <div class="act-meta">Hike &middot; 6-7 hours &middot; Free &middot; Difficult (chains, scrambling)</div>
+      <div class="act-desc">The highest peak overlooking the lake. 360° panorama from Mont Blanc to the Chartreuse. Start from Prés Ronds parking above Col de la Forclaz. 1,394m elevation gain, cables and chains near the top. This is the crown jewel hike. Start early (6-7am) to beat August crowds.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Canyon d'Angon (Full Descent)</div>
+      <div class="act-meta">Canyoning &middot; 3-4 hours &middot; ~€50-65/person guided &middot; Intermediate-Hard</div>
+      <div class="act-desc">Rappelling down waterfalls, natural slides, jumps up to 8m. The full "performance" version at the foot of La Tournette. Book with Vertical Aventure or Terreo Canyoning. August = book in advance.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Gravel Routes + Basecamp Café</div>
+      <div class="act-meta">Cycling &middot; Half to full day &middot; Rental ~€50-80/day &middot; Moderate</div>
+      <div class="act-desc">Basecamp in Talloires just opened: gravel bike rental, guided tours, café, and repair shop right on the lake. Four mapped gravel routes in the area. Ask about the Col des Aravis loop.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Via Ferrata</div>
+      <div class="act-meta">Adventure &middot; 3-4 hours &middot; ~€45-60/person guided &middot; Moderate</div>
+      <div class="act-desc">Several via ferrata routes in the Annecy Mountains area. Guided options through Bureau des Guides d'Annecy. Exposed traverses with lake views below.</div>
+    </div>
+
+    <span class="tier-label tier-worth" style="margin-top:1rem;">Highly Worthwhile</span>
+
+    <div class="activity-item">
+      <div class="act-name">Mountain Bike Parks</div>
+      <div class="act-meta">Cycling &middot; Half day &middot; Lift pass ~€20-35 &middot; Intermediate+</div>
+      <div class="act-desc">La Clusaz and Le Grand-Bornand have lift-served bike parks in summer mode. About 40 min drive. Enduro and flow trails. Le Grand-Bornand also has a new pump track.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Roc de Chère Trail Run</div>
+      <div class="act-meta">Running &middot; 1-2 hours &middot; Free &middot; Easy-Moderate</div>
+      <div class="act-desc">Nature reserve between Menthon and Talloires with forested trails, viewpoints, and swimming access from the rocks below. Beautiful morning run. Cliff diving spot too.</div>
+    </div>
+  </div>
+
+  <!-- IAN ADRENALINE -->
+  <div class="person-content" id="ian">
+    <span class="tier-label tier-must">Must-Do</span>
+
+    <div class="activity-item">
+      <div class="act-name">Tandem Paragliding from Col de la Forclaz</div>
+      <div class="act-meta">Flight &middot; 15-25 min flight &middot; ~€100-130 &middot; No experience needed</div>
+      <div class="act-desc">THE iconic Annecy experience. Launch from the Col de la Forclaz (1,150m) and soar over the lake with the full panorama below. One of Europe's best paragliding sites. Book 1-2 weeks in advance for August. Multiple operators; ask about acrobatic options if Ian wants to go full send.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Outdoor Rock Climbing</div>
+      <div class="act-meta">Climbing &middot; Half day &middot; ~€50-70 guided &middot; All levels</div>
+      <div class="act-desc">Limestone cliffs around the lake with 80+ flying sites. Monté Médio and Bureau des Guides d'Annecy offer guided sessions on lakeside crags. Multi-pitch routes available for experienced climbers.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Cliff Jumping at Roc de Chère</div>
+      <div class="act-meta">Water/Adventure &middot; 2 hours &middot; Free &middot; Moderate risk</div>
+      <div class="act-desc">The nature reserve has cliff faces dropping into crystal-clear deep water. Hike through the forest to find the spots. The water is deep enough. Locals know them. Not officially sanctioned but very much done.</div>
+    </div>
+
+    <span class="tier-label tier-worth" style="margin-top:1rem;">Highly Worthwhile</span>
+
+    <div class="activity-item">
+      <div class="act-name">Criq'Bloc Indoor Bouldering</div>
+      <div class="act-meta">Climbing &middot; 2 hours &middot; ~€12-15 &middot; All levels</div>
+      <div class="act-desc">Bouldering gym at La Crique recreation center next to the lake in Annecy. Good rainy day option or warm-up session.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Intense Canyoning (Montmin)</div>
+      <div class="act-meta">Canyoning &middot; 4-5 hours &middot; ~€60-75/person &middot; Hard</div>
+      <div class="act-desc">The second canyon on the lake. More technical than Angon. Bigger drops, longer descent. For when the regular canyon isn't enough.</div>
+    </div>
+  </div>
+
+  <!-- ANDREW -->
+  <div class="person-content" id="andrew">
+    <span class="tier-label tier-must">Must-Do</span>
+
+    <div class="activity-item">
+      <div class="act-name">Hidden Beach Hopping by Kayak</div>
+      <div class="act-meta">Water &middot; Half day &middot; ~€25 rental &middot; Chill</div>
+      <div class="act-desc">Rent a kayak or SUP and explore the small coves along the southern end of the lake (Bout du Lac area). Doussard has quiet beaches you can only reach by water. Crystal clear, warm in August, zero crowds. Bring a book.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Bout du Lac Nature Reserve + Beaver Trail</div>
+      <div class="act-meta">Hike &middot; 50 min &middot; Free &middot; Very easy (flat, 3.4km)</div>
+      <div class="act-desc">The only fully preserved natural wetland on the lake. Flat walking trail through the marshes where the Ire and Eau Morte rivers meet the lake. European beavers were reintroduced here in 1972 and you can see their tree work everywhere. Quiet, beautiful, zero elevation gain. Andrew's speed.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Roc de Chère Easy Loop</div>
+      <div class="act-meta">Hike &middot; 1.5 hours &middot; Free &middot; Easy</div>
+      <div class="act-desc">Forested nature reserve between Menthon and Talloires. Beautiful viewpoints over the lake, swimming access from the rocks, and you'll probably have the trail to yourself in the morning. 50 min up, 40 min down. Not a mountain, just a forested hill with incredible views.</div>
+    </div>
+
+    <span class="tier-label tier-worth" style="margin-top:1rem;">Highly Worthwhile</span>
+
+    <div class="activity-item">
+      <div class="act-name">Beach Day at Plage de Saint-Jorioz</div>
+      <div class="act-meta">Water &middot; All day &middot; Free &middot; Maximum chill</div>
+      <div class="act-desc">Best public beach on the lake. Sandy, spacious, clean water. Arrive before 10am in August to claim a spot. Swim, read, nap, repeat. The quintessential lake day.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Swim-Accessible Waterfall (Cascade d'Angon)</div>
+      <div class="act-meta">Hike + Swim &middot; 2 hours &middot; Free &middot; Easy-Moderate</div>
+      <div class="act-desc">Short hike to a waterfall that drops into a pool near the lake. Cool off under the falls. More scenic than strenuous. Good morning activity before a beach afternoon.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Evening Laps at Plage d'Albigny</div>
+      <div class="act-meta">Swimming &middot; 1 hour &middot; Free &middot; Chill</div>
+      <div class="act-desc">The beach in Annecy proper. After 6pm the day-trippers clear out and the water is golden. Long open-water swim parallel to shore. Former rower energy.</div>
+    </div>
+  </div>
+
+  <!-- CHIP + MK -->
+  <div class="person-content" id="chip-mk">
+    <span class="tier-label tier-must">Must-Do</span>
+
+    <div class="activity-item">
+      <div class="act-name">Sunset SUP + Apéro</div>
+      <div class="act-meta">Water &middot; 2 hours &middot; ~€20-30 rental &middot; Chill</div>
+      <div class="act-desc">Paddle out around 7pm from the west shore (afternoon sun side), bring a bottle of rosé in a dry bag, anchor up somewhere scenic, watch the mountains turn pink. This is the move.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Waterfront Restaurant Crawl</div>
+      <div class="act-meta">Food &middot; Evening &middot; €30-60/person &middot; Social</div>
+      <div class="act-desc">Le Poisson Rouge (wooden terrace in the water, local fish), Le Balcon du Lac (fondue with a view), and the restaurants along the Annecy canal. MK will want photos at all of them. Fair.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Annecy Old Town Night Out</div>
+      <div class="act-meta">Nightlife &middot; Evening &middot; Budget varies &middot; Social butterfly territory</div>
+      <div class="act-desc">The canals, the bars, the gelato. Chip and MK's natural habitat. Start with dinner on Rue Sainte-Claire, drinks along the Thiou canal, gelato at Glacier des Alpes. Andrew: Perrier, scenic bench, good vibes.</div>
+    </div>
+
+    <span class="tier-label tier-worth" style="margin-top:1rem;">Highly Worthwhile</span>
+
+    <div class="activity-item">
+      <div class="act-name">Sunset at Col de la Forclaz (Apéro Edition)</div>
+      <div class="act-meta">Scenic &middot; Evening &middot; Free (BYO wine) &middot; Zero effort</div>
+      <div class="act-desc">Drive up, park, watch paragliders land, drink wine, take photos for Instagram. The most "I can't believe this is real" moment of the trip. MK will lose her mind.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Ice Cream Tour</div>
+      <div class="act-meta">Food &middot; 2 hours &middot; ~€5/stop &middot; Essential research</div>
+      <div class="act-desc">Glacier des Alpes in Annecy, the artisan shops in Saint-Jorioz, the random place in Duingt that's been there since forever. This is serious work. Multiple stops required for data integrity.</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-name">Pédalos + Lake Picnic</div>
+      <div class="act-meta">Water &middot; 2-3 hours &middot; ~€15-25/hour rental &middot; Peak social</div>
+      <div class="act-desc">Rent a pédalo in Annecy or Saint-Jorioz, pack charcuterie and cheese, float around the Grand Lac. It's goofy. It's perfect. Chip will race someone.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DAY TRIPS -->
+<section id="daytrips">
+  <h2>Day Trips</h2>
+  <p>All within an hour of the lake. Swipe to browse.</p>
+  <div class="scroll-container">
+
+    <div class="scroll-card">
+      <div class="emoji">🏔️</div>
+      <h4>Chamonix-Mont-Blanc</h4>
+      <div class="drive">1h 15min drive</div>
+      <p>Aiguille du Midi cable car (3,842m) for jaw-dropping Mont Blanc views. Walk the glass Skywalk. Hike to Lac Blanc. Full-day commitment but unforgettable. ~€70 for cable car round trip.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">🏰</div>
+      <h4>Yvoire</h4>
+      <div class="drive">50 min drive</div>
+      <p>Medieval village on Lake Geneva, officially one of France's "Most Beautiful Villages." Cobbled streets, 700-year-old ramparts, the Jardin des Cinq Sens (Garden of Five Senses). Perfect half-day. Combine with Geneva.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">🇨🇭</div>
+      <h4>Geneva</h4>
+      <div class="drive">45 min drive</div>
+      <p>Quick international hop for lunch by Lake Geneva, the Jet d'Eau, Old Town, and Swiss chocolate. Pair with Yvoire for a full day. Remember: Switzerland is expensive. Very expensive.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">⛷️</div>
+      <h4>La Clusaz</h4>
+      <div class="drive">35 min drive</div>
+      <p>Ski resort in summer mode. Lift-served mountain biking, hiking trails, alpine lake swimming, and excellent Reblochon cheese from the farms that invented it. Le Grand-Bornand next door has a great pump track too.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">🧀</div>
+      <h4>Thônes</h4>
+      <div class="drive">25 min drive</div>
+      <p>Capital of Reblochon cheese. Visit the cooperative, taste the real thing, learn more about cheese than you ever wanted to. Thursday morning market is the local one. Combine with La Clusaz.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">🌊</div>
+      <h4>Gorges du Fier</h4>
+      <div class="drive">15 min drive</div>
+      <p>Dramatic narrow canyon with a walkway bolted to the cliff face 25m above a rushing river. Quick visit (1 hour), super impressive. Good rainy-day option since you're already getting wet from the mist.</p>
+    </div>
+
+    <div class="scroll-card">
+      <div class="emoji">🏔️</div>
+      <h4>Le Semnoz</h4>
+      <div class="drive">20 min drive</div>
+      <p>The mountain right behind Annecy. Drive up for panoramic views of the lake, Mont Blanc, and the Aravis range. Easy summit hike, picnic spots, paragliding launch. Sunset up here is ridiculous.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FOOD -->
+<section id="food">
+  <h2>Where to Eat</h2>
+
+  <div class="food-tier">
+    <h3>✨ Splurge Night</h3>
+    <div class="food-item">
+      <div class="name">Yoann Conte (2 Michelin stars)</div>
+      <div class="desc">On the shores of the lake in Veyrier. Alpine-Breton fusion, tasting menu, the works. Book well in advance. This is the "we're adults now" dinner. ~€150-200/person.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Jean Sulpice (2 Michelin stars)</div>
+      <div class="desc">In Talloires. Nature-driven cuisine that changes with the seasons. The setting alone is worth it. ~€130-180/person.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Le Clos des Sens (1 Michelin star)</div>
+      <div class="desc">Modern, sleek, intimate. Inventive tasting menus. ~€100-150/person.</div>
+    </div>
+  </div>
+
+  <div class="food-tier">
+    <h3>🍷 Special Night (But Not Mortgage-Level)</h3>
+    <div class="food-item">
+      <div class="name">Le Poisson Rouge</div>
+      <div class="desc">Wooden terrace extending into the lake. Local fish (perch, féra), Savoyard specialties. The one that looks like it's floating on water. ~€35-50/person.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Le Balcon du Lac</div>
+      <div class="desc">Tartiflette, raclette, and fondue with lake views. The full Savoyard experience without pretension. Great for the group. ~€25-40/person.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">L'Osmose du Lac</div>
+      <div class="desc">Lakefront dining with a focus on local, seasonal ingredients. Beautiful setting, reasonable prices for the view. ~€30-45/person.</div>
+    </div>
+  </div>
+
+  <div class="food-tier">
+    <h3>🥖 Casual / Don't Miss</h3>
+    <div class="food-item">
+      <div class="name">Annecy Market Lunch</div>
+      <div class="desc">Sunday or Friday market: rotisserie chicken, cheeses, charcuterie, bread, and a bottle of Roussette on the canal. The best meal of the trip will cost €8/person.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Le Bon Wagon (Duingt)</div>
+      <div class="desc">Cycling café by the pump track. Coffee, pastries, and the vibe of a place that gets it. Post-ride essential.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Glacier des Alpes</div>
+      <div class="desc">Ice cream institution in Annecy Old Town. The line is long. The ice cream is worth it. Get the Génépi flavor for the full Alpine experience.</div>
+    </div>
+    <div class="food-item">
+      <div class="name">Any Ferme-Auberge in the mountains</div>
+      <div class="desc">Farm restaurants serving what they raise: Reblochon, diots (Savoyard sausages), polenta, and tarte aux myrtilles. Ask locals for their favorite. Usually €15-25 for a huge meal.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- VOTE -->
+<section id="vote">
+  <h2>Cast Your Vote</h2>
+  <p>Where should we stay? Pick the area that calls to you. Results show after you vote.</p>
+
+  <div class="vote-section" id="vote-form">
+    <input class="vote-input" type="text" id="voter-name" placeholder="Your name">
+
+    <div class="vote-option" onclick="selectVote(this, 'west-sevrier')">
+      <div class="vote-dot"></div>
+      <div><strong>West Shore - Sévrier</strong><br><span style="font-size:0.82rem;color:var(--text-light);">Most practical. Walkable, bike path, Carrefour.</span></div>
+    </div>
+    <div class="vote-option" onclick="selectVote(this, 'west-stjorioz')">
+      <div class="vote-dot"></div>
+      <div><strong>West Shore - Saint-Jorioz</strong><br><span style="font-size:0.82rem;color:var(--text-light);">Best beach. Slightly more chill than Sévrier.</span></div>
+    </div>
+    <div class="vote-option" onclick="selectVote(this, 'west-duingt')">
+      <div class="vote-dot"></div>
+      <div><strong>West Shore - Duingt</strong><br><span style="font-size:0.82rem;color:var(--text-light);">Charming pinch point. Castle, pump track, cycling café.</span></div>
+    </div>
+    <div class="vote-option" onclick="selectVote(this, 'east-veyrier')">
+      <div class="vote-dot"></div>
+      <div><strong>East Shore - Veyrier-du-Lac</strong><br><span style="font-size:0.82rem;color:var(--text-light);">Quiet money. Closest east town to Annecy.</span></div>
+    </div>
+    <div class="vote-option" onclick="selectVote(this, 'east-menthon')">
+      <div class="vote-dot"></div>
+      <div><strong>East Shore - Menthon-Saint-Bernard</strong><br><span style="font-size:0.82rem;color:var(--text-light);">Castle town. Good beach. Village feel.</span></div>
+    </div>
+    <div class="vote-option" onclick="selectVote(this, 'no-pref')">
+      <div class="vote-dot"></div>
+      <div><strong>No Strong Preference</strong><br><span style="font-size:0.82rem;color:var(--text-light);">I trust Liv. (Correct answer.)</span></div>
+    </div>
+
+    <button class="vote-btn" onclick="submitVote()">Submit Vote</button>
+  </div>
+
+  <div id="vote-results" style="display:none;">
+    <h3 style="margin-bottom:1rem;">Results</h3>
+    <div id="results-container"></div>
+    <p style="font-size:0.82rem; color:var(--text-light); margin-top:1rem;" id="voter-list"></p>
+    <button class="vote-btn" style="background:var(--text-light);margin-top:0.5rem;" onclick="resetVote()">Vote Again / Change Vote</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Made with <span class="heart">&#9829;</span> by Liv (with some help from a very thorough AI)</p>
+  <p style="margin-top:0.3rem;">Annecy 2026. The one where we did it on our own.</p>
+</footer>
+
+<script>
+// ==================== MAP ====================
+const map = L.map('map', { scrollWheelZoom: false }).setView([45.855, 6.155], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+const eastIcon = L.divIcon({ className:'', html:'<div style="width:14px;height:14px;background:#E07A5F;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+const westIcon = L.divIcon({ className:'', html:'<div style="width:14px;height:14px;background:#457B9D;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+const cityIcon = L.divIcon({ className:'', html:'<div style="width:16px;height:16px;background:#1B7A6E;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>', iconSize:[16,16], iconAnchor:[8,8] });
+
+const towns = [
+  { name:'Annecy', lat:45.899, lng:6.129, icon:cityIcon, shore:'City', drive:'—', desc:'The pearl of the French Alps. Old Town canals, markets, restaurants, and the gateway to the lake. This is where you go for culture, shopping, and gelato.' },
+  { name:'Veyrier-du-Lac', lat:45.879, lng:6.167, icon:eastIcon, shore:'East', drive:'5 min', desc:'Quiet, upscale, gorgeous lake views. Residential vibe with private docks. Limited shops but close to Annecy. Morning sun on the water.' },
+  { name:'Menthon-Saint-Bernard', lat:45.862, lng:6.190, icon:eastIcon, shore:'East', drive:'12 min', desc:'The castle town. Nearly 1,000-year-old château, good beach, access to Roc de Chère nature reserve. More village-y than Veyrier.' },
+  { name:'Talloires-Montmin', lat:45.840, lng:6.214, icon:eastIcon, shore:'East', drive:'18 min', desc:'Adventure hub and foodie destination. Canyon d\'Angon, paragliding, Michelin restaurants. The Basecamp gravel café just opened here.' },
+  { name:'Sévrier', lat:45.868, lng:6.133, icon:westIcon, shore:'West', drive:'8 min', desc:'The practical base. Carrefour, bakeries, Voie Verte, multiple beaches. Walk to everything. Best for a 2-week stay with 5 people and one car.' },
+  { name:'Saint-Jorioz', lat:45.847, lng:6.157, icon:westIcon, shore:'West', drive:'12 min', desc:'Best public beach on the lake. Small port, farmers market, village center. Voie Verte runs through. Slightly more relaxed than Sévrier.' },
+  { name:'Duingt', lat:45.832, lng:6.200, icon:westIcon, shore:'West (pinch)', drive:'15 min', desc:'Where Grand Lac becomes Petit Lac. Castle on a peninsula, cycling café Le Bon Wagon, 1000m² pump track. Charming and perfectly positioned.' }
+];
+
+// Grand Lac / Petit Lac labels
+L.marker([45.87, 6.15], { icon: L.divIcon({ className:'', html:'<div style="font-family:Fraunces,serif;font-size:13px;color:#457B9D;opacity:0.7;font-style:italic;white-space:nowrap;">Grand Lac</div>', iconSize:[80,20], iconAnchor:[40,10] }) }).addTo(map);
+L.marker([45.815, 6.19], { icon: L.divIcon({ className:'', html:'<div style="font-family:Fraunces,serif;font-size:12px;color:#457B9D;opacity:0.7;font-style:italic;white-space:nowrap;">Petit Lac</div>', iconSize:[70,18], iconAnchor:[35,9] }) }).addTo(map);
+
+towns.forEach(t => {
+  const shoreColor = t.shore==='East' ? '#E07A5F' : t.shore==='West'||t.shore==='West (pinch)' ? '#457B9D' : '#1B7A6E';
+  L.marker([t.lat, t.lng], { icon: t.icon })
+    .addTo(map)
+    .bindPopup(`<div style="font-family:DM Sans,sans-serif;max-width:220px;">
+      <strong style="font-family:Fraunces,serif;font-size:1.05rem;">${t.name}</strong><br>
+      <span style="font-size:0.78rem;color:${shoreColor};font-weight:600;">${t.shore} Shore</span>
+      <span style="font-size:0.78rem;color:#636E72;"> · ${t.drive} to Annecy</span>
+      <p style="font-size:0.82rem;margin-top:6px;line-height:1.4;">${t.desc}</p>
+    </div>`, { maxWidth: 240 });
+});
+
+// ==================== PERSON TABS ====================
+function showPerson(id) {
+  document.querySelectorAll('.person-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.person-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ==================== VOTING ====================
+let selectedVote = null;
+let votes = {};
+
+// Load votes from memory (simple in-page storage)
+try {
+  const stored = sessionStorage.getItem('annecy-votes');
+  if (stored) votes = JSON.parse(stored);
+  const myVote = sessionStorage.getItem('annecy-my-vote');
+  if (myVote) {
+    document.getElementById('vote-form').style.display = 'none';
+    document.getElementById('vote-results').style.display = 'block';
+    renderResults();
+  }
+} catch(e) {}
+
+function selectVote(el, value) {
+  document.querySelectorAll('.vote-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedVote = value;
+}
+
+function submitVote() {
+  const name = document.getElementById('voter-name').value.trim();
+  if (!name) { alert('Please enter your name!'); return; }
+  if (!selectedVote) { alert('Please select an area!'); return; }
+
+  if (!votes[selectedVote]) votes[selectedVote] = [];
+  // Remove any previous vote by same name
+  Object.keys(votes).forEach(k => { votes[k] = votes[k].filter(n => n.toLowerCase() !== name.toLowerCase()); });
+  votes[selectedVote].push(name);
+
+  try {
+    sessionStorage.setItem('annecy-votes', JSON.stringify(votes));
+    sessionStorage.setItem('annecy-my-vote', name);
+  } catch(e) {}
+
+  document.getElementById('vote-form').style.display = 'none';
+  document.getElementById('vote-results').style.display = 'block';
+  renderResults();
+}
+
+function renderResults() {
+  const labels = {
+    'west-sevrier': 'West - Sévrier',
+    'west-stjorioz': 'West - Saint-Jorioz',
+    'west-duingt': 'West - Duingt',
+    'east-veyrier': 'East - Veyrier',
+    'east-menthon': 'East - Menthon',
+    'no-pref': 'No Preference'
+  };
+  const colors = {
+    'west-sevrier': '#457B9D',
+    'west-stjorioz': '#457B9D',
+    'west-duingt': '#457B9D',
+    'east-veyrier': '#E07A5F',
+    'east-menthon': '#E07A5F',
+    'no-pref': '#999'
+  };
+
+  let totalVotes = 0;
+  Object.values(votes).forEach(arr => totalVotes += arr.length);
+  if (totalVotes === 0) totalVotes = 1;
+
+  let html = '';
+  let allVoters = [];
+  Object.keys(labels).forEach(key => {
+    const count = (votes[key] || []).length;
+    const pct = Math.round((count / totalVotes) * 100);
+    html += `<div class="results-bar">
+      <div class="bar-label">${labels[key]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[key]};">${count > 0 ? count : ''}</div></div>
+    </div>`;
+    (votes[key] || []).forEach(n => allVoters.push(n));
+  });
+
+  document.getElementById('results-container').innerHTML = html;
+  document.getElementById('voter-list').textContent = allVoters.length > 0 ? 'Voted: ' + allVoters.join(', ') : '';
+}
+
+function resetVote() {
+  try {
+    sessionStorage.removeItem('annecy-my-vote');
+  } catch(e) {}
+  selectedVote = null;
+  document.querySelectorAll('.vote-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('voter-name').value = '';
+  document.getElementById('vote-form').style.display = 'block';
+  document.getElementById('vote-results').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
