@@ -1,1297 +1,1712 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Annecy 2026 — Sibling Trip</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-:root {
-  --teal: #1B7A6E;
-  --teal-dark: #145C54;
-  --teal-light: #E0F5F1;
-  --lake: #2A9D8F;
-  --water: #2A9D8F;
-  --water-light: #DDF3EE;
-  --suffer: #2D6A4F;
-  --suffer-light: #DDEBE2;
-  --adrenaline: #E07A5F;
-  --adrenaline-light: #FBE5DC;
-  --food: #C9893C;
-  --food-light: #F8EBD3;
-  --easy: #6A8FB8;
-  --easy-light: #E3ECF4;
-  --cream: #FFFBF5;
-  --sand: #F4E8D5;
-  --text: #2D3436;
-  --text-light: #636E72;
-  --white: #FFFFFF;
-  --shadow: 0 2px 12px rgba(0,0,0,0.08);
-  --radius: 14px;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
-h1,h2,h3,h4 { font-family: 'Fraunces', serif; font-weight: 600; line-height: 1.15; }
-h2 { font-size: 1.7rem; margin-bottom: 0.4rem; color: var(--teal-dark); }
-h3 { font-size: 1.2rem; margin-bottom: 0.4rem; }
-p { margin-bottom: 0.7rem; }
-a { color: var(--teal-dark); }
-
-/* NAV */
-nav {
-  position: sticky; top: 0; z-index: 1000;
-  background: rgba(255,251,245,0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 0.55rem 1rem;
-  -webkit-overflow-scrolling: touch;
-}
-nav a {
-  display: inline-block;
-  padding: 0.35rem 0.85rem;
-  margin-right: 0.25rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-light);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-nav a:hover, nav a:focus { background: var(--teal-light); color: var(--teal); }
-
-/* SECTIONS */
-section { padding: 2.4rem 1.2rem; max-width: 820px; margin: 0 auto; }
-.section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--sand), transparent); margin: 0 auto; max-width: 600px; }
-.section-kicker {
-  display:inline-block; font-size:0.72rem; text-transform:uppercase;
-  letter-spacing:1px; color:var(--text-light); font-weight:600;
-  margin-bottom: 0.4rem;
-}
-
-/* HERO */
-.hero {
-  background:
-    radial-gradient(ellipse at top, rgba(255,255,255,0.18), transparent 60%),
-    linear-gradient(135deg, #145C54 0%, #2A9D8F 45%, #6A8FB8 100%);
-  color: white; text-align: center;
-  padding: 3.4rem 1.4rem 2.8rem;
-  position: relative;
-  overflow: hidden;
-}
-.hero h1 {
-  font-size: 2.6rem; margin-bottom: 0.5rem; font-weight: 700;
-  letter-spacing: -0.5px;
-}
-.hero .lede {
-  font-size: 1.05rem; opacity: 0.95; font-weight: 300;
-  max-width: 580px; margin: 0 auto 0.9rem;
-  line-height: 1.45;
-}
-.hero .home-line {
-  display:inline-block; margin-top:0.6rem; padding: 0.45rem 1.1rem;
-  background: rgba(255,255,255,0.18); border-radius:999px;
-  font-size: 0.85rem; backdrop-filter: blur(6px);
-}
-.hero .dates {
-  font-size: 0.85rem; margin-top: 0.7rem; opacity: 0.85; letter-spacing: 0.4px;
-}
-
-/* STATS BAR */
-.stats-bar {
-  display: flex; justify-content: center; flex-wrap: wrap; gap: 1.2rem;
-  padding: 1.1rem; background: var(--white);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-.stat { text-align: center; min-width: 90px; }
-.stat .num { font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: var(--teal); }
-.stat .label { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* MOOD PICKER */
-.mood-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-  gap: 0.7rem;
-  margin-top: 0.9rem;
-}
-.mood-card {
-  position: relative;
-  border-radius: var(--radius);
-  padding: 1rem 1rem 0.95rem;
-  cursor: pointer;
-  background: var(--white);
-  border: 2px solid transparent;
-  box-shadow: var(--shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  text-align: left;
-  overflow: hidden;
-}
-.mood-card::before {
-  content:''; position:absolute; inset:0;
-  background: linear-gradient(135deg, var(--mc, var(--teal-light)) 0%, transparent 70%);
-  opacity: 0.55; pointer-events: none;
-}
-.mood-card > * { position: relative; z-index: 1; }
-.mood-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,0,0,0.10); }
-.mood-card .mood-emoji { font-size: 1.7rem; line-height: 1; margin-bottom: 0.4rem; }
-.mood-card .mood-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.02rem; margin-bottom: 0.15rem; }
-.mood-card .mood-sub { font-size: 0.78rem; color: var(--text-light); line-height:1.35; }
-.mood-card.water  { --mc: var(--water-light); }
-.mood-card.suffer { --mc: var(--suffer-light); }
-.mood-card.adrenaline { --mc: var(--adrenaline-light); }
-.mood-card.food   { --mc: var(--food-light); }
-.mood-card.easy   { --mc: var(--easy-light); }
-
-/* MAP */
-#map { height: 380px; border-radius: var(--radius); margin: 0.9rem 0 0.5rem; box-shadow: var(--shadow); }
-.map-legend { font-size: 0.78rem; color: var(--text-light); }
-.map-legend span { white-space: nowrap; margin-right: 0.6rem; }
-.legend-dot {
-  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
-  vertical-align: middle; margin-right: 4px;
-}
-
-/* HOME BASE */
-.home-card {
-  background: linear-gradient(135deg, var(--teal-light) 0%, var(--easy-light) 100%);
-  border-radius: var(--radius);
-  padding: 1.3rem;
-  box-shadow: var(--shadow);
-  margin-top: 0.6rem;
-}
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.7rem;
-  margin-top: 0.9rem;
-}
-.home-pill {
-  background: rgba(255,255,255,0.8);
-  border-radius: 10px;
-  padding: 0.65rem 0.8rem;
-}
-.home-pill .ph-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); font-weight: 600; }
-.home-pill .ph-val { font-size: 0.92rem; font-weight: 600; color: var(--teal-dark); margin-top: 0.1rem; }
-.home-pill .ph-sub { font-size: 0.78rem; color: var(--text-light); margin-top: 0.1rem; }
-
-/* CATEGORY (mood) FILTERS */
-.cat-tabs {
-  display: flex; overflow-x: auto; gap: 0.4rem;
-  margin: 1rem 0 1rem; padding-bottom: 0.3rem;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.cat-tabs::-webkit-scrollbar { display: none; }
-.cat-tab {
-  padding: 0.5rem 0.95rem; border-radius: 999px; font-size: 0.85rem;
-  font-weight: 600; cursor: pointer; white-space: nowrap;
-  background: var(--white); color: var(--text-light);
-  border: 1px solid rgba(0,0,0,0.08); transition: all 0.18s;
-  user-select: none;
-}
-.cat-tab:hover { color: var(--teal); border-color: var(--teal); }
-.cat-tab.active { background: var(--teal); color: white; border-color: var(--teal); }
-.cat-tab[data-cat="water"].active   { background: var(--water);  border-color: var(--water); }
-.cat-tab[data-cat="suffer"].active  { background: var(--suffer); border-color: var(--suffer); }
-.cat-tab[data-cat="adrenaline"].active { background: var(--adrenaline); border-color: var(--adrenaline); }
-.cat-tab[data-cat="food"].active    { background: var(--food);   border-color: var(--food); }
-.cat-tab[data-cat="easy"].active    { background: var(--easy);   border-color: var(--easy); }
-
-/* ACTIVITY CARDS */
-.act-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.7rem;
-}
-.act-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 0.95rem 1rem;
-  box-shadow: var(--shadow);
-  border-left: 4px solid var(--teal);
-  display: flex; flex-direction: column;
-  position: relative;
-}
-.act-card[data-cat="water"]      { border-left-color: var(--water); }
-.act-card[data-cat="suffer"]     { border-left-color: var(--suffer); }
-.act-card[data-cat="adrenaline"] { border-left-color: var(--adrenaline); }
-.act-card[data-cat="food"]       { border-left-color: var(--food); }
-.act-card[data-cat="easy"]       { border-left-color: var(--easy); }
-.act-card .act-emoji { font-size: 1.3rem; line-height: 1; margin-bottom: 0.35rem; }
-.act-card .act-title {
-  font-family: 'Fraunces', serif; font-weight: 600;
-  font-size: 1.02rem; margin-bottom: 0.25rem; line-height:1.25;
-}
-.act-card .act-desc { font-size: 0.86rem; color: var(--text); margin-bottom: 0.55rem; }
-.act-card .act-chips { display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:auto; }
-.chip {
-  display: inline-block; padding: 0.18rem 0.55rem;
-  border-radius: 999px; font-size: 0.72rem; font-weight: 600;
-  background: var(--teal-light); color: var(--teal-dark);
-  white-space: nowrap;
-}
-.chip.time { background: #EEF1F4; color: #4B5663; }
-.chip.cost { background: #F4E8D5; color: #7A5A1A; }
-.chip.energy.low  { background: #DDEBE2; color: #2D6A4F; }
-.chip.energy.med  { background: #FFF3CD; color: #856404; }
-.chip.energy.high { background: #FBE5DC; color: #B14E2D; }
-.chip.special    { background: #1B7A6E; color: white; }
-
-/* EVENING / CULTURE event cards */
-.event-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 1rem;
-  box-shadow: var(--shadow);
-  margin-bottom: 0.7rem;
-  border-left: 4px solid var(--easy);
-}
-.event-card .ev-when { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-.event-card .ev-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.05rem; margin: 0.15rem 0 0.3rem; }
-.event-card.misses { opacity: 0.78; border-left-color: #aaa; }
-.event-card.misses .ev-when::before { content: "⚠ "; color: #b14e2d; }
-
-/* MARKETS */
-.market-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.6rem;
-}
-.market-pill {
-  background: var(--white);
-  border-radius: 10px;
-  padding: 0.6rem 0.8rem;
-  box-shadow: var(--shadow);
-  border-left: 3px solid var(--food);
-}
-.market-pill .mp-day { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--food); font-weight: 700; }
-.market-pill .mp-name { font-weight: 600; font-size: 0.92rem; margin-top: 0.1rem; }
-.market-pill .mp-note { font-size: 0.78rem; color: var(--text-light); margin-top: 0.1rem; }
-
-/* HYPE CHECK */
-.who-row { display:flex; flex-wrap:wrap; gap:0.5rem; }
-.who-chip {
-  padding:0.55rem 1.1rem; border-radius:999px;
-  border:2px solid rgba(0,0,0,0.08); background:var(--cream);
-  font-weight:600; font-size:0.95rem; cursor:pointer;
-  transition: all 0.18s ease; user-select:none;
-}
-.who-chip:hover { border-color: var(--teal); }
-.who-chip.active {
-  background: linear-gradient(135deg, var(--teal) 0%, var(--easy) 100%);
-  color: white; border-color: transparent;
-  box-shadow: 0 4px 14px rgba(27,122,110,0.35);
-  transform: translateY(-1px);
-}
-.hype-grid {
-  display:grid; grid-template-columns: 1fr 1fr; gap:0.55rem;
-  margin: 0.4rem 0 0.6rem;
-}
-.hype-card {
-  background: var(--white);
-  border: 2px solid rgba(0,0,0,0.06);
-  border-radius: var(--radius);
-  padding: 0.85rem 0.9rem;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  position: relative;
-}
-.hype-card:hover { border-color: var(--teal); transform: translateY(-2px); box-shadow: var(--shadow); }
-.hype-card.selected {
-  border-color: var(--teal);
-  background: linear-gradient(135deg, var(--teal-light) 0%, var(--easy-light) 100%);
-  box-shadow: 0 4px 14px rgba(27,122,110,0.18);
-}
-.hype-card.selected::after {
-  content: "✓"; position: absolute; top: 8px; right: 10px;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--teal); color: white; font-size: 0.78rem;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
-}
-.hype-emoji { font-size: 1.55rem; line-height:1; margin-bottom:0.3rem; }
-.hype-title { font-family: 'Fraunces', serif; font-size: 0.95rem; font-weight: 600; line-height:1.25; margin-bottom: 0.2rem; }
-.hype-sub { font-size: 0.76rem; color: var(--text-light); line-height:1.35; }
-
-.vote-section { background: var(--white); border-radius: var(--radius); padding: 1.3rem; box-shadow: var(--shadow); }
-.vote-btn {
-  display: block; width: 100%; padding: 0.85rem;
-  margin-top: 0.7rem; border: none; border-radius: var(--radius);
-  background: var(--teal); color: white;
-  font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
-  cursor: pointer; transition: background 0.2s;
-}
-.vote-btn:hover { background: var(--teal-dark); }
-
-/* HYPE RESULTS */
-.hype-result {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.5rem;
-  box-shadow: var(--shadow);
-}
-.hype-result-head { display:flex; justify-content:space-between; align-items:baseline; gap:0.6rem; }
-.hype-result-title { font-family: 'Fraunces', serif; font-weight:600; font-size:0.95rem; }
-.hype-result-count { font-size:0.78rem; color:var(--text-light); white-space:nowrap; }
-.hype-result-bar {
-  margin-top: 0.45rem; height: 8px; background: rgba(0,0,0,0.05);
-  border-radius: 999px; overflow: hidden;
-}
-.hype-result-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--teal) 0%, var(--easy) 100%);
-  border-radius: 999px;
-  transition: width 0.5s ease;
-}
-.hype-result-voters { font-size: 0.78rem; color: var(--text-light); margin-top: 0.4rem; }
-.hype-result.unanimous {
-  background: linear-gradient(135deg, var(--teal-light) 0%, var(--food-light) 100%);
-  border: 2px solid var(--teal);
-}
-.hype-result.unanimous .hype-result-title::before { content: "🔥 "; }
-
-@media (max-width: 480px) {
-  .hype-grid { grid-template-columns: 1fr; }
-  .hero h1 { font-size: 2rem; }
-  h2 { font-size: 1.4rem; }
-  section { padding: 2rem 1rem; }
-  .stats-bar { gap: 0.7rem; }
-  #map { height: 320px; }
-  .mood-card { padding: 0.85rem; }
-}
-
-/* FOOTER */
-footer {
-  text-align: center; padding: 2rem 1.5rem;
-  color: var(--text-light); font-size: 0.85rem;
-}
-footer .heart { color: var(--adrenaline); }
-
-/* Notes block */
-.note {
-  font-size: 0.82rem; color: var(--text-light);
-  background: var(--sand); padding: 0.7rem 0.9rem;
-  border-radius: 10px; margin-top: 0.8rem;
-}
-</style>
-</head>
-<body>
-
-<nav id="topnav">
-  <a href="#mood">Pick a mood</a>
-  <a href="#home-base">Home base</a>
-  <a href="#map-section">The lake</a>
-  <a href="#activities">Everything to do</a>
-  <a href="#food">Food &amp; markets</a>
-  <a href="#evenings">Evenings</a>
-  <a href="#vote">Hype check</a>
-</nav>
-
-<!-- HERO -->
-<div class="hero">
-  <h1>Annecy 2026</h1>
-  <div class="lede">The lake, the mountains, the food, the bikes, the swims. Two weeks in the place I keep coming back to — and the first time we get to ravish it together.</div>
-  <div class="home-line">🏡 100 m from the water · directly on the bike path · Sévrier</div>
-  <div class="dates">Aug 15 – 29, 2026 · 14 nights · Liv, Andrew, Chip &amp; Ian</div>
-</div>
-
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stat"><div class="num">~100 m</div><div class="label">House → Lake</div></div>
-  <div class="stat"><div class="num">22–24°C</div><div class="label">Aug Swim Temp</div></div>
-  <div class="stat"><div class="num">42 km</div><div class="label">Voie Verte at the door</div></div>
-  <div class="stat"><div class="num">2,351 m</div><div class="label">La Tournette</div></div>
-  <div class="stat"><div class="num">#1</div><div class="label">Cleanest lake in Europe</div></div>
-</div>
-
-<!-- MOOD PICKER -->
-<section id="mood">
-  <span class="section-kicker">How this works</span>
-  <h2>Wake up. Pick a mood. Go.</h2>
-  <p style="max-width:620px;">Annecy turns into a different trip depending on what we're feeling that day. Tap a mood to jump straight to the menu. Stack two if it's a big day.</p>
-  <div class="mood-grid">
-    <a class="mood-card water"  href="#activities" onclick="filterCat('water'); return true;">
-      <div class="mood-emoji">🌊</div>
-      <div class="mood-title">I want water</div>
-      <div class="mood-sub">Swims, SUP, kayak, snorkel, boat apéro, secret coves.</div>
-    </a>
-    <a class="mood-card suffer" href="#activities" onclick="filterCat('suffer'); return true;">
-      <div class="mood-emoji">🥵</div>
-      <div class="mood-title">I want a sufferfest</div>
-      <div class="mood-sub">Semnoz, Aravis, La Tournette, the full lake loop.</div>
-    </a>
-    <a class="mood-card adrenaline" href="#activities" onclick="filterCat('adrenaline'); return true;">
-      <div class="mood-emoji">💨</div>
-      <div class="mood-title">I want big energy</div>
-      <div class="mood-sub">Canyoning, wakeboard, summer luge, bike park, pump track.</div>
-    </a>
-    <a class="mood-card food" href="#activities" onclick="filterCat('food'); return true;">
-      <div class="mood-emoji">🧀</div>
-      <div class="mood-title">I want food</div>
-      <div class="mood-sub">Markets, Reblochon farms, lake-edge dinners, apéro.</div>
-    </a>
-    <a class="mood-card easy" href="#activities" onclick="filterCat('easy'); return true;">
-      <div class="mood-emoji">✨</div>
-      <div class="mood-title">I want easy magic</div>
-      <div class="mood-sub">Sunset swims, old town, gelato, festivals, wooden boat.</div>
-    </a>
-  </div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- HOME BASE -->
-<section id="home-base">
-  <span class="section-kicker">Home base · Sévrier</span>
-  <h2>La Roche &amp; Le Lac</h2>
-  <p><strong>190 Route d'Albertville, 74320 Sévrier</strong> — about 100 m from the lake, sitting directly on the Voie Verte bike path. Walk out the gate and you're either in the water or on the wheels.</p>
-
-  <div class="home-card">
-    <div style="font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem;">From the front door</div>
-    <div class="home-grid">
-      <div class="home-pill">
-        <div class="ph-label">Closest swim</div>
-        <div class="ph-val">~5 min walk</div>
-        <div class="ph-sub">Sévrier beach, default morning dip</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Bakery</div>
-        <div class="ph-val">~5–10 min walk</div>
-        <div class="ph-sub">Whoever's up first is on croissants</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Annecy Old Town</div>
-        <div class="ph-val">~12 min by bike</div>
-        <div class="ph-sub">Flat, car-free on the Voie Verte</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Saint-Jorioz beach</div>
-        <div class="ph-val">~10–15 min by bike</div>
-        <div class="ph-sub">Best public sand on the lake</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Duingt for lunch</div>
-        <div class="ph-val">~25 min by bike</div>
-        <div class="ph-sub">Castle, pump track, café</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Full lake loop</div>
-        <div class="ph-val">42 km · ~3 hrs</div>
-        <div class="ph-sub">Door to door, mostly car-free</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Talloires (adventure HQ)</div>
-        <div class="ph-val">~25 min drive</div>
-        <div class="ph-sub">Canyon d'Angon, Forclaz viewpoint</div>
-      </div>
-      <div class="home-pill">
-        <div class="ph-label">Carrefour Sévrier</div>
-        <div class="ph-val">~12 min walk</div>
-        <div class="ph-sub">For everything the market doesn't cover</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="note"><strong>The default day:</strong> bakery run → lake swim → bike to Annecy for an espresso → market haul → terrace lunch → trail / canyon / boat depending on mood → sunset swim → cook with whatever Liv hauled home. Repeat. For two weeks. (We stay attached to the earth — no paragliding for this crew.)</div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- MAP -->
-<section id="map-section">
-  <span class="section-kicker">The lake</span>
-  <h2>Where everything is</h2>
-  <p>Lac d'Annecy is a bent finger pointing south: the wide <strong>Grand Lac</strong> in the north, the narrower <strong>Petit Lac</strong> curving around Duingt's pinch point. Our house is the green star.</p>
-  <div id="map"></div>
-  <p class="map-legend" style="margin-top:0.5rem;">
-    <span><span class="legend-dot" style="background:#2D8A4E;"></span>Home base</span>
-    <span><span class="legend-dot" style="background:#1B7A6E;"></span>Annecy</span>
-    <span><span class="legend-dot" style="background:var(--water);"></span>Water mission</span>
-    <span><span class="legend-dot" style="background:var(--adrenaline);"></span>Big energy</span>
-    <span><span class="legend-dot" style="background:var(--food);"></span>Food</span>
-  </p>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- ACTIVITY UNIVERSE -->
-<section id="activities">
-  <span class="section-kicker">Everything to do</span>
-  <h2>The activity universe</h2>
-  <p>Filter by mood. Tap a card to read the gist. Time / cost / energy on every one.</p>
-
-  <div class="cat-tabs">
-    <div class="cat-tab active" data-cat="all" onclick="filterCat('all')">All</div>
-    <div class="cat-tab" data-cat="water" onclick="filterCat('water')">🌊 Water</div>
-    <div class="cat-tab" data-cat="suffer" onclick="filterCat('suffer')">🥵 Sufferfest</div>
-    <div class="cat-tab" data-cat="adrenaline" onclick="filterCat('adrenaline')">💨 Big energy</div>
-    <div class="cat-tab" data-cat="food" onclick="filterCat('food')">🧀 Food</div>
-    <div class="cat-tab" data-cat="easy" onclick="filterCat('easy')">✨ Easy magic</div>
-  </div>
-
-  <div class="act-grid" id="act-grid">
-
-    <!-- WATER -->
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🌅</div>
-      <div class="act-title">Sunset apéro on a licence-free electric boat</div>
-      <div class="act-desc">Skipper-yourself electric boat (under 6hp = no licence). Pack rosé + charcuterie, swim-stop in the middle of the lake, golden hour. The signature group move.</div>
-      <div class="act-chips"><span class="chip time">2–3 hr</span><span class="chip cost">€80–140 boat</span><span class="chip energy low">Low</span><span class="chip special">Splurge-y</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🪨</div>
-      <div class="act-title">Roc de Chère swim mission</div>
-      <div class="act-desc">Forest hike through the nature reserve to rocky, glass-clear water. Caves to poke around, slide-into-the-lake from the low rocks. <strong>The cliff-jumping spots are a watch-only situation for us</strong> — we're here for the swim, not the launch.</div>
-      <div class="act-chips"><span class="chip time">2–3 hr</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🦫</div>
-      <div class="act-title">Bout-du-Lac wild swim + nature reserve</div>
-      <div class="act-desc">South tip at Doussard. Protected ecosystem, beavers around, glass water that nobody's standing in. Recovery-day swim.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">Free</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🤿</div>
-      <div class="act-title">Snorkel / freedive / scuba</div>
-      <div class="act-desc">Lake's clean enough that you actually see fish, weeds, and underwater pile-dwelling sites. Divers can hit the sunken steamer "France." Casual snorkels work too — just bring masks.</div>
-      <div class="act-chips"><span class="chip time">1–4 hr</span><span class="chip cost">€0 / €70+ guided</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🏄‍♀️</div>
-      <div class="act-title">Sunset SUP from out the door</div>
-      <div class="act-desc">Paddle out at 7pm from Sévrier, anchor somewhere quiet, watch the mountains turn pink. Cheap and unbeatable.</div>
-      <div class="act-chips"><span class="chip time">~2 hr</span><span class="chip cost">€20–30</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🚤</div>
-      <div class="act-title">Wakeboard / waterski</div>
-      <div class="act-desc">Plenty of cable + boat operators around the lake. Ian and Chip in particular — this is yours.</div>
-      <div class="act-chips"><span class="chip time">1–2 hr</span><span class="chip cost">€40–80</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🛶</div>
-      <div class="act-title">Packraft secret-water mission</div>
-      <div class="act-desc">Drag a packraft to a coves-only stretch of shore (Bout-du-Lac, between Talloires bays). Solo or pairs — feels like cheating.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">Rental varies</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">⛵</div>
-      <div class="act-title">Wooden Savoyard boat</div>
-      <div class="act-desc">Old-school wooden launches at Pâquier / Pont des Amours. Slow tour of the bay, full Annecy postcard.</div>
-      <div class="act-chips"><span class="chip time">1 hr</span><span class="chip cost">€15–20</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🎣</div>
-      <div class="act-title">Quiet morning fishing permit</div>
-      <div class="act-desc">Daily permit at the tabac. Andrew-coded. Coffee, water, no one talking. Féra and perch the targets.</div>
-      <div class="act-chips"><span class="chip time">Sunrise</span><span class="chip cost">€15 permit</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🏖️</div>
-      <div class="act-title">Plage de Saint-Jorioz day</div>
-      <div class="act-desc">Best public sand on the lake. Get there before 10. Books, naps, swims until sundown.</div>
-      <div class="act-chips"><span class="chip time">All day</span><span class="chip cost">Free</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="water">
-      <div class="act-emoji">🌊</div>
-      <div class="act-title">River swim — Fier / Chéran gorges</div>
-      <div class="act-desc">Hot-day backup when the lake is buzzing. Cold, clean, swimmable pools in the gorges. <em>Check local conditions first; don't be a hero in moving water.</em></div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span><span class="chip">Conditions matter</span></div>
-    </div>
-
-    <!-- SUFFERFEST -->
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🚴‍♂️</div>
-      <div class="act-title">42 km Voie Verte loop</div>
-      <div class="act-desc">The whole lake, mostly car-free. Door to door. Stop for a swim in Talloires, ice cream in Saint-Jorioz, a beer in Duingt. Group ride.</div>
-      <div class="act-chips"><span class="chip time">~3 hr chill</span><span class="chip cost">Bike rental</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">⛰️</div>
-      <div class="act-title">Semnoz road climb</div>
-      <div class="act-desc">Local proving-ground. ~17 km, ~1,000 m up from the lake. Shaded forest road. The "I had a real day" climb.</div>
-      <div class="act-chips"><span class="chip time">3–4 hr</span><span class="chip cost">Free</span><span class="chip energy high">High</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🌲</div>
-      <div class="act-title">Semnoz gravel day</div>
-      <div class="act-desc">Switch the road bike for gravel and ride the ridge. Forest, alpine pasture, lake views you didn't know existed.</div>
-      <div class="act-chips"><span class="chip time">Half–full day</span><span class="chip cost">Rental ~€60</span><span class="chip energy high">High</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🏔️</div>
-      <div class="act-title">La Tournette — the lower refuge</div>
-      <div class="act-desc">Highest peak over the lake, but the final pitch has chains and exposed scrambles — hard pass for a crew with vertigo. Hike up to the <strong>Refuge de Rosairy / Casset</strong> instead: same alpine drama, same lake-spread-below view, no rungs bolted into a cliff.</div>
-      <div class="act-chips"><span class="chip time">4–5 hr</span><span class="chip cost">Free</span><span class="chip energy high">High</span><span class="chip">Stop before the chains</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🪨</div>
-      <div class="act-title">Parmelan via the standard route</div>
-      <div class="act-desc">Limestone plateau hike with a refuge at the top. Drama without the chains-and-cables of Tournette. <strong>Take the standard route up, not the Pas de l'Aulp via ferrata variant</strong> — that one has rungs and exposure.</div>
-      <div class="act-chips"><span class="chip time">5–6 hr</span><span class="chip cost">Free</span><span class="chip energy high">High</span><span class="chip">No Pas de l'Aulp</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🚵</div>
-      <div class="act-title">Major cols on a road bike</div>
-      <div class="act-desc">Forclaz · Semnoz · Aravis · Glières. Pick one a week. Each is a postcard climb in its own right.</div>
-      <div class="act-chips"><span class="chip time">3–6 hr each</span><span class="chip cost">Free</span><span class="chip energy high">High</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🥾</div>
-      <div class="act-title">Circuit des 3 Croix from Sévrier</div>
-      <div class="act-desc">Right-out-the-door trail loop. Three crosses, big lake views, no driving needed.</div>
-      <div class="act-chips"><span class="chip time">3–4 hr</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🥾</div>
-      <div class="act-title">Taillefer from Duingt — the safe version</div>
-      <div class="act-desc">Climb up through the forest to the panorama point above the pinch — birds-eye on both basins. <strong>Skip the upper ridge scramble</strong>: it's steep and exposed, not our category. Turn around at the viewpoint and lunch in Duingt.</div>
-      <div class="act-chips"><span class="chip time">3–4 hr</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span><span class="chip">Stop at the viewpoint</span></div>
-    </div>
-
-    <div class="act-card" data-cat="suffer">
-      <div class="act-emoji">🥾</div>
-      <div class="act-title">Mont Baron / Mont Veyrier</div>
-      <div class="act-desc">Direct sunrise hike from Annecy side. Quick gain, ridge walk, full lake panorama. Great half-day.</div>
-      <div class="act-chips"><span class="chip time">3–4 hr</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <!-- BIG ENERGY (no cliff-launching for this crew) -->
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">💧</div>
-      <div class="act-title">Canyon d'Angon descent</div>
-      <div class="act-desc">Rappel waterfalls, natural slides, splashy jumps. Guided, harnessed, water at the bottom — the thrill without the open-air-flying problem. One of the great half-days.</div>
-      <div class="act-chips"><span class="chip time">3–4 hr</span><span class="chip cost">€50–65</span><span class="chip energy high">High</span></div>
-    </div>
-
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">🚤</div>
-      <div class="act-title">Wakeboard / waterski / wakesurf</div>
-      <div class="act-desc">Boat or cable, lake's clean, water's warm. Falling is the worst case and the worst case is fine. Ian and Chip in particular — this is yours.</div>
-      <div class="act-chips"><span class="chip time">1–2 hr</span><span class="chip cost">€40–80</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">🏂</div>
-      <div class="act-title">Lift-served bike park</div>
-      <div class="act-desc">Semnoz, La Clusaz, Le Grand-Bornand. Enduro and flow trails, lift you back up. ~30–40 min drive. Speed without exposure — perfect.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€20–35 lift</span><span class="chip energy high">High</span></div>
-    </div>
-
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">💨</div>
-      <div class="act-title">Duingt pump track</div>
-      <div class="act-desc">1,000 m² pump track on the lake, three circuits. Fun-stupid for an hour. Pair with Le Bon Wagon café right next door.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">Free</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">🛷</div>
-      <div class="act-title">Summer luge</div>
-      <div class="act-desc">Semnoz / La Clusaz / Chamonix all run summer luge tracks. Stupid fun, all ages.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">€8–10/run</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="adrenaline">
-      <div class="act-emoji">🌳</div>
-      <div class="act-title">Treetop adventure / accrobranche</div>
-      <div class="act-desc">Acro'Aventures Talloires has zip lines and rope bridges over the lake. Lower-stakes day with full views.</div>
-      <div class="act-chips"><span class="chip time">2–3 hr</span><span class="chip cost">€25–35</span><span class="chip energy med">Medium</span></div>
-    </div>
-
-    <!-- FOOD -->
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🧀</div>
-      <div class="act-title">Reblochon farm visit (Aravis / La Clusaz)</div>
-      <div class="act-desc">Drive up to a working farm, taste at the source, learn how the cheese on every Savoyard plate gets made. Andrew-friendly: it's about the cheese, not the wine.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€10 tasting</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🐟</div>
-      <div class="act-title">Le Poisson Rouge — Sévrier</div>
-      <div class="act-desc">Wooden terrace literally in the lake. Local féra, perch, and Savoyard plates. The big lake-edge dinner of the trip.</div>
-      <div class="act-chips"><span class="chip time">Evening</span><span class="chip cost">€35–50/pp</span><span class="chip special">Reserve</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🍽️</div>
-      <div class="act-title">L'Aquarama — Angon</div>
-      <div class="act-desc">Casual lakeside spot in Angon, post-canyoning lunch energy. Fresh fish, terrace, low fuss.</div>
-      <div class="act-chips"><span class="chip time">Lunch / dinner</span><span class="chip cost">€25–40/pp</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🥬</div>
-      <div class="act-title">Auberge La Ferme de Ferrières</div>
-      <div class="act-desc">Mountain ferme-auberge. Diots, polenta, tartiflette, Reblochon — what they grow and raise themselves. Cheap, huge, deeply Savoyard.</div>
-      <div class="act-chips"><span class="chip time">Long lunch</span><span class="chip cost">€15–25/pp</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🐄</div>
-      <div class="act-title">La Ferme de la Forclaz</div>
-      <div class="act-desc">Drive up, picnic at the viewpoint, watch the paragliders launch into the void on someone else's behalf, then eat tartiflette at the farm restaurant. The view comes free. We leave safely attached to the earth.</div>
-      <div class="act-chips"><span class="chip time">Lunch</span><span class="chip cost">€20–30/pp</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🧺</div>
-      <div class="act-title">Market → picnic loop</div>
-      <div class="act-desc">Hit one local market a day, build a picnic from it, find a beach or a viewpoint to eat it on. The cheapest, best meal of the trip.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€8–12/pp</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🍷</div>
-      <div class="act-title">Savoie wine + cheese tasting</div>
-      <div class="act-desc">Mondeuse, Roussette, Reblochon, Tomme. Built around food and apéro culture, not drinking — Andrew can fully run the cheese flight.</div>
-      <div class="act-chips"><span class="chip time">~2 hr</span><span class="chip cost">€20–35/pp</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🧀</div>
-      <div class="act-title">Thônes Reblochon cooperative</div>
-      <div class="act-desc">Capital of Reblochon. Taste at the cooperative, hit Thursday's local market, drive back via the Aravis pass. Cheese day.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€10–15</span></div>
-    </div>
-
-    <div class="act-card" data-cat="food">
-      <div class="act-emoji">🥧</div>
-      <div class="act-title">Big group cook night at the house</div>
-      <div class="act-desc">Tartiflette / raclette / fondue with whatever Liv hauled from the market. Kitchen takeover. Mandatory at least twice.</div>
-      <div class="act-chips"><span class="chip time">Evening</span><span class="chip cost">~€15/pp</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <!-- EASY MAGIC -->
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🌇</div>
-      <div class="act-title">Sunset swim, every night that's nice</div>
-      <div class="act-desc">The default evening. Walk to the lake from the house at 8pm, dunk, dry off, pour something. Doesn't get old.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">Free</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🥐</div>
-      <div class="act-title">Annecy old town wander</div>
-      <div class="act-desc">Pastel canals, Palais de l'Île, espresso on the Thiou, gelato at Glacier des Alpes. Bike there, take the Voie Verte home.</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€15–25 if you eat</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🎷</div>
-      <div class="act-title">Impérial Annecy Festival</div>
-      <div class="act-desc">Aug 18–28, on our exact dates. Free 6pm "discovery" concerts on the lake. Paid 9pm shows in the gardens. Jazz, classical, comedy.</div>
-      <div class="act-chips"><span class="chip time">Evening</span><span class="chip cost">Free–€40</span><span class="chip special">Aug 18–28</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🌳</div>
-      <div class="act-title">Annecy Paysages outdoor art walk</div>
-      <div class="act-desc">Citywide outdoor art trail through gardens and waterfront. Free, walkable, perfect for a slower afternoon.</div>
-      <div class="act-chips"><span class="chip time">2 hr</span><span class="chip cost">Free</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">⛵</div>
-      <div class="act-title">Wooden boat off the Pâquier</div>
-      <div class="act-desc">Old-school launch from the lawn in Annecy. Slow, scenic, picture-perfect.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">€15–20</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🍦</div>
-      <div class="act-title">Gelato + canals</div>
-      <div class="act-desc">Glacier des Alpes is the spot. The walk along the Thiou after is the real trip. Génépi flavor for the alpine cred.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">€5–8</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🏰</div>
-      <div class="act-title">Château de Montrottier — knights show</div>
-      <div class="act-desc">Aug 19–20, 2026. Equestrian and knights demonstration at the château, easily paired with Gorges du Fier next door (Lovagny).</div>
-      <div class="act-chips"><span class="chip time">Half day</span><span class="chip cost">€10–15</span><span class="chip special">Aug 19–20</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">🏞️</div>
-      <div class="act-title">Gorges du Fier walkway</div>
-      <div class="act-desc">Catwalk bolted into a slot canyon over a rushing river. Quick, dramatic, easy. Great rainy-day move or pair with Montrottier.</div>
-      <div class="act-chips"><span class="chip time">~1 hr</span><span class="chip cost">€7</span><span class="chip energy low">Low</span></div>
-    </div>
-
-    <div class="act-card" data-cat="easy">
-      <div class="act-emoji">⛰️</div>
-      <div class="act-title">Col de la Forclaz hangs at sunset</div>
-      <div class="act-desc">Drive up after 7pm. Picnic on the grass, drink something cold, watch the paragliders launch into pink sky <em>from a safe distance with both feet on the ground</em>. Eat at La Ferme up there if you stay.</div>
-      <div class="act-chips"><span class="chip time">~2 hr</span><span class="chip cost">Free</span><span class="chip energy low">Low</span></div>
-    </div>
-
-  </div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- FOOD & MARKETS -->
-<section id="food">
-  <span class="section-kicker">Food &amp; markets</span>
-  <h2>Eat it where it grows</h2>
-  <p>Default mode: cook with market food at the house, splurge on 3–4 lake-edge dinners, bakery every morning.</p>
-
-  <h3 style="margin-top:1.2rem;">Markets, by day</h3>
-  <div class="market-grid">
-    <div class="market-pill"><div class="mp-day">Tue · Fri · Sun</div><div class="mp-name">Annecy Old Town</div><div class="mp-note">The big one. Sunday is huge.</div></div>
-    <div class="market-pill"><div class="mp-day">Wed</div><div class="mp-name">Sévrier</div><div class="mp-note">Walking distance from the house.</div></div>
-    <div class="market-pill"><div class="mp-day">Thu</div><div class="mp-name">Saint-Jorioz</div><div class="mp-note">Bike there, market-to-beach loop.</div></div>
-    <div class="market-pill"><div class="mp-day">Thu (summer)</div><div class="mp-name">Talloires</div><div class="mp-note">Pair with east-side adventure day.</div></div>
-    <div class="market-pill"><div class="mp-day">Fri</div><div class="mp-name">Veyrier-du-Lac</div><div class="mp-note">Smaller, prettier, lake views.</div></div>
-    <div class="market-pill"><div class="mp-day">Evenings</div><div class="mp-name">Alby-sur-Chéran / Chapeiry</div><div class="mp-note">Farmers' apéro markets.</div></div>
-  </div>
-
-  <h3 style="margin-top:1.4rem;">Savoyard greatest hits</h3>
-  <div class="act-grid" style="margin-top:0.5rem;">
-    <div class="act-card" data-cat="food"><div class="act-title">Tartiflette</div><div class="act-desc">Potatoes, lardons, onions, half a wheel of Reblochon melted on top. Group dinner.</div></div>
-    <div class="act-card" data-cat="food"><div class="act-title">Fondue savoyarde</div><div class="act-desc">Comté + Beaufort + Emmental, white wine, garlic, bread, problem solved.</div></div>
-    <div class="act-card" data-cat="food"><div class="act-title">Raclette</div><div class="act-desc">Melt, scrape, repeat. Charcuterie + cornichons + boiled potatoes. Easy.</div></div>
-    <div class="act-card" data-cat="food"><div class="act-title">Diots</div><div class="act-desc">Smoky Savoyard sausages, often slow-cooked in white wine. Mountain energy.</div></div>
-    <div class="act-card" data-cat="food"><div class="act-title">Féra du lac</div><div class="act-desc">Local lake whitefish. Almost only eaten right here. Order it lake-edge.</div></div>
-    <div class="act-card" data-cat="food"><div class="act-title">Boulangerie run</div><div class="act-desc">Croissants, pain au chocolat, baguette tradition. Whoever's up first. Non-negotiable.</div></div>
-  </div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- EVENINGS / ON OUR DATES -->
-<section id="evenings">
-  <span class="section-kicker">Evenings &amp; what's on</span>
-  <h2>Stuff actually happening Aug 15–29</h2>
-
-  <div class="event-card">
-    <div class="ev-when">Aug 18 – 28 · on our dates</div>
-    <div class="ev-title">Impérial Annecy Festival</div>
-    <p style="font-size:0.92rem;">Jazz, classical, comedy on the lake. Free <strong>6pm discovery concerts</strong>, paid <strong>9pm headliners</strong> in the Imperial Gardens. Easy pre-dinner move.</p>
-    <p style="font-size:0.85rem;color:var(--text-light);">Highlights: <strong>People Aki</strong> (Aug 23, 6pm, free) · <strong>Edouard Baer</strong> (Aug 28, 9pm, paid).</p>
-  </div>
-
-  <div class="event-card">
-    <div class="ev-when">Aug 19 – 20 · on our dates</div>
-    <div class="ev-title">Château de Montrottier · knights &amp; equestrian show</div>
-    <p style="font-size:0.92rem;">Pair with Gorges du Fier (Lovagny) for a half-day combo. Easy bring-everyone day.</p>
-  </div>
-
-  <div class="event-card">
-    <div class="ev-when">All trip · default mode</div>
-    <div class="ev-title">Annecy Paysages outdoor art walk</div>
-    <p style="font-size:0.92rem;">Free citywide outdoor art trail. Wander, stumble, gelato.</p>
-  </div>
-
-  <div class="event-card misses">
-    <div class="ev-when">Aug 1 · misses our dates</div>
-    <div class="ev-title">Fête du Lac (legendary, but we're 2 weeks late)</div>
-    <p style="font-size:0.92rem;">The biggest fireworks show in Europe over the lake. Annecy's signature event — but it happens before we land. Filing as: another reason to come back.</p>
-  </div>
-
-  <div class="note">Default evening: sunset swim → long dinner on the terrace or at a lake-edge place → maybe a 9pm Impérial show, maybe an espresso in old town, maybe just bed. We're not here for nightlife — we're here for the long table.</div>
-</section>
-
-<div class="section-divider"></div>
-
-<!-- HYPE CHECK -->
-<section id="vote">
-  <span class="section-kicker">Hype check</span>
-  <h2>Which of you is here for what</h2>
-  <p>Pick who you are, then mash the cards that pull you. No wrong answers. Multi-select on. Liv reads this and starts booking.</p>
-
-  <div class="vote-section" id="vote-form">
-    <div style="margin-bottom:0.9rem;">
-      <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); font-weight:600; margin-bottom:0.5rem;">Who's voting</div>
-      <div class="who-row" id="who-row">
-        <div class="who-chip" data-who="Liv">Liv</div>
-        <div class="who-chip" data-who="Andrew">Andrew</div>
-        <div class="who-chip" data-who="Chip">Chip</div>
-        <div class="who-chip" data-who="Ian">Ian</div>
-      </div>
-    </div>
-
-    <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); font-weight:600; margin: 1rem 0 0.5rem;">What pulls you (tap all that apply)</div>
-
-    <div class="hype-grid">
-      <div class="hype-card" data-hype="forclaz">
-        <div class="hype-emoji">🌇</div>
-        <div class="hype-title">Watch paragliders from Forclaz</div>
-        <div class="hype-sub">Picnic, pink sky, both feet on the ground</div>
-      </div>
-      <div class="hype-card" data-hype="boat">
-        <div class="hype-emoji">🛥️</div>
-        <div class="hype-title">Sunset apéro boat</div>
-        <div class="hype-sub">Licence-free electric, swim stops</div>
-      </div>
-      <div class="hype-card" data-hype="canyon">
-        <div class="hype-emoji">💧</div>
-        <div class="hype-title">Canyon d'Angon</div>
-        <div class="hype-sub">Splashy, harnessed, water at the bottom</div>
-      </div>
-      <div class="hype-card" data-hype="luge">
-        <div class="hype-emoji">🛷</div>
-        <div class="hype-title">Summer luge</div>
-        <div class="hype-sub">Semnoz / La Clusaz, all ages, stupid fun</div>
-      </div>
-      <div class="hype-card" data-hype="wakeboard">
-        <div class="hype-emoji">🚤</div>
-        <div class="hype-title">Wake / waterski / wakesurf</div>
-        <div class="hype-sub">Boat or cable, lake's clean</div>
-      </div>
-      <div class="hype-card" data-hype="bikepark">
-        <div class="hype-emoji">🏂</div>
-        <div class="hype-title">Lift-served bike park</div>
-        <div class="hype-sub">Semnoz / La Clusaz / Le Grand-Bornand</div>
-      </div>
-      <div class="hype-card" data-hype="loop">
-        <div class="hype-emoji">🚴‍♂️</div>
-        <div class="hype-title">Semnoz sufferfest (or 42 km lake loop)</div>
-        <div class="hype-sub">Big day on the bike, real legs</div>
-      </div>
-      <div class="hype-card" data-hype="cols">
-        <div class="hype-emoji">🚵</div>
-        <div class="hype-title">Climb the cols on a road bike</div>
-        <div class="hype-sub">Forclaz, Semnoz, Aravis, Glières</div>
-      </div>
-      <div class="hype-card" data-hype="pumptrack">
-        <div class="hype-emoji">💨</div>
-        <div class="hype-title">Duingt pump track</div>
-        <div class="hype-sub">1,000 m² + Le Bon Wagon</div>
-      </div>
-      <div class="hype-card" data-hype="threecroix">
-        <div class="hype-emoji">🥾</div>
-        <div class="hype-title">Circuit des 3 Croix from Sévrier</div>
-        <div class="hype-sub">Right out the door, big lake views</div>
-      </div>
-      <div class="hype-card" data-hype="veyrier">
-        <div class="hype-emoji">⛰️</div>
-        <div class="hype-title">Mont Baron / Veyrier ridge walk</div>
-        <div class="hype-sub">Half day, full lake panorama, no chains</div>
-      </div>
-      <div class="hype-card" data-hype="sup">
-        <div class="hype-emoji">🏄‍♀️</div>
-        <div class="hype-title">Sunset SUP from out the door</div>
-        <div class="hype-sub">Golden hour, Sévrier shore</div>
-      </div>
-      <div class="hype-card" data-hype="snorkel">
-        <div class="hype-emoji">🤿</div>
-        <div class="hype-title">Snorkel / freedive</div>
-        <div class="hype-sub">Underwater pile-dwellings, fish</div>
-      </div>
-      <div class="hype-card" data-hype="cliffjump">
-        <div class="hype-emoji">🪨</div>
-        <div class="hype-title">Secret swim mission — Roc de Chère</div>
-        <div class="hype-sub">Forest hike → glass water (no jumping)</div>
-      </div>
-      <div class="hype-card" data-hype="boutdulac">
-        <div class="hype-emoji">🦫</div>
-        <div class="hype-title">Bout-du-Lac wild swim</div>
-        <div class="hype-sub">Doussard end, beavers, recovery day</div>
-      </div>
-      <div class="hype-card" data-hype="beachday">
-        <div class="hype-emoji">🏖️</div>
-        <div class="hype-title">Pure beach day, Saint-Jorioz</div>
-        <div class="hype-sub">Sandy, spacious, book + nap</div>
-      </div>
-      <div class="hype-card" data-hype="reblochon">
-        <div class="hype-emoji">🧀</div>
-        <div class="hype-title">Cheese pilgrimage — Reblochon farm + ferme-auberge</div>
-        <div class="hype-sub">Cheese at altitude, diots, polenta</div>
-      </div>
-      <div class="hype-card" data-hype="market">
-        <div class="hype-emoji">🧺</div>
-        <div class="hype-title">Market → picnic loop</div>
-        <div class="hype-sub">Best meal of the trip, €8/person</div>
-      </div>
-      <div class="hype-card" data-hype="poisson">
-        <div class="hype-emoji">🐟</div>
-        <div class="hype-title">Le Poisson Rouge dinner</div>
-        <div class="hype-sub">Wooden terrace in the lake</div>
-      </div>
-      <div class="hype-card" data-hype="cookin">
-        <div class="hype-emoji">🥧</div>
-        <div class="hype-title">Big group cook night at the house</div>
-        <div class="hype-sub">Tartiflette / raclette / fondue</div>
-      </div>
-      <div class="hype-card" data-hype="oldtown">
-        <div class="hype-emoji">🥐</div>
-        <div class="hype-title">Annecy old town night</div>
-        <div class="hype-sub">Canals, gelato, market haul</div>
-      </div>
-      <div class="hype-card" data-hype="festival">
-        <div class="hype-emoji">🎷</div>
-        <div class="hype-title">Impérial Festival evening</div>
-        <div class="hype-sub">Free 6pm or paid 9pm shows</div>
-      </div>
-    </div>
-
-    <button class="vote-btn" onclick="submitHype()">Lock in my picks</button>
-  </div>
-
-  <div id="vote-results" style="display:none;">
-    <h3 style="margin:0.4rem 0 0.4rem;">Group hype board</h3>
-    <p style="font-size:0.85rem;color:var(--text-light); margin-bottom:1rem;" id="voter-summary"></p>
-    <div id="results-container"></div>
-    <button class="vote-btn" style="background:var(--text-light);margin-top:0.8rem;" onclick="resetHype()">Change my picks</button>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <p>Made with <span class="heart">♥</span> by Liv · for Andrew, Chip &amp; Ian</p>
-  <p style="margin-top:0.3rem;">Annecy 2026. Two weeks. The four of us.</p>
-</footer>
-
-<script>
-// ==================== MAP ====================
-const HOME = { lat: 45.8530, lng: 6.1395 };
-const map = L.map('map', { scrollWheelZoom: false }).setView([45.852, 6.175], 11.7);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors',
-  maxZoom: 18
-}).addTo(map);
-
-function dot(color, size) {
-  size = size || 14;
-  return L.divIcon({
-    className: '',
-    html: '<div style="width:'+size+'px;height:'+size+'px;background:'+color+';border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
-    iconSize: [size, size], iconAnchor: [size/2, size/2]
-  });
-}
-const homeIcon = L.divIcon({
-  className: '',
-  html: '<div style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:#2D8A4E;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.35);color:white;font-size:18px;line-height:1;">★</div>',
-  iconSize: [34, 34], iconAnchor: [17, 17]
-});
-
-const C = {
-  water:      '#2A9D8F',
-  adrenaline: '#E07A5F',
-  food:       '#C9893C',
-  city:       '#1B7A6E'
-};
-
-const markers = [
-  { name: 'Annecy Old Town', lat: 45.899, lng: 6.129, color: C.city,
-    desc: 'Pearl of the Alps. Markets Tue/Fri/Sun, canals, gelato. ~12 min by bike from the house on the Voie Verte.' },
-  { name: 'Saint-Jorioz beach', lat: 45.847, lng: 6.157, color: C.water,
-    desc: 'Best public sand on the lake. ~10–15 min by bike from the house.' },
-  { name: 'Duingt — pump track + Le Bon Wagon', lat: 45.832, lng: 6.200, color: C.adrenaline,
-    desc: 'Castle on a peninsula, 1,000 m² pump track, cycling café. ~25 min by bike.' },
-  { name: 'Talloires bay (kayak / wooden boat)', lat: 45.840, lng: 6.214, color: C.water,
-    desc: 'Bay of Talloires — kayak, swim, lakefront cafés. Adventure HQ next door.' },
-  { name: 'Col de la Forclaz (sunset hangs)', lat: 45.815, lng: 6.245, color: C.food,
-    desc: 'Iconic viewpoint over the lake. Picnic, watch paragliders launch on someone else\'s behalf, then eat at La Ferme de la Forclaz. We stay attached to the earth.' },
-  { name: 'Canyon d\'Angon', lat: 45.836, lng: 6.226, color: C.adrenaline,
-    desc: 'Rappels, slides, 8 m jumps. Standard guided trip, 3–4 hr.' },
-  { name: 'Roc de Chère swim mission', lat: 45.853, lng: 6.207, color: C.water,
-    desc: 'Forest reserve → rocky, glass-clear water. Caves to poke around, low-rock entries. Cliff-jumping is a watch-only situation for us.' },
-  { name: 'Bout-du-Lac (Doussard) wild swim', lat: 45.787, lng: 6.220, color: C.water,
-    desc: 'South tip nature reserve. Beavers, marshes, recovery-day swim.' },
-  { name: 'Le Semnoz (climb / bike park / luge)', lat: 45.778, lng: 6.075, color: C.adrenaline,
-    desc: 'Local proving-ground. Road climb, gravel ridge, summer luge, lift-served bike park.' },
-  { name: 'La Tournette — refuge route only', lat: 45.810, lng: 6.275, color: C.adrenaline,
-    desc: 'Highest peak over the lake. Hike to the refuge for the alpine view; the chained final pitch is a hard pass for this crew.' },
-  { name: 'Thônes — Reblochon coop', lat: 45.881, lng: 6.319, color: C.food,
-    desc: 'Capital of Reblochon. Cooperative tasting + Thursday market.' },
-  { name: 'Gorges du Fier', lat: 45.881, lng: 6.061, color: C.food,
-    desc: 'Catwalk slot canyon, ~1 hr. Pair with Château de Montrottier next door.' }
-];
-
-L.marker([45.87, 6.15], { icon: L.divIcon({ className: '', html: '<div style="font-family:Fraunces,serif;font-size:13px;color:#457B9D;opacity:0.7;font-style:italic;white-space:nowrap;">Grand Lac</div>', iconSize: [80, 20], iconAnchor: [40, 10] }) }).addTo(map);
-L.marker([45.815, 6.19], { icon: L.divIcon({ className: '', html: '<div style="font-family:Fraunces,serif;font-size:12px;color:#457B9D;opacity:0.7;font-style:italic;white-space:nowrap;">Petit Lac</div>', iconSize: [70, 18], iconAnchor: [35, 9] }) }).addTo(map);
-
-L.marker([HOME.lat, HOME.lng], { icon: homeIcon, zIndexOffset: 1000 })
-  .addTo(map)
-  .bindPopup('<div style="font-family:DM Sans,sans-serif;max-width:240px;">' +
-    '<strong style="font-family:Fraunces,serif;font-size:1.1rem;color:#2D8A4E;">★ Home Base</strong><br>' +
-    '<span style="font-size:0.78rem;color:#2D8A4E;font-weight:600;">La Roche &amp; Le Lac · Sévrier</span>' +
-    '<p style="font-size:0.82rem;margin-top:6px;line-height:1.4;">190 Route d\'Albertville, 74320 Sévrier. ~100 m from the lake, on the Voie Verte.</p>' +
-    '</div>', { maxWidth: 260 }).openPopup();
-
-markers.forEach(function(m) {
-  L.marker([m.lat, m.lng], { icon: dot(m.color, 14) })
-    .addTo(map)
-    .bindPopup('<div style="font-family:DM Sans,sans-serif;max-width:230px;">' +
-      '<strong style="font-family:Fraunces,serif;font-size:1.02rem;">' + m.name + '</strong>' +
-      '<p style="font-size:0.82rem;margin-top:6px;line-height:1.4;">' + m.desc + '</p>' +
-      '</div>', { maxWidth: 250 });
-});
-
-// ==================== CATEGORY FILTER ====================
-function filterCat(cat) {
-  document.querySelectorAll('.cat-tab').forEach(function(t) {
-    t.classList.toggle('active', t.dataset.cat === cat);
-  });
-  document.querySelectorAll('#act-grid .act-card').forEach(function(card) {
-    if (cat === 'all' || card.dataset.cat === cat) {
-      card.style.display = '';
-    } else {
-      card.style.display = 'none';
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Annecy 2026: Activity Guide</title>
+  <meta
+    name="description"
+    content="A sibling-friendly Annecy trip guide organized by activity, with plain-English context, French translations, official links, and visual references."
+  />
+  <meta property="og:title" content="Annecy 2026: Activity Guide" />
+  <meta
+    property="og:description"
+    content="Lake swims, cycling, mountain days, markets, food, and useful translations for a two-week Annecy trip."
+  />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500..800;1,9..144,500..800&family=Work+Sans:wght@400..700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root,
+    [data-theme='light'] {
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body: 'Work Sans', Arial, sans-serif;
+
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2.35rem, 1.1rem + 4vw, 5rem);
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+
+      --bg: #f7f1e7;
+      --surface: #fffaf1;
+      --surface-2: #edf4ee;
+      --surface-3: #e3eef0;
+      --ink: #24312f;
+      --muted: #69736e;
+      --faint: #9ea49c;
+      --lake: #0f6f7a;
+      --lake-deep: #0a4c54;
+      --sage: #6e8562;
+      --stone: #d9cdbb;
+      --terracotta: #b05d3b;
+      --sun: #d7a64a;
+      --white: #ffffff;
+      --border: color-mix(in oklab, var(--ink) 14%, transparent);
+      --shadow-sm: 0 1px 2px color-mix(in oklab, var(--ink) 10%, transparent);
+      --shadow-md: 0 12px 32px color-mix(in oklab, var(--ink) 12%, transparent);
+      --radius-sm: 0.45rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1.1rem;
+      --radius-xl: 1.6rem;
+      --content: 1160px;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
-  });
-}
 
-// ==================== HYPE CHECK ====================
-const HYPE_LABELS = {
-  forclaz:   'Watch paragliders from Forclaz',
-  boat:      'Sunset apéro boat',
-  canyon:    "Canyon d'Angon",
-  luge:      'Summer luge',
-  wakeboard: 'Wake / waterski / wakesurf',
-  bikepark:  'Lift-served bike park',
-  loop:      'Semnoz sufferfest / 42 km lake loop',
-  cols:      'Climb the cols on a road bike',
-  pumptrack: 'Duingt pump track',
-  threecroix:'Circuit des 3 Croix from Sévrier',
-  veyrier:   'Mont Baron / Veyrier ridge walk',
-  sup:       'Sunset SUP from the door',
-  snorkel:   'Snorkel / freedive',
-  cliffjump: 'Secret swim mission — Roc de Chère',
-  boutdulac: 'Bout-du-Lac wild swim',
-  beachday:  'Pure beach day, Saint-Jorioz',
-  reblochon: 'Cheese pilgrimage — Reblochon farm + ferme-auberge',
-  market:    'Market → picnic loop',
-  poisson:   'Le Poisson Rouge dinner',
-  cookin:    'Big group cook night',
-  oldtown:   'Annecy old town night',
-  festival:  'Impérial Festival evening'
-};
+    [data-theme='dark'] {
+      --bg: #111b1b;
+      --surface: #192423;
+      --surface-2: #22302a;
+      --surface-3: #1f3035;
+      --ink: #f0eee7;
+      --muted: #b6b9b1;
+      --faint: #7f8780;
+      --lake: #74c6cd;
+      --lake-deep: #9fd8dc;
+      --sage: #a8bd95;
+      --stone: #4c4a43;
+      --terracotta: #e0916e;
+      --sun: #f0c86b;
+      --white: #101716;
+      --border: color-mix(in oklab, var(--ink) 16%, transparent);
+      --shadow-sm: 0 1px 2px color-mix(in oklab, black 35%, transparent);
+      --shadow-md: 0 14px 36px color-mix(in oklab, black 45%, transparent);
+    }
 
-const TRAVELERS = ['Liv', 'Andrew', 'Chip', 'Ian'];
-let currentWho = null;
-let selectedHype = new Set();
-let hypeAll = {};
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-try {
-  const stored = sessionStorage.getItem('annecy-hype-v2');
-  if (stored) hypeAll = JSON.parse(stored);
-} catch (e) {}
+    html {
+      scroll-behavior: smooth;
+      text-size-adjust: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      scroll-padding-top: var(--space-16);
+    }
 
-function whoAlreadyVoted() {
-  const set = new Set();
-  Object.values(hypeAll).forEach(function(arr) { (arr || []).forEach(function(n) { set.add(n); }); });
-  return set;
-}
+    body {
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.6;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, color-mix(in oklab, var(--lake) 14%, transparent), transparent 38rem),
+        linear-gradient(135deg, var(--bg), color-mix(in oklab, var(--surface-2) 42%, var(--bg)));
+    }
 
-document.querySelectorAll('.who-chip').forEach(function(chip) {
-  chip.addEventListener('click', function() {
-    document.querySelectorAll('.who-chip').forEach(function(c) { c.classList.remove('active'); });
-    chip.classList.add('active');
-    currentWho = chip.dataset.who;
-    selectedHype = new Set();
-    Object.keys(hypeAll).forEach(function(k) {
-      if ((hypeAll[k] || []).indexOf(currentWho) !== -1) selectedHype.add(k);
-    });
-    document.querySelectorAll('.hype-card').forEach(function(card) {
-      if (selectedHype.has(card.dataset.hype)) card.classList.add('selected');
-      else card.classList.remove('selected');
-    });
-  });
-});
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(90deg, var(--ink) 1px, transparent 1px),
+        linear-gradient(var(--ink) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+    }
 
-document.querySelectorAll('.hype-card').forEach(function(card) {
-  card.addEventListener('click', function() {
-    const k = card.dataset.hype;
-    if (selectedHype.has(k)) { selectedHype.delete(k); card.classList.remove('selected'); }
-    else { selectedHype.add(k); card.classList.add('selected'); }
-  });
-});
+    img,
+    svg,
+    iframe {
+      display: block;
+      max-width: 100%;
+    }
 
-function submitHype() {
-  if (!currentWho) { alert('Pick who you are first!'); return; }
-  if (selectedHype.size === 0) { alert('Tap at least one thing that pulls you!'); return; }
+    img {
+      height: auto;
+      background: var(--surface-2);
+    }
 
-  Object.keys(hypeAll).forEach(function(k) {
-    hypeAll[k] = (hypeAll[k] || []).filter(function(n) { return n !== currentWho; });
-  });
-  selectedHype.forEach(function(k) {
-    if (!hypeAll[k]) hypeAll[k] = [];
-    if (hypeAll[k].indexOf(currentWho) === -1) hypeAll[k].push(currentWho);
-  });
+    a {
+      color: var(--lake-deep);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.18em;
+      transition: color var(--transition), background var(--transition), border-color var(--transition);
+    }
 
-  try { sessionStorage.setItem('annecy-hype-v2', JSON.stringify(hypeAll)); } catch (e) {}
+    a:hover {
+      color: var(--terracotta);
+    }
 
-  document.getElementById('vote-form').style.display = 'none';
-  document.getElementById('vote-results').style.display = 'block';
-  renderHype();
-}
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      border: 0;
+    }
 
-function renderHype() {
-  const voted = whoAlreadyVoted();
-  const summary = TRAVELERS.map(function(n) {
-    return voted.has(n)
-      ? '<span style="color:var(--teal);font-weight:600;">✓ ' + n + '</span>'
-      : '<span style="opacity:0.5;">' + n + '</span>';
-  }).join(' &middot; ');
-  document.getElementById('voter-summary').innerHTML = 'Locked in: ' + summary;
+    :focus-visible {
+      outline: 2px solid var(--lake);
+      outline-offset: 3px;
+      border-radius: var(--radius-sm);
+    }
 
-  const ranked = Object.keys(HYPE_LABELS).map(function(k) {
-    return { key: k, label: HYPE_LABELS[k], voters: hypeAll[k] || [] };
-  }).sort(function(a, b) { return b.voters.length - a.voters.length; });
+    .skip-link {
+      position: absolute;
+      left: var(--space-4);
+      top: var(--space-4);
+      transform: translateY(-150%);
+      background: var(--surface);
+      color: var(--ink);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      z-index: 100;
+    }
 
-  let html = '';
-  ranked.forEach(function(item) {
-    const count = item.voters.length;
-    const pct = Math.round((count / TRAVELERS.length) * 100);
-    const unanimous = count === TRAVELERS.length;
-    html += '<div class="hype-result ' + (unanimous ? 'unanimous' : '') + '">' +
-      '<div class="hype-result-head">' +
-        '<div class="hype-result-title">' + item.label + '</div>' +
-        '<div class="hype-result-count">' + count + '/' + TRAVELERS.length + (unanimous ? ' &middot; everyone' : '') + '</div>' +
-      '</div>' +
-      '<div class="hype-result-bar"><div class="hype-result-fill" style="width:' + pct + '%;"></div></div>' +
-      (count > 0 ? '<div class="hype-result-voters">' + item.voters.join(', ') + '</div>' : '') +
-    '</div>';
-  });
-  document.getElementById('results-container').innerHTML = html;
-}
+    .skip-link:focus {
+      transform: translateY(0);
+    }
 
-function resetHype() {
-  document.getElementById('vote-form').style.display = 'block';
-  document.getElementById('vote-results').style.display = 'none';
-}
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: color-mix(in oklab, var(--bg) 88%, transparent);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
 
-if (Object.keys(hypeAll).length > 0) {
-  document.getElementById('vote-results').style.display = 'block';
-  renderHype();
-}
-</script>
+    .nav {
+      width: min(var(--content), calc(100% - var(--space-8)));
+      min-height: 68px;
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
 
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      color: var(--lake-deep);
+      flex: 0 0 auto;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+    }
+
+    .nav-links a,
+    .theme-toggle {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-full, 999px);
+      padding: var(--space-2) var(--space-4);
+      text-decoration: none;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover,
+    .theme-toggle:hover {
+      color: var(--ink);
+      background: color-mix(in oklab, var(--lake) 10%, transparent);
+    }
+
+    .theme-toggle {
+      background: transparent;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section {
+      width: min(var(--content), calc(100% - var(--space-8)));
+      margin-inline: auto;
+      padding-block: clamp(var(--space-10), 7vw, var(--space-20));
+    }
+
+    .hero {
+      width: min(1320px, calc(100% - var(--space-8)));
+      margin: var(--space-6) auto 0;
+      min-height: min(820px, calc(100dvh - 96px));
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: clamp(var(--space-6), 5vw, var(--space-16));
+      align-items: center;
+      padding-block: var(--space-10);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      width: fit-content;
+      margin-bottom: var(--space-5);
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--lake-deep);
+      background: color-mix(in oklab, var(--surface) 82%, transparent);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      line-height: 1.04;
+      text-wrap: balance;
+      letter-spacing: -0.035em;
+    }
+
+    h1 {
+      font-size: var(--text-2xl);
+      max-width: 11ch;
+      margin-bottom: var(--space-5);
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      margin-bottom: var(--space-4);
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-2);
+    }
+
+    p {
+      max-width: 70ch;
+      text-wrap: pretty;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: var(--text-lg);
+      max-width: 54ch;
+      margin-bottom: var(--space-8);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .button,
+    .ghost-button {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border-radius: 999px;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .button {
+      background: var(--lake-deep);
+      color: #fffaf1;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .button:hover {
+      color: #fffaf1;
+      background: var(--terracotta);
+    }
+
+    .ghost-button {
+      color: var(--ink);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--surface) 72%, transparent);
+    }
+
+    .hero-media {
+      display: grid;
+      gap: var(--space-4);
+      align-items: stretch;
+    }
+
+    .photo-frame {
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      background: var(--surface-3);
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      min-height: inherit;
+      object-fit: cover;
+    }
+
+    .photo-caption {
+      position: absolute;
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border: 1px solid color-mix(in oklab, white 30%, transparent);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, #102222 64%, transparent);
+      color: #fffaf1;
+      backdrop-filter: blur(12px);
+      font-size: var(--text-sm);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+    }
+
+    .stat {
+      padding: var(--space-4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, var(--surface) 78%, transparent);
+    }
+
+    .stat strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      letter-spacing: -0.03em;
+      color: var(--lake-deep);
+    }
+
+    .stat span {
+      display: block;
+      margin-top: var(--space-1);
+      color: var(--muted);
+      font-size: var(--text-xs);
+      line-height: 1.35;
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(280px, 0.55fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+
+    .note-card,
+    .map-card,
+    .gloss-card,
+    .activity-card,
+    .source-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: color-mix(in oklab, var(--surface) 84%, transparent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .note-card {
+      padding: var(--space-6);
+    }
+
+    .note-card p + p {
+      margin-top: var(--space-4);
+    }
+
+    .quote {
+      margin-block: var(--space-6);
+      padding-left: var(--space-5);
+      border-left: 2px solid var(--terracotta);
+      color: var(--lake-deep);
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      line-height: 1.22;
+      letter-spacing: -0.025em;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-2);
+      margin-top: var(--space-5);
+    }
+
+    .swatch {
+      min-height: 78px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: var(--space-2);
+      display: flex;
+      align-items: end;
+      color: #fffaf1;
+      font-size: var(--text-xs);
+      font-weight: 700;
+    }
+
+    .swatch:nth-child(1) { background: #0f6f7a; }
+    .swatch:nth-child(2) { background: #6e8562; }
+    .swatch:nth-child(3) { background: #d9cdbb; color: #24312f; }
+    .swatch:nth-child(4) { background: #b05d3b; }
+    .swatch:nth-child(5) { background: #d7a64a; color: #24312f; }
+
+    .map-card {
+      overflow: hidden;
+    }
+
+    .map-card iframe {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border: 0;
+      filter: saturate(0.78) contrast(0.94);
+    }
+
+    .map-card figcaption {
+      padding: var(--space-4);
+      color: var(--muted);
+      font-size: var(--text-sm);
+    }
+
+    .town-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.55fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .town-map {
+      position: sticky;
+      top: calc(68px + var(--space-6));
+      padding: var(--space-6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: color-mix(in oklab, var(--surface-2) 78%, transparent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .shore-key {
+      display: grid;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+
+    .shore-key div {
+      padding: var(--space-4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, var(--surface) 72%, transparent);
+    }
+
+    .shore-key strong {
+      display: block;
+      margin-bottom: var(--space-1);
+      color: var(--lake-deep);
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .shore-key span {
+      display: block;
+      color: var(--muted);
+      font-size: var(--text-sm);
+      line-height: 1.45;
+    }
+
+    .town-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    .town-card {
+      padding: var(--space-5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      background: color-mix(in oklab, var(--surface) 84%, transparent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .town-card.featured-town {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: minmax(220px, 0.42fr) minmax(0, 0.58fr);
+      gap: var(--space-5);
+      padding: var(--space-3);
+    }
+
+    .town-photo {
+      min-height: 100%;
+      overflow: hidden;
+      border-radius: calc(var(--radius-xl) - var(--space-2));
+      background: var(--surface-2);
+    }
+
+    .town-photo img {
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      object-fit: cover;
+    }
+
+    .town-copy {
+      padding: var(--space-4) var(--space-3) var(--space-4) 0;
+      display: grid;
+      align-content: start;
+      gap: var(--space-3);
+    }
+
+    .town-card h3 {
+      margin-bottom: 0;
+    }
+
+    .town-card p {
+      color: var(--muted);
+      font-size: var(--text-sm);
+    }
+
+    .town-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+
+    .town-tag {
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: var(--space-1) var(--space-3);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--sage) 14%, transparent);
+      color: color-mix(in oklab, var(--ink) 74%, var(--sage));
+      font-size: var(--text-xs);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+    }
+
+    .section-head p {
+      color: var(--muted);
+      max-width: 54ch;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-8);
+    }
+
+    .filter-button {
+      min-height: 44px;
+      padding: var(--space-2) var(--space-4);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--surface) 74%, transparent);
+      color: var(--muted);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      transition: color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .filter-button[aria-pressed='true'] {
+      color: #fffaf1;
+      background: var(--lake-deep);
+    }
+
+    .filter-button:active {
+      transform: translateY(1px);
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--space-5);
+    }
+
+    .activity-card {
+      grid-column: span 6;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(180px, 0.42fr) minmax(0, 0.58fr);
+      min-height: 360px;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+    }
+
+    .activity-card[data-featured='true'] {
+      grid-column: span 12;
+      grid-template-columns: minmax(320px, 0.48fr) minmax(0, 0.52fr);
+    }
+
+    .activity-card.is-hidden {
+      display: none;
+    }
+
+    .activity-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .activity-image {
+      position: relative;
+      min-height: 100%;
+      background: var(--surface-2);
+    }
+
+    .activity-image img {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      object-fit: cover;
+    }
+
+    .activity-content {
+      padding: clamp(var(--space-5), 4vw, var(--space-8));
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .activity-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      width: fit-content;
+      min-height: 30px;
+      padding: var(--space-1) var(--space-3);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--lake) 11%, transparent);
+      color: var(--lake-deep);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .pill.energy {
+      background: color-mix(in oklab, var(--terracotta) 13%, transparent);
+      color: var(--terracotta);
+    }
+
+    .pill.food {
+      background: color-mix(in oklab, var(--sun) 20%, transparent);
+      color: color-mix(in oklab, var(--ink) 76%, var(--sun));
+    }
+
+    .activity-content p {
+      color: var(--muted);
+    }
+
+    .plain-box {
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+    }
+
+    .plain-box strong {
+      color: var(--ink);
+    }
+
+    .term {
+      font-weight: 700;
+      color: var(--terracotta);
+    }
+
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: auto;
+    }
+
+    .text-link {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--ink);
+      background: color-mix(in oklab, var(--surface) 78%, transparent);
+      font-size: var(--text-sm);
+      font-weight: 700;
+    }
+
+    .text-link:hover {
+      background: color-mix(in oklab, var(--terracotta) 12%, var(--surface));
+    }
+
+    .gloss-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+
+    .gloss-card {
+      padding: var(--space-5);
+    }
+
+    .gloss-card dt {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      line-height: 1.1;
+      margin-bottom: var(--space-2);
+      color: var(--lake-deep);
+    }
+
+    .gloss-card dd {
+      color: var(--muted);
+      font-size: var(--text-sm);
+    }
+
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+    }
+
+    .source-card {
+      padding: var(--space-5);
+    }
+
+    .source-card span {
+      display: block;
+      margin-bottom: var(--space-2);
+      color: var(--muted);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .source-card a {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      line-height: 1.1;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .source-card p {
+      margin-top: var(--space-3);
+      color: var(--muted);
+      font-size: var(--text-sm);
+    }
+
+    .footer {
+      width: min(var(--content), calc(100% - var(--space-8)));
+      margin-inline: auto;
+      padding: var(--space-10) 0 var(--space-12);
+      color: var(--muted);
+      font-size: var(--text-sm);
+      border-top: 1px solid var(--border);
+    }
+
+    .footer a {
+      color: var(--muted);
+    }
+
+    @media (max-width: 1040px) {
+      .hero,
+      .intro-grid,
+      .town-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .town-map {
+        position: static;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      h1 {
+        max-width: 12ch;
+      }
+
+      .activity-card,
+      .activity-card[data-featured='true'] {
+        grid-column: span 12;
+      }
+
+      .source-grid,
+      .gloss-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 740px) {
+      .nav {
+        width: min(100% - var(--space-4), var(--content));
+      }
+
+      .brand span {
+        display: none;
+      }
+
+      .nav-links a:not(:last-of-type) {
+        display: none;
+      }
+
+      .section,
+      .hero,
+      .footer {
+        width: min(100% - var(--space-4), var(--content));
+      }
+
+      .hero {
+        padding-block: var(--space-8);
+      }
+
+      .photo-frame {
+        min-height: 330px;
+      }
+
+      .mini-grid,
+      .palette,
+      .gloss-grid,
+      .source-grid,
+      .town-grid,
+      .town-card.featured-town {
+        grid-template-columns: 1fr;
+      }
+
+      .town-card.featured-town {
+        grid-column: span 1;
+      }
+
+      .town-copy {
+        padding: var(--space-3);
+      }
+
+      .activity-card,
+      .activity-card[data-featured='true'] {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-image img {
+        min-height: 260px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head p {
+        margin-top: var(--space-3);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Annecy 2026 home">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+          <path d="M5 34C14 31 19 18 24 10C29 18 34 31 43 34" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          <path d="M8 36C16 40 31 40 40 36" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          <path d="M18 30C21 28 27 28 30 30" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        <span>Annecy 2026</span>
+      </a>
+      <div class="nav-links">
+        <a href="#activities">Activities</a>
+        <a href="#towns">Towns</a>
+        <a href="#translations">Translations</a>
+        <a href="#links">Links</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme">Theme</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section id="top" class="hero" aria-labelledby="hero-title">
+      <div>
+        <span class="eyebrow">Annecy, August 2026</span>
+        <h1 id="hero-title">A lake trip, organized by what we actually want to do.</h1>
+        <p class="lede">
+          The lake, the mountains, the food, the bikes, the swims. Two weeks in the place I keep coming back to,
+          rebuilt as an activity menu so nobody needs prior Annecy, French, cycling, or mountain-person context.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#activities">Start with the activity menu</a>
+          <a class="ghost-button" href="#translations">Decode the French words</a>
+        </div>
+      </div>
+      <aside class="hero-media" aria-label="Lake Annecy preview">
+        <figure class="photo-frame">
+          <img
+            src="https://en.lac-annecy.com/content/uploads/2023/06/Balade_a_velo_le_long_du_lac-Monica_Dalmasso-11595-1920px-980x670.jpg"
+            alt="Cyclists riding beside Lake Annecy with mountains and blue water in the background"
+            width="980"
+            height="670"
+            loading="eager"
+            decoding="async"
+          />
+          <figcaption class="photo-caption">
+            The core vibe: a swimmable lake, a bike path, mountains close enough to casually ruin your legs.
+          </figcaption>
+        </figure>
+        <div class="mini-grid" aria-label="Trip facts">
+          <div class="stat">
+            <strong>40 km</strong>
+            <span>classic loop around the lake</span>
+          </div>
+          <div class="stat">
+            <strong>23°C</strong>
+            <span>average summer lake water</span>
+          </div>
+          <div class="stat">
+            <strong>0 context</strong>
+            <span>required to use this guide</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="orientation-title">
+      <div class="intro-grid">
+        <article class="note-card">
+          <span class="eyebrow">How to use this</span>
+          <h2 id="orientation-title">Pick a mood, not a town.</h2>
+          <p>
+            The old version explained the lake by shore and village. That is useful for planning housing, but not for people arriving fresh who just want to know:
+            what are we doing, how intense is it, and why should I care?
+          </p>
+          <p>
+            So this version is organized by activity. Each card explains the thing in normal English, translates the French terms, and links out to official or useful resources.
+          </p>
+          <p class="quote">
+            Short version: swim most days, bike when the legs want drama, eat constantly, and reserve one or two big mountain-adventure days.
+          </p>
+          <h3>Color scheme</h3>
+          <p>
+            I’d keep the palette calm and place-specific: lake blue, sage green, warm stone, terracotta, and late-afternoon gold.
+            It feels more like Annecy itself and less like a generic travel app.
+          </p>
+          <div class="palette" aria-label="Recommended palette">
+            <span class="swatch">lake</span>
+            <span class="swatch">sage</span>
+            <span class="swatch">stone</span>
+            <span class="swatch">terra</span>
+            <span class="swatch">gold</span>
+          </div>
+        </article>
+
+        <figure class="map-card">
+          <iframe
+            title="OpenStreetMap view of Lake Annecy"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=6.0570%2C45.8160%2C6.2440%2C45.9440&amp;layer=mapnik&amp;marker=45.8595%2C6.1390"
+            loading="lazy"
+          ></iframe>
+          <figcaption>
+            Rough orientation: Annecy is at the north end of the lake. Sévrier is on the west shore. Talloires and Montmin are on the east side where a lot of the mountain/adventure stuff starts.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="towns" class="section" aria-labelledby="towns-title">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Lay of the land</span>
+          <h2 id="towns-title">The lake towns, in human terms.</h2>
+        </div>
+        <p>
+          Think of the lake as two useful shores: the easier bike-path west side, and the dramatic east side with prettier villages, cliffs, coves, and mountain access.
+        </p>
+      </div>
+
+      <div class="town-layout">
+        <aside class="town-map" aria-label="Lake orientation">
+          <h3>How to picture it</h3>
+          <p>
+            Annecy sits at the north end. Going clockwise from town, the east side is Veyrier, Menthon, and Talloires. Coming back up the west side, you hit Duingt, Saint-Jorioz, and Sévrier.
+          </p>
+          <div class="shore-key">
+            <div>
+              <strong>East shore</strong>
+              <span>Veyrier, Menthon, Talloires. More dramatic, more cliffy, more “wow, we are in the Alps.”</span>
+            </div>
+            <div>
+              <strong>West shore</strong>
+              <span>Duingt, Saint-Jorioz, Sévrier. Flatter, easier by bike, great for low-friction beach days.</span>
+            </div>
+            <div>
+              <strong>Getting around</strong>
+              <span>Line 50A serves Annecy, Sévrier, Saint-Jorioz, and Duingt. Line 60 serves Annecy, Veyrier-du-Lac, Menthon-Saint-Bernard, and Talloires-Montmin.</span>
+            </div>
+          </div>
+        </aside>
+
+        <div class="town-grid">
+          <article class="town-card featured-town">
+            <div class="town-photo">
+              <img
+                src="https://en.lac-annecy.com/content/uploads/2022/07/1200x1200_Le_Marche_de_la_Vieille_Ville-Francoise_Cavazzana-8069-1920px.jpg"
+                alt="Market stalls in Annecy old town"
+                width="1200"
+                height="1200"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="town-copy">
+              <div class="town-tags">
+                <span class="town-tag">North end</span>
+                <span class="town-tag">Old town</span>
+                <span class="town-tag">Easy default</span>
+              </div>
+              <h3>Annecy and Vieux Annecy</h3>
+              <p>
+                This is the anchor: canals, old stone streets, markets, lakefront walks, gelato, restaurants, and the place everyone can understand immediately.
+              </p>
+              <p>
+                <strong>Translation/context:</strong> <span class="term">Vieux Annecy</span> or <span class="term">vieille ville</span> means old Annecy or old town. This is where we go when we want beauty without logistics.
+              </p>
+            </div>
+          </article>
+
+          <article class="town-card">
+            <div class="town-tags">
+              <span class="town-tag">East shore</span>
+              <span class="town-tag">Close to Annecy</span>
+            </div>
+            <h3>Veyrier-du-Lac</h3>
+            <p>
+              The first east-shore village after Annecy. It feels residential, polished, and very lake-housey, with quick access to the water and views back toward town.
+            </p>
+            <p>
+              <strong>Good for:</strong> a softer east-shore beach stop, a scenic roll-through, or the beginning of the “pretty side of the lake” feeling.
+            </p>
+          </article>
+
+          <article class="town-card">
+            <div class="town-tags">
+              <span class="town-tag">East shore</span>
+              <span class="town-tag">Castle energy</span>
+            </div>
+            <h3>Menthon-Saint-Bernard</h3>
+            <p>
+              Menthon is the storybook one: shaded beach, castle above town, and an easy “we swam, then saw something historic” day.
+            </p>
+            <p>
+              <strong>Translation/context:</strong> <span class="term">château</span> means castle. The Château de Menthon is the fairytale-looking one above the lake.
+            </p>
+          </article>
+
+          <article class="town-card featured-town">
+            <div class="town-photo">
+              <img
+                src="https://en.lac-annecy.com/content/uploads/2023/07/1200x1200_Vue_de_Duingt_depuis_la_plage_de_Talloires-Montmin-Gilles_Piel-10594-1920px.jpg"
+                alt="View of Duingt from the Talloires-Montmin beach"
+                width="1200"
+                height="1200"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="town-copy">
+              <div class="town-tags">
+                <span class="town-tag">East shore</span>
+                <span class="town-tag">Magic beaches</span>
+                <span class="town-tag">Adventure base</span>
+              </div>
+              <h3>Talloires and the Angon road beaches</h3>
+              <p>
+                This is the dreamy one. Talloires has the bay, the classic postcard views, swimming spots, paragliding access, and the road toward Angon where the little beaches and coves get stupidly magical.
+              </p>
+              <p>
+                <strong>Liv note:</strong> this is where the “secret” rope-swing energy belongs. We can keep the actual spot off the internet and just let the brothers discover it properly.
+              </p>
+            </div>
+          </article>
+
+          <article class="town-card">
+            <div class="town-tags">
+              <span class="town-tag">Southwest bend</span>
+              <span class="town-tag">Photo stop</span>
+            </div>
+            <h3>Duingt</h3>
+            <p>
+              Duingt is the little village on the bend with the château-on-the-water silhouette. It is one of the best “wait, this place is insane” moments on the loop.
+            </p>
+            <p>
+              <strong>Good for:</strong> beach stop, coffee/bike-path pause, old train tunnel moment, and looking back across the lake toward Talloires.
+            </p>
+          </article>
+
+          <article class="town-card">
+            <div class="town-tags">
+              <span class="town-tag">West shore</span>
+              <span class="town-tag">Beach day</span>
+            </div>
+            <h3>Saint-Jorioz</h3>
+            <p>
+              Saint-Jorioz is practical and beach-forward: roomy swimming area, shade, facilities, and easy access from the west-side bike path.
+            </p>
+            <p>
+              <strong>Good for:</strong> the easiest group beach day, a casual bike stop, and lower-drama lake time when nobody wants to overplan.
+            </p>
+          </article>
+
+          <article class="town-card">
+            <div class="town-tags">
+              <span class="town-tag">West shore</span>
+              <span class="town-tag">Near Annecy</span>
+            </div>
+            <h3>Sévrier</h3>
+            <p>
+              Sévrier is the close west-shore option: convenient from Annecy, easy on the bike path, and useful when we want lake access without committing to a whole expedition.
+            </p>
+            <p>
+              <strong>Translation/context:</strong> that accent in <span class="term">Sévrier</span> does not change the plan. It is basically “Seh-vree-ay,” and it is very much the practical side of the lake.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="activities" class="section" aria-labelledby="activities-title">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Activity menu</span>
+          <h2 id="activities-title">Choose your own Annecy day.</h2>
+        </div>
+        <p>
+          Filter by energy level. “Easy” means most people can join. “Medium” means bring shoes, snacks, and a little patience. “Spicy” means Liv is excited and at least one brother may ask questions.
+        </p>
+      </div>
+
+      <div class="filter-bar" role="group" aria-label="Filter activities by category">
+        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="filter-button" type="button" data-filter="easy" aria-pressed="false">Easy</button>
+        <button class="filter-button" type="button" data-filter="water" aria-pressed="false">Water</button>
+        <button class="filter-button" type="button" data-filter="bike" aria-pressed="false">Bike</button>
+        <button class="filter-button" type="button" data-filter="mountain" aria-pressed="false">Mountain</button>
+        <button class="filter-button" type="button" data-filter="food" aria-pressed="false">Food</button>
+      </div>
+
+      <div class="activity-grid">
+        <article class="activity-card" data-featured="true" data-tags="easy water" id="swim">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2023/07/980x670_La_plage_de_Saint-Jorioz-Gilles_Piel-10652-1920px.jpg"
+              alt="A sunny Lake Annecy beach with mountains behind the water"
+              width="980"
+              height="670"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill">Easy</span>
+              <span class="pill">Water</span>
+              <span class="pill">Daily default</span>
+            </div>
+            <h3>Lake swims and beach afternoons</h3>
+            <p>
+              This is the baseline activity: walk or bike to the lake, swim, read, snack, repeat. Lake Annecy is unusually clear and very swim-friendly in summer.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">plage</span> means beach. It may be grass, pebbles, or sand, not necessarily an ocean-style beach.</p>
+            </div>
+            <p>
+              Good for everyone. Low friction. Excellent for jet lag, recovery days, or “we did too much yesterday” days.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/activities/beaches/" target="_blank" rel="noopener noreferrer">Official beach list</a>
+              <a class="text-link" href="https://en.lac-annecy.com/beach-bathing-area/plage-municipale-de-saint-jorioz-saint-jorioz/" target="_blank" rel="noopener noreferrer">Saint-Jorioz beach</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="bike easy water" id="bike-path">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2020/10/La_Voie_Verte-Gilles_Piel-10005-730x420px.jpg"
+              alt="The Lake Annecy greenway bike path beside the lake"
+              width="730"
+              height="420"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill">Easy to medium</span>
+              <span class="pill">Bike</span>
+            </div>
+            <h3>The lake loop by bike</h3>
+            <p>
+              This is the “everyone should do it once” ride: a scenic loop around the lake with lots of protected bike path, swim stops, and snack options.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">voie verte</span> means greenway: a bike/pedestrian path separated from cars.</p>
+            </div>
+            <p>
+              For non-cyclists, this can be rented e-bike territory. For cyclists, it is the soft opening before the actual climbs.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/cycle-tourism-route/cycling-route-around-lake-annecy-annecy/" target="_blank" rel="noopener noreferrer">Official 40 km loop</a>
+              <a class="text-link" href="https://en.lac-annecy.com/activities/cycling-and-e-biking/" target="_blank" rel="noopener noreferrer">Cycling and e-biking</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="bike mountain" id="cols">
+          <div class="activity-image">
+            <img
+              src="https://www.annecymountains.com/wp-content/uploads/2021/08/01-Tetiere_DSF5822-recadree-Grand.jpg"
+              alt="A cyclist riding above Lake Annecy with mountains in the distance"
+              width="1920"
+              height="771"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill energy">Medium to spicy</span>
+              <span class="pill">Bike</span>
+            </div>
+            <h3>Climb a col</h3>
+            <p>
+              A <span class="term">col</span> is a mountain pass: basically, the road climbs up and over a saddle between peaks. In cycling terms, this is where Tour de France drama happens.
+            </p>
+            <div class="plain-box">
+              <p><strong>Beginner translation:</strong> “Do a col” means “ride uphill for a long time, enjoy a ridiculous view, then descend.”</p>
+            </div>
+            <p>
+              We can pick the level: gentle scenic climb, Forclaz day, or a full “why are we like this” alpine route.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/routes-for-electrically-assisted-cycles/tour-du-lac-par-les-cols-cycling-route-annecy/" target="_blank" rel="noopener noreferrer">Lake via the cols</a>
+              <a class="text-link" href="https://en.lac-annecy.com/routes-for-electrically-assisted-cycles/concentre-de-cols-alpins-cycling-route-annecy/" target="_blank" rel="noopener noreferrer">Big alpine cols</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="mountain water" id="via-ferrata">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2020/10/Parapente_au-dessus_du_lac-Olivier_Allamand-8580-1920px.jpg"
+              alt="Paragliders over Lake Annecy and the mountains"
+              width="730"
+              height="420"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill energy">Spicy</span>
+              <span class="pill">Mountain</span>
+            </div>
+            <h3>Via ferrata, without making everyone Google it</h3>
+            <p>
+              <span class="term">Via ferrata</span> literally means “iron way.” It is a protected climbing route with metal rungs, cables, ladders, and sometimes bridges.
+            </p>
+            <div class="plain-box">
+              <p><strong>Normal-person explanation:</strong> It is halfway between hiking and rock climbing. You wear a harness and clip into safety cables, so it feels adventurous without requiring climbing experience.</p>
+            </div>
+            <p>
+              Good if people want a memorable “we did a mountain thing” story. Bad if anyone hates exposure or heights.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/activities/outdoor-sports/via-ferrata/" target="_blank" rel="noopener noreferrer">What via ferrata is</a>
+              <a class="text-link" href="https://en.lac-annecy.com/activite-bookable/the-via-tyro-of-annecy-via-ferrata-and-zip-lines/" target="_blank" rel="noopener noreferrer">Via Tyro option</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="mountain water" id="canyoning">
+          <div class="activity-image">
+            <img
+              src="https://www.annecymountainguide.com/media/cache/header_background_image_desktop/2019/06/4732-canyoning-angon2.jpg"
+              alt="A waterfall canyon near Lake Annecy"
+              width="1200"
+              height="900"
+              loading="lazy"
+              decoding="async"
+              onerror="this.closest('.activity-image').classList.add('image-fallback'); this.remove();"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill energy">Medium to spicy</span>
+              <span class="pill">Water</span>
+            </div>
+            <h3>Canyoning at Angon</h3>
+            <p>
+              Canyoning means moving down a mountain stream using a mix of walking, sliding, jumping, swimming, and rope-assisted descents. Angon is the classic nearby canyon.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">canyon d’Angon</span> means Angon Canyon. <span class="term">cascade</span> means waterfall.</p>
+            </div>
+            <p>
+              This is the “cold water, helmets, screaming in a fun way” activity. Best booked with a guide.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/activite-bookable/canyoning-angon-discovery/" target="_blank" rel="noopener noreferrer">Angon discovery canyon</a>
+              <a class="text-link" href="https://en.lac-annecy.com/ideas-for-a-stay/thematic/days-along-the-water/" target="_blank" rel="noopener noreferrer">Waterfall context</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="mountain" id="paragliding">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2020/10/Parapente_au-dessus_du_lac-Olivier_Allamand-8580-1920px.jpg"
+              alt="A tandem paraglider flying over Lake Annecy"
+              width="730"
+              height="420"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill energy">Spicy but guided</span>
+              <span class="pill">Mountain</span>
+            </div>
+            <h3>Paragliding from Col de la Forclaz</h3>
+            <p>
+              This is the iconic Annecy postcard activity: tandem flight above the lake, taking off from a mountain pass and landing down near the water.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">parapente</span> means paragliding. <span class="term">baptême</span> often means first-time tandem flight, not a religious event.</p>
+            </div>
+            <p>
+              Best for someone who wants the view without doing the climb. Weather-dependent and worth booking early if people are serious.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/service/airmax-parapente-talloires-montmin/" target="_blank" rel="noopener noreferrer">Tandem flight info</a>
+              <a class="text-link" href="https://en.lac-annecy.com/must-sees/breathtaking-panoramas/" target="_blank" rel="noopener noreferrer">Forclaz viewpoint</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="mountain" id="hike">
+          <div class="activity-image">
+            <img
+              src="https://www.annecymountainguide.com/media/cache/activity_content_picture/2023/03/9569-3189-tournette-annecy.jpg"
+              alt="Hikers on La Tournette above Lake Annecy"
+              width="600"
+              height="600"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill energy">Spicy</span>
+              <span class="pill">Mountain</span>
+            </div>
+            <h3>La Tournette hike</h3>
+            <p>
+              La Tournette is the big mountain above the lake. It is gorgeous, but it is not a casual “walk after lunch.”
+            </p>
+            <div class="plain-box">
+              <p><strong>Plain English:</strong> Big climb, real hiking shoes, exposed sections, ladders/handrails near the top, and weather matters.</p>
+            </div>
+            <p>
+              Amazing for the right group on the right day. Very skippable if people want vacation, not a character-building exercise.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/hiking-itinerary/la-tournette-depuis-le-col-de-laulp-talloires-montmin/" target="_blank" rel="noopener noreferrer">Official hike details</a>
+              <a class="text-link" href="https://en.lac-annecy.com/activite-reservable/group-hiking-la-tournette-2351m/" target="_blank" rel="noopener noreferrer">Guided option</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="easy food" id="markets">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2022/07/980x670_Le_Marche_de_la_Vieille_Ville-Francoise_Cavazzana-8071-1920px.jpg"
+              alt="The old town market in Annecy with food stalls"
+              width="980"
+              height="670"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill">Easy</span>
+              <span class="pill food">Food</span>
+            </div>
+            <h3>Markets, bakeries, and cooking at the house</h3>
+            <p>
+              Default food mode: bakery in the morning, market food for the house, cheese/fruit/bread always available, and a few real dinners out.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">marché</span> means market. <span class="term">boulangerie</span> means bakery. <span class="term">fromagerie</span> means cheese shop.</p>
+            </div>
+            <p>
+              Great for the whole group because it makes the trip feel French without requiring every meal to become an expensive production.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/event/old-town-market-annecy/" target="_blank" rel="noopener noreferrer">Old Town market</a>
+              <a class="text-link" href="https://en.lac-annecy.com/webzine/from-one-market-to-another/" target="_blank" rel="noopener noreferrer">Markets around the lake</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="activity-card" data-tags="easy food water" id="town">
+          <div class="activity-image">
+            <img
+              src="https://en.lac-annecy.com/content/uploads/2022/07/1200x1200_Le_Marche_de_la_Vieille_Ville-Francoise_Cavazzana-8069-1920px.jpg"
+              alt="Annecy old town market and stone streets"
+              width="1200"
+              height="1200"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <span class="pill">Easy</span>
+              <span class="pill food">Food</span>
+            </div>
+            <h3>Annecy town wander</h3>
+            <p>
+              This is the low-planning day: old town, canals, market, gelato, lakefront walk, maybe dinner. It is the easiest crowd-pleaser.
+            </p>
+            <div class="plain-box">
+              <p><strong>Translation/context:</strong> <span class="term">vieille ville</span> means old town. <span class="term">lac</span> means lake.</p>
+            </div>
+            <p>
+              Ideal on arrival day, post-big-ride day, or when everyone has different energy levels.
+            </p>
+            <div class="link-row">
+              <a class="text-link" href="https://en.lac-annecy.com/service/lake-annecy-tourist-office-annecy/" target="_blank" rel="noopener noreferrer">Tourist office</a>
+              <a class="text-link" href="https://en.lac-annecy.com/restaurants/" target="_blank" rel="noopener noreferrer">Restaurant search</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="translations" class="section" aria-labelledby="translations-title">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Tiny glossary</span>
+          <h2 id="translations-title">French and mountain words, translated.</h2>
+        </div>
+        <p>
+          This is the cheat sheet for Ian and anyone who does not spend their free time learning French geography or cycling terminology.
+        </p>
+      </div>
+
+      <dl class="gloss-grid">
+        <div class="gloss-card">
+          <dt>Lac</dt>
+          <dd>Lake. So Lac d’Annecy simply means Lake Annecy.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Col</dt>
+          <dd>A mountain pass. Cyclists use it to mean a major climb over or toward a pass.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Via ferrata</dt>
+          <dd>“Iron way”: a protected climbing route with cables, metal rungs, ladders, or bridges.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Voie verte</dt>
+          <dd>Greenway: a protected bike/pedestrian path, usually separated from traffic.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Plage</dt>
+          <dd>Beach. Around the lake, this can mean grass, pebbles, sand, or a paid/supervised swimming area.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Baptême</dt>
+          <dd>For adventure sports, usually a first-time guided/tandem experience. “Baptême parapente” means a tandem paragliding flight.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Randonnée</dt>
+          <dd>Hike. But difficulty varies wildly, from gentle trail to “please bring real shoes.”</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Cascade</dt>
+          <dd>Waterfall. You’ll see this around Angon and other water routes.</dd>
+        </div>
+        <div class="gloss-card">
+          <dt>Vieille ville</dt>
+          <dd>Old town. In Annecy, this means canals, arcades, markets, restaurants, and wandering.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="links" class="section" aria-labelledby="links-title">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Useful links</span>
+          <h2 id="links-title">Keep these handy.</h2>
+        </div>
+        <p>
+          These are the best jumping-off points for booking, checking details, or explaining what an activity actually is.
+        </p>
+      </div>
+
+      <div class="source-grid">
+        <article class="source-card">
+          <span>Official</span>
+          <a href="https://en.lac-annecy.com" target="_blank" rel="noopener noreferrer">Lake Annecy Tourist Office</a>
+          <p>Main official hub for activities, restaurants, beaches, practical info, and bookings.</p>
+        </article>
+        <article class="source-card">
+          <span>Water</span>
+          <a href="https://en.lac-annecy.com/activities/beaches/" target="_blank" rel="noopener noreferrer">Beaches</a>
+          <p>Best list for supervised swimming areas, beach facilities, and which spots fit which day.</p>
+        </article>
+        <article class="source-card">
+          <span>Bikes</span>
+          <a href="https://en.lac-annecy.com/activities/cycling-and-e-biking/" target="_blank" rel="noopener noreferrer">Cycling and e-biking</a>
+          <p>Use this to pick between gentle lake path, e-bike day, or proper mountain effort.</p>
+        </article>
+        <article class="source-card">
+          <span>Mountain</span>
+          <a href="https://en.lac-annecy.com/must-sees/breathtaking-panoramas/" target="_blank" rel="noopener noreferrer">Panoramas</a>
+          <p>Viewpoints, Forclaz context, and ideas for big scenery without necessarily doing a big hike.</p>
+        </article>
+        <article class="source-card">
+          <span>Adventure</span>
+          <a href="https://en.lac-annecy.com/activities/outdoor-sports/via-ferrata/" target="_blank" rel="noopener noreferrer">Via ferrata</a>
+          <p>Good explainer for the activity, plus nearby options around the lake and mountains.</p>
+        </article>
+        <article class="source-card">
+          <span>Food</span>
+          <a href="https://en.lac-annecy.com/webzine/from-one-market-to-another/" target="_blank" rel="noopener noreferrer">Markets around the lake</a>
+          <p>Useful for building low-key food days around market mornings.</p>
+        </article>
+        <article class="source-card">
+          <span>Big hike</span>
+          <a href="https://en.lac-annecy.com/hiking-itinerary/la-tournette-depuis-le-col-de-laulp-talloires-montmin/" target="_blank" rel="noopener noreferrer">La Tournette route</a>
+          <p>The “read this before casually suggesting it” hike page.</p>
+        </article>
+        <article class="source-card">
+          <span>Getting around</span>
+          <a href="https://en.lac-annecy.com/practical/how-to-move-there/getting-around-the-lake/" target="_blank" rel="noopener noreferrer">Lake transport</a>
+          <p>Useful for boat shuttles, private transfers, and planning non-car lake movement.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Built as a sibling-friendly Annecy guide. Images and activity details link to Lake Annecy tourism resources where available.
+      Current structure: activity-first, translation-forward, low-assumption.
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const toggle = document.querySelector('[data-theme-toggle]');
+      let theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.setAttribute('data-theme', theme);
+
+      function updateToggle() {
+        if (!toggle) return;
+        toggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
+        toggle.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
+      }
+
+      updateToggle();
+      toggle?.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
+        updateToggle();
+      });
+    })();
+
+    (function () {
+      const buttons = Array.from(document.querySelectorAll('[data-filter]'));
+      const cards = Array.from(document.querySelectorAll('.activity-card'));
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const filter = button.dataset.filter;
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+          cards.forEach((card) => {
+            const tags = (card.dataset.tags || '').split(' ');
+            card.classList.toggle('is-hidden', filter !== 'all' && !tags.includes(filter));
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
