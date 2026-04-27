@@ -3,93 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Annecy 2026 — Two Weeks Around Lac d'Annecy</title>
+  <title>Lac d’Annecy — A sibling field guide</title>
   <meta
     name="description"
-    content="A skimmable menu of swims, beach towns, market mornings, long dinners, and big-view days around Lac d'Annecy in Haute-Savoie."
+    content="A sibling field guide to Lac d’Annecy in Haute-Savoie: where to swim, ride, eat, wander, and accidentally lose an afternoon."
   />
-  <meta property="og:title" content="Annecy 2026 — Two Weeks Around Lac d'Annecy" />
+  <meta property="og:title" content="Lac d’Annecy — A sibling field guide" />
   <meta
     property="og:description"
-    content="Beaches, docks, swim spots, towns, food, and easy day trips around Lac d'Annecy in Haute-Savoie."
+    content="Where to swim, ride, eat, wander, and accidentally lose an afternoon around Lac d’Annecy."
   />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="assets/ride/ride_turquoise_eastern_shore.jpg" />
   <meta name="theme-color" content="#0B1F33" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500..800;1,9..144,500..800&family=Inter:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
   <style>
     :root {
       --font-display: 'Fraunces', Georgia, serif;
       --font-body: 'Inter', system-ui, -apple-system, Arial, sans-serif;
 
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
-      --text-sm: clamp(0.875rem, 0.82rem + 0.3vw, 0.98rem);
+      --text-xs: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
+      --text-sm: clamp(0.86rem, 0.82rem + 0.25vw, 0.96rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.08rem);
-      --text-lg: clamp(1.15rem, 1rem + 0.7vw, 1.45rem);
-      --text-xl: clamp(1.6rem, 1.25rem + 1.4vw, 2.4rem);
-      --text-2xl: clamp(2.4rem, 1.4rem + 4vw, 4.8rem);
+      --text-md: clamp(1.08rem, 1rem + 0.4vw, 1.22rem);
+      --text-lg: clamp(1.25rem, 1.1rem + 0.7vw, 1.55rem);
+      --text-xl: clamp(1.7rem, 1.3rem + 1.6vw, 2.6rem);
+      --text-2xl: clamp(2.4rem, 1.5rem + 4vw, 5rem);
+      --text-3xl: clamp(3rem, 1.8rem + 5.5vw, 6.4rem);
 
-      --space-1: 0.25rem;
-      --space-2: 0.5rem;
-      --space-3: 0.75rem;
-      --space-4: 1rem;
-      --space-5: 1.25rem;
-      --space-6: 1.5rem;
-      --space-8: 2rem;
-      --space-10: 2.5rem;
-      --space-12: 3rem;
-      --space-16: 4rem;
-      --space-20: 5rem;
-
-      /* Alpine lake palette — no warm/skin tones */
-      --bg: #f6fbff;            /* alpine snow */
-      --surface: #ffffff;       /* white card */
-      --surface-2: #eaf4fa;     /* mist blue */
-      --surface-3: #dcebf3;     /* deeper mist */
-      --ink: #0b1f33;           /* deep lake navy */
-      --ink-2: #102a43;
-      --muted: #4c6475;         /* slate blue-gray */
+      /* Cool alpine palette — no warm/skin tones */
+      --bg: #f4faff;
+      --bg-deep: #eaf3fa;
+      --surface: #ffffff;
+      --surface-2: #e7f1f8;
+      --surface-3: #d8e7f0;
+      --ink: #0b1f33;
+      --ink-2: #142e47;
+      --muted: #4c6475;
       --faint: #88a0b1;
-      --aqua: #42c6d7;          /* glacier aqua */
-      --aqua-bright: #53d5e3;
-      --aqua-deep: #1c97a8;
-      --alpine: #1f7fb3;        /* alpine action blue */
-      --alpine-deep: #155a85;
-      --pine: #2f6b4f;          /* forest accent */
-      --lavender: #c8d8f0;      /* cool lavender ice */
-      --border: #cde0ea;
-      --border-strong: #a9c8d8;
+      --aqua: #36b9cc;
+      --aqua-bright: #4fd1de;
+      --aqua-deep: #18879a;
+      --alpine: #1f7fb3;
+      --alpine-deep: #114b73;
+      --pine: #2f6b4f;
+      --glacier: #cfe5f0;
+      --mist: #dde9f1;
+      --border: #c9dce7;
+      --border-strong: #9ec0d3;
 
-      --shadow-xs: 0 1px 2px rgba(11, 31, 51, 0.06);
       --shadow-sm: 0 2px 6px rgba(11, 31, 51, 0.07);
       --shadow-md: 0 16px 36px rgba(11, 31, 51, 0.10);
-      --shadow-lg: 0 28px 60px rgba(11, 31, 51, 0.16);
+      --shadow-lg: 0 30px 70px rgba(11, 31, 51, 0.18);
 
       --radius-sm: 0.5rem;
       --radius-md: 0.85rem;
       --radius-lg: 1.15rem;
       --radius-xl: 1.6rem;
-      --radius-2xl: 2rem;
 
       --content: 1180px;
-      --content-wide: 1320px;
-      --transition: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      --content-wide: 1340px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html {
       scroll-behavior: smooth;
-      text-size-adjust: none;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
       scroll-padding-top: 80px;
@@ -102,39 +96,23 @@
       line-height: 1.6;
       color: var(--ink);
       background:
-        radial-gradient(ellipse 1100px 600px at 80% -10%, rgba(66, 198, 215, 0.16), transparent 70%),
-        radial-gradient(ellipse 900px 500px at -10% 30%, rgba(31, 127, 179, 0.10), transparent 70%),
+        radial-gradient(ellipse 1100px 600px at 80% -10%, rgba(54, 185, 204, 0.16), transparent 70%),
+        radial-gradient(ellipse 900px 500px at -10% 20%, rgba(31, 127, 179, 0.10), transparent 70%),
         var(--bg);
     }
 
-    img, svg, iframe {
-      display: block;
-      max-width: 100%;
-    }
-
-    img {
-      height: auto;
-      background: var(--surface-2);
-    }
+    img, svg, iframe { display: block; max-width: 100%; }
+    img { height: auto; background: var(--mist); }
 
     a {
       color: var(--alpine);
-      text-decoration-thickness: 0.08em;
+      text-decoration-thickness: 0.07em;
       text-underline-offset: 0.18em;
       transition: color var(--transition);
     }
+    a:hover { color: var(--alpine-deep); }
 
-    a:hover {
-      color: var(--alpine-deep);
-    }
-
-    button {
-      font: inherit;
-      color: inherit;
-      cursor: pointer;
-      border: 0;
-      background: transparent;
-    }
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: transparent; }
 
     :focus-visible {
       outline: 2px solid var(--aqua);
@@ -143,2193 +121,1678 @@
     }
 
     .skip-link {
-      position: absolute;
-      left: var(--space-4);
-      top: var(--space-4);
+      position: absolute; left: 1rem; top: 1rem;
       transform: translateY(-150%);
-      background: var(--surface);
-      color: var(--ink);
-      padding: var(--space-3) var(--space-4);
-      border-radius: var(--radius-md);
-      z-index: 100;
-      box-shadow: var(--shadow-md);
+      background: var(--surface); color: var(--ink);
+      padding: 0.5rem 0.85rem; border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md); z-index: 100;
     }
+    .skip-link:focus { transform: translateY(0); }
 
-    .skip-link:focus {
-      transform: translateY(0);
-    }
-
-    /* Header / Nav */
+    /* ----- header ----- */
     .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      background: rgba(246, 251, 255, 0.85);
-      backdrop-filter: saturate(140%) blur(14px);
-      -webkit-backdrop-filter: saturate(140%) blur(14px);
+      position: sticky; top: 0; z-index: 40;
+      backdrop-filter: blur(12px);
+      background: rgba(244, 250, 255, 0.78);
       border-bottom: 1px solid var(--border);
     }
-
     .nav {
-      width: min(var(--content-wide), calc(100% - var(--space-6)));
-      min-height: 64px;
-      margin-inline: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-4);
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      gap: 1rem;
     }
-
     .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-3);
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      font-size: 1.05rem;
-    }
-
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      color: var(--alpine);
-      flex: 0 0 auto;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: var(--space-1);
-      font-size: var(--text-sm);
-    }
-
-    .nav-links a {
-      min-height: 40px;
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: var(--space-2) var(--space-4);
-      text-decoration: none;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .nav-links a:hover {
-      color: var(--ink);
-      background: var(--surface-2);
-    }
-
-    main {
-      position: relative;
-      z-index: 1;
-    }
-
-    .section {
-      width: min(var(--content), calc(100% - var(--space-6)));
-      margin-inline: auto;
-      padding-block: clamp(var(--space-12), 7vw, var(--space-20));
-    }
-
-    .section-wide {
-      width: min(var(--content-wide), calc(100% - var(--space-6)));
-    }
-
-    /* Typography */
-    h1, h2, h3 {
+      display: inline-flex; align-items: center; gap: 0.55rem;
       font-family: var(--font-display);
-      line-height: 1.05;
-      text-wrap: balance;
-      letter-spacing: -0.025em;
-      color: var(--ink);
       font-weight: 600;
-    }
-
-    h1 {
-      font-size: var(--text-2xl);
-      max-width: 14ch;
-      margin-bottom: var(--space-5);
-    }
-
-    h2 {
-      font-size: var(--text-xl);
-      margin-bottom: var(--space-4);
-    }
-
-    h3 {
-      font-size: var(--text-lg);
-      margin-bottom: var(--space-2);
-    }
-
-    p {
-      max-width: 70ch;
-      text-wrap: pretty;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      width: fit-content;
-      margin-bottom: var(--space-4);
-      padding: 0.4rem 0.85rem;
-      border-radius: 999px;
-      background: var(--surface-2);
-      color: var(--alpine-deep);
-      font-size: var(--text-xs);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      border: 1px solid var(--border);
-    }
-
-    .eyebrow::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--aqua);
-    }
-
-    .lede {
-      color: var(--muted);
-      font-size: var(--text-lg);
-      max-width: 56ch;
-      margin-bottom: var(--space-8);
-    }
-
-    /* Hero — collage of personal ride stills */
-    .hero {
-      width: min(var(--content-wide), calc(100% - var(--space-6)));
-      margin: var(--space-6) auto 0;
-      padding-block: clamp(var(--space-8), 5vw, var(--space-16));
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 1fr);
-      gap: clamp(var(--space-6), 4vw, var(--space-12));
-      align-items: center;
-    }
-
-    .hero-copy h1 {
-      max-width: 16ch;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-3);
-      align-items: center;
-      margin-top: var(--space-4);
-    }
-
-    .button, .ghost-button {
-      min-height: 50px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-2);
-      padding: var(--space-3) var(--space-5);
-      border-radius: 999px;
-      font-size: var(--text-sm);
-      font-weight: 700;
-      text-decoration: none;
-      border: 1px solid transparent;
-      transition: transform var(--transition), background var(--transition), color var(--transition), box-shadow var(--transition);
-    }
-
-    .button {
-      background: var(--ink);
-      color: #ffffff;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .button:hover {
-      background: var(--alpine);
-      color: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .ghost-button {
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
       color: var(--ink);
-      border-color: var(--border-strong);
-      background: var(--surface);
+      text-decoration: none;
+    }
+    .brand .dot {
+      width: 0.55rem; height: 0.55rem; border-radius: 50%;
+      background: linear-gradient(135deg, var(--aqua), var(--alpine));
+      box-shadow: 0 0 0 4px rgba(54, 185, 204, 0.18);
+    }
+    .nav-links {
+      display: flex; gap: 0.25rem; flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: var(--radius-sm);
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--surface-2); }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
     }
 
-    .ghost-button:hover {
-      background: var(--surface-2);
-      border-color: var(--alpine);
-      color: var(--alpine-deep);
-    }
-
-    .hero-collage {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      gap: var(--space-3);
-      aspect-ratio: 5 / 6;
-      max-height: 720px;
-    }
-
-    .hero-collage figure {
+    /* ----- hero ----- */
+    .hero {
       position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      background: var(--surface-3);
-      border: 1px solid var(--border);
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 4vw, 5rem) 1.25rem clamp(2rem, 3vw, 3.5rem);
     }
-
-    .hero-collage img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: clamp(1.5rem, 3vw, 3rem);
+      align-items: end;
     }
-
-    .hero-collage figure:hover img {
-      transform: scale(1.04);
+    @media (max-width: 880px) {
+      .hero-grid { grid-template-columns: 1fr; }
     }
-
-    .hero-collage .c-main {
-      grid-column: 1 / span 6;
-      grid-row: 1 / span 4;
-    }
-
-    .hero-collage .c-a {
-      grid-column: 1 / span 3;
-      grid-row: 5 / span 2;
-    }
-
-    .hero-collage .c-b {
-      grid-column: 4 / span 3;
-      grid-row: 5 / span 2;
-    }
-
-    .photo-tag {
-      position: absolute;
-      left: var(--space-3);
-      bottom: var(--space-3);
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--alpine-deep);
+      background: var(--surface-2);
       padding: 0.4rem 0.7rem;
       border-radius: 999px;
-      background: rgba(11, 31, 51, 0.78);
-      backdrop-filter: blur(6px);
-      color: #ffffff;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .photo-tag::before {
-      content: '●';
-      color: var(--aqua-bright);
-      margin-right: 0.4rem;
-      font-size: 0.6em;
-    }
-
-    /* Stat row under hero */
-    .hero-stats {
-      width: min(var(--content-wide), calc(100% - var(--space-6)));
-      margin: var(--space-4) auto 0;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-3);
-    }
-
-    .stat {
-      padding: var(--space-4) var(--space-5);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      box-shadow: var(--shadow-xs);
     }
-
-    .stat strong {
-      display: block;
+    .eyebrow::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--aqua);
+    }
+    h1.hero-title {
       font-family: var(--font-display);
-      font-size: 1.5rem;
-      letter-spacing: -0.03em;
-      color: var(--alpine-deep);
-      font-weight: 600;
-    }
-
-    .stat span {
-      display: block;
-      margin-top: var(--space-1);
-      color: var(--muted);
-      font-size: var(--text-xs);
-      line-height: 1.4;
       font-weight: 500;
+      font-size: var(--text-3xl);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 1.1rem 0 1.1rem;
     }
-
-    /* Lake bases — town/swim spot grid */
-    .base-grid {
+    h1.hero-title em {
+      font-style: italic;
+      font-weight: 500;
+      color: var(--alpine-deep);
+    }
+    .hero-lede {
+      font-size: var(--text-md);
+      color: var(--ink-2);
+      max-width: 36ch;
+      line-height: 1.45;
+    }
+    .hero-entry {
+      margin-top: clamp(1.5rem, 3vw, 2.5rem);
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: var(--space-4);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
     }
-
-    .base-card {
-      grid-column: span 3;
-      padding: var(--space-5) var(--space-5) var(--space-6);
-      border-radius: var(--radius-xl);
+    @media (max-width: 720px) {
+      .hero-entry { grid-template-columns: 1fr; }
+    }
+    .hero-entry a {
+      display: flex; flex-direction: column; gap: 0.25rem;
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius-md);
       background: var(--surface);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      text-decoration: none;
+      color: var(--ink);
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
     }
-
-    .base-card:hover {
+    .hero-entry a:hover {
+      border-color: var(--alpine);
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
-      border-color: var(--aqua);
     }
-
-    .base-card.featured {
-      grid-column: span 6;
-      padding: 0;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: minmax(280px, 0.45fr) minmax(0, 0.55fr);
-      gap: 0;
-    }
-
-    .base-card.featured .base-photo {
-      min-height: 100%;
-      background: var(--surface-2);
-      overflow: hidden;
-    }
-
-    .base-card.featured .base-photo img {
-      width: 100%;
-      height: 100%;
-      min-height: 280px;
-      object-fit: cover;
-    }
-
-    .base-card.featured .base-body {
-      padding: var(--space-6);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-
-    .base-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .base-tag {
-      padding: 0.2rem 0.65rem;
-      border-radius: 999px;
-      background: var(--surface-2);
-      color: var(--alpine-deep);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-    }
-
-    .base-tag.home { background: rgba(31, 127, 179, 0.14); color: var(--alpine-deep); }
-    .base-tag.beach { background: rgba(66, 198, 215, 0.20); color: var(--aqua-deep); }
-    .base-tag.dock { background: rgba(31, 127, 179, 0.10); color: var(--alpine-deep); }
-    .base-tag.quiet { background: rgba(47, 107, 79, 0.13); color: var(--pine); }
-    .base-tag.town { background: rgba(11, 31, 51, 0.08); color: var(--ink); }
-    .base-tag.scout { background: rgba(200, 216, 240, 0.55); color: var(--ink-2); }
-
-    .base-card h3 {
-      margin-bottom: 0;
-    }
-
-    .base-card .blurb {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .base-rows {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--space-2);
-      margin-top: var(--space-2);
-      padding-top: var(--space-3);
-      border-top: 1px dashed var(--border-strong);
-    }
-
-    .base-row {
-      display: grid;
-      grid-template-columns: 96px 1fr;
-      gap: var(--space-3);
-      font-size: 0.86rem;
-      line-height: 1.45;
-    }
-
-    .base-row dt {
-      color: var(--alpine-deep);
-      font-weight: 700;
+    .hero-entry .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-size: 0.7rem;
-      padding-top: 0.15rem;
-    }
-
-    .base-row dd {
-      color: var(--muted);
-    }
-
-    .base-row dd strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    /* Mood section */
-    .mood-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-4);
-    }
-
-    .mood-card {
-      padding: var(--space-5) var(--space-5) var(--space-6);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
-      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
-      cursor: pointer;
-    }
-
-    .mood-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--aqua);
-    }
-
-    .mood-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-md);
-      background: var(--surface-2);
-      display: grid;
-      place-items: center;
-      margin-bottom: var(--space-4);
       color: var(--alpine);
-      font-size: 1.4rem;
     }
-
-    .mood-card h3 {
-      font-size: 1.15rem;
-      margin-bottom: var(--space-1);
-    }
-
-    .mood-card p {
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
-
-    .mood-card .mood-tags {
-      margin-top: var(--space-3);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .mood-tags .chip {
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      background: var(--surface-2);
-      color: var(--alpine-deep);
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-
-    /* Map / Orientation */
-    .orient {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-      gap: var(--space-6);
-      align-items: stretch;
-    }
-
-    .map-card {
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .map-card iframe {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      border: 0;
-      flex: 0 0 auto;
-    }
-
-    .map-legend {
-      padding: var(--space-5);
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-3);
-      border-top: 1px solid var(--border);
-      background: var(--surface-2);
-    }
-
-    .legend-item {
-      display: flex;
-      gap: var(--space-3);
-      align-items: flex-start;
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      flex: 0 0 auto;
-      margin-top: 0.3rem;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.7);
-    }
-
-    .legend-dot.beach { background: var(--aqua); }
-    .legend-dot.dock { background: var(--alpine); }
-    .legend-dot.quiet { background: var(--pine); }
-    .legend-dot.town { background: var(--ink); }
-
-    .legend-item strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .orient-side {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-4);
-    }
-
-    .home-base {
-      padding: var(--space-6);
-      border-radius: var(--radius-xl);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .home-base h3 {
-      font-size: 1.3rem;
-      margin-bottom: var(--space-2);
-    }
-
-    .home-base p {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .home-base p + p {
-      margin-top: var(--space-3);
-    }
-
-    .shore-key {
-      padding: var(--space-5);
-      border-radius: var(--radius-xl);
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-    }
-
-    .shore-key h4 {
+    .hero-entry .lede {
       font-family: var(--font-display);
-      font-size: 1rem;
-      margin-bottom: var(--space-3);
-      color: var(--ink);
-      letter-spacing: -0.02em;
+      font-size: 1.18rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
     }
 
-    .shore-key div + div {
-      margin-top: var(--space-3);
-      padding-top: var(--space-3);
-      border-top: 1px dashed var(--border-strong);
-    }
-
-    .shore-key strong {
-      display: block;
-      color: var(--alpine-deep);
-      margin-bottom: 0.15rem;
-    }
-
-    .shore-key span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.45;
-    }
-
-    /* Ambient lake strip — repurposed ride stills as place context */
-    .ambient {
-      width: min(var(--content-wide), calc(100% - var(--space-6)));
-      margin: clamp(var(--space-12), 7vw, var(--space-16)) auto 0;
-      padding: clamp(var(--space-6), 3vw, var(--space-10));
-      border-radius: var(--radius-2xl);
-      background:
-        linear-gradient(135deg, var(--ink) 0%, var(--alpine-deep) 100%);
-      color: #ffffff;
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
+    .hero-photo {
       position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 5 / 6;
+      box-shadow: var(--shadow-lg);
+      background: var(--mist);
     }
-
-    .ambient::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 90% 10%, rgba(66, 198, 215, 0.25), transparent 50%);
+    .hero-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .hero-photo figcaption {
+      position: absolute; left: 1rem; right: 1rem; bottom: 1rem;
+      color: #fff;
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 0.95rem;
+      text-shadow: 0 2px 12px rgba(11, 31, 51, 0.55);
+    }
+    .hero-photo::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(11, 31, 51, 0.55) 100%);
       pointer-events: none;
     }
 
-    .ambient > * {
-      position: relative;
-      z-index: 1;
+    /* ----- generic section ----- */
+    .section {
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 5vw, 5.5rem) 1.25rem;
     }
-
-    .ambient .eyebrow {
-      background: rgba(255, 255, 255, 0.12);
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .ambient h2,
-    .ambient h3 {
-      color: #ffffff;
-    }
-
-    .ambient p {
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .ambient-grid {
-      margin-top: var(--space-6);
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-4);
-    }
-
-    .ambient-card {
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .ambient-card .ambient-photo {
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .ambient-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .ambient-card figcaption {
-      padding: var(--space-3) var(--space-4);
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.85);
-      line-height: 1.4;
-    }
-
-    .ambient-card figcaption strong {
-      display: block;
-      color: #ffffff;
-      font-weight: 600;
-      margin-bottom: 0.15rem;
-      font-size: 0.9rem;
-    }
-
-    /* Section heads */
+    .section-narrow { max-width: var(--content); }
     .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: var(--space-6);
-      margin-bottom: var(--space-8);
+      display: flex; flex-direction: column; gap: 0.6rem;
+      margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+      max-width: 60ch;
     }
-
-    .section-head p {
+    .section-tag {
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--aqua-deep);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: var(--text-xl);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .section-lede {
+      font-size: var(--text-md);
       color: var(--muted);
       max-width: 56ch;
-      font-size: 1rem;
     }
 
-    /* Filters */
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
-      margin-bottom: var(--space-8);
-    }
-
-    .filter-button {
-      min-height: 42px;
-      padding: var(--space-2) var(--space-4);
-      border: 1px solid var(--border-strong);
-      border-radius: 999px;
+    /* ----- map section ----- */
+    .map-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: 1.25rem;
       background: var(--surface);
-      color: var(--muted);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition);
-    }
-
-    .filter-button:hover {
-      color: var(--ink);
-      border-color: var(--alpine);
-    }
-
-    .filter-button[aria-pressed='true'] {
-      color: #ffffff;
-      background: var(--ink);
-      border-color: var(--ink);
-    }
-
-    .filter-button:active {
-      transform: translateY(1px);
-    }
-
-    /* Activity grid */
-    .activity-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: var(--space-5);
-    }
-
-    .activity-card {
-      grid-column: span 6;
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: minmax(180px, 0.42fr) minmax(0, 0.58fr);
-      min-height: 320px;
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      background: var(--surface);
-      box-shadow: var(--shadow-xs);
-      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
-    }
-
-    .activity-card[data-featured='true'] {
-      grid-column: span 12;
-      grid-template-columns: minmax(320px, 0.5fr) minmax(0, 0.5fr);
-      min-height: 380px;
-    }
-
-    .activity-card.is-hidden {
-      display: none;
-    }
-
-    .activity-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .activity-image {
-      position: relative;
-      min-height: 100%;
-      background: var(--surface-2);
       overflow: hidden;
-    }
-
-    .activity-image img {
-      width: 100%;
-      height: 100%;
-      min-height: 280px;
-      object-fit: cover;
-    }
-
-    .activity-content {
-      padding: clamp(var(--space-5), 3vw, var(--space-7, 1.75rem));
-      padding-block: var(--space-6);
-      padding-inline: var(--space-6);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-
-    .activity-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      width: fit-content;
-      min-height: 26px;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      background: rgba(31, 127, 179, 0.10);
-      color: var(--alpine-deep);
-      font-size: 0.74rem;
-      font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: 0.01em;
-    }
-
-    .pill.water { background: rgba(66, 198, 215, 0.20); color: var(--aqua-deep); }
-    .pill.bike { background: rgba(31, 127, 179, 0.12); color: var(--alpine-deep); }
-    .pill.mtn { background: rgba(47, 107, 79, 0.13); color: var(--pine); }
-    .pill.food { background: rgba(200, 216, 240, 0.45); color: var(--ink-2); }
-    .pill.easy { background: var(--surface-2); color: var(--ink); }
-    .pill.spicy { background: rgba(31, 127, 179, 0.13); color: var(--alpine-deep); }
-
-    .activity-content p {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .plain-box {
-      padding: var(--space-3) var(--space-4);
-      border-radius: var(--radius-md);
-      background: var(--surface-2);
-      font-size: 0.88rem;
-    }
-
-    .plain-box strong {
-      color: var(--ink);
-    }
-
-    .term {
-      font-weight: 700;
-      color: var(--alpine-deep);
-      font-style: italic;
-    }
-
-    .link-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: auto;
-    }
-
-    .text-link {
-      min-height: 36px;
-      display: inline-flex;
-      align-items: center;
-      padding: 0.4rem 0.85rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      text-decoration: none;
-      color: var(--ink);
-      background: var(--surface);
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-
-    .text-link:hover {
-      background: var(--surface-2);
-      border-color: var(--alpine);
-      color: var(--alpine-deep);
-    }
-
-    /* Hype Check */
-    .hype {
-      padding: clamp(var(--space-6), 4vw, var(--space-10));
-      border-radius: var(--radius-2xl);
-      background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .hype-head {
-      display: flex;
-      gap: var(--space-4);
-      align-items: flex-start;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      margin-bottom: var(--space-5);
-    }
-
-    .hype-head h2 { margin-bottom: 0; }
-    .hype-head p { color: var(--muted); font-size: 0.95rem; max-width: 50ch; }
-
-    .vote-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-3);
-    }
-
-    .vote-card {
-      padding: var(--space-4) var(--space-4) var(--space-5);
-      border-radius: var(--radius-lg);
-      border: 1.5px solid var(--border);
-      background: var(--surface);
-      cursor: pointer;
-      text-align: left;
-      width: 100%;
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      position: relative;
-    }
-
-    .vote-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--aqua);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .vote-card[aria-pressed='true'] {
-      border-color: var(--alpine);
-      background: var(--surface-2);
-      box-shadow: 0 0 0 3px rgba(31, 127, 179, 0.15);
-    }
-
-    .vote-card[aria-pressed='true']::after {
-      content: '✓';
-      position: absolute;
-      top: 0.6rem;
-      right: 0.7rem;
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: var(--alpine);
-      color: #ffffff;
-      display: grid;
-      place-items: center;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .vote-card strong {
-      font-family: var(--font-display);
-      font-size: 1.08rem;
-      color: var(--ink);
-      letter-spacing: -0.02em;
-      font-weight: 600;
-    }
-
-    .vote-card span {
-      color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.4;
-    }
-
-    .hype-status {
-      margin-top: var(--space-4);
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    /* Glossary */
-    .gloss-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-4);
-    }
-
-    .gloss-card {
-      padding: var(--space-5);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
-    }
-
-    .gloss-card dt {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      line-height: 1.1;
-      margin-bottom: var(--space-2);
-      color: var(--alpine-deep);
-      font-weight: 600;
-    }
-
-    .gloss-card dd {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    /* Source/Links */
-    .source-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-4);
-    }
-
-    .source-card {
-      padding: var(--space-5);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-
-    .source-card:hover {
-      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
-      border-color: var(--aqua);
+    }
+    @media (max-width: 880px) {
+      .map-wrap { grid-template-columns: 1fr; }
+    }
+    .map-stage {
+      position: relative;
+      min-height: 480px;
+    }
+    @media (max-width: 880px) {
+      .map-stage { min-height: 360px; }
+    }
+    #map {
+      position: absolute; inset: 0;
+      background: var(--surface-2);
+    }
+    .leaflet-container {
+      font-family: var(--font-body);
+      background: var(--surface-2);
+    }
+    /* Custom marker */
+    .pin {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2.5px solid var(--alpine);
+      box-shadow: 0 4px 10px rgba(11, 31, 51, 0.25);
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+    .pin.is-active {
+      background: var(--aqua);
+      border-color: var(--alpine-deep);
+      transform: scale(1.25);
     }
 
-    .source-card span.kicker {
-      display: block;
-      margin-bottom: var(--space-2);
-      color: var(--alpine-deep);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 700;
+    .map-panel {
+      padding: 1.5rem 1.5rem 1.75rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    @media (max-width: 880px) {
+      .map-panel { border-left: 0; border-top: 1px solid var(--border); max-height: none; }
+    }
+    .map-panel .place-list {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .place-list button {
+      font-size: 0.82rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink-2);
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+    }
+    .place-list button:hover { border-color: var(--alpine); color: var(--alpine-deep); }
+    .place-list button[aria-pressed="true"] {
+      background: var(--alpine);
+      color: #fff;
+      border-color: var(--alpine);
     }
 
-    .source-card a {
-      color: var(--ink);
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      line-height: 1.15;
+    .panel-card .panel-eyebrow {
+      font-size: 0.72rem;
       font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--aqua-deep);
+    }
+    .panel-card h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.7rem;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-top: 0.25rem;
+    }
+    .panel-card .vibe {
+      margin-top: 0.6rem;
+      font-size: 1.02rem;
+      font-style: italic;
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+    .panel-rows {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 0.5rem 0.9rem;
+      align-items: baseline;
+    }
+    .panel-rows dt {
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 0.15rem;
+    }
+    .panel-rows dd {
+      font-size: 0.96rem;
+      color: var(--ink-2);
+    }
+    .panel-link {
+      align-self: flex-start;
+      margin-top: 0.6rem;
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--alpine);
       text-decoration: none;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+    .panel-link:hover { border-color: var(--alpine); }
+    .panel-link::after { content: "→"; }
+
+    /* ----- towns (around the lake) ----- */
+    .towns {
+      display: flex; flex-direction: column;
+      gap: clamp(2.25rem, 4vw, 3.5rem);
+    }
+    .town {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: clamp(1.25rem, 3vw, 2.5rem);
+      align-items: start;
+    }
+    .town:nth-child(even) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+    .town:nth-child(even) .town-figure {
+      order: 2;
+    }
+    @media (max-width: 880px) {
+      .town, .town:nth-child(even) { grid-template-columns: 1fr; }
+      .town:nth-child(even) .town-figure { order: 0; }
+    }
+    .town-figure {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      box-shadow: var(--shadow-md);
+      background: var(--mist);
+    }
+    .town-figure img { width: 100%; height: 100%; object-fit: cover; }
+    .town-figure figcaption {
+      position: absolute; left: 0.85rem; bottom: 0.7rem;
+      color: #fff;
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 0.92rem;
+      text-shadow: 0 2px 12px rgba(11, 31, 51, 0.55);
+    }
+    .town-figure::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(11, 31, 51, 0.5) 100%);
+      pointer-events: none;
+    }
+    .town-body .town-eyebrow {
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--aqua-deep);
+    }
+    .town-body h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.4rem);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      margin-top: 0.3rem;
+      color: var(--ink);
+    }
+    .town-pitch {
+      margin-top: 0.85rem;
+      font-size: var(--text-md);
+      color: var(--ink-2);
+      max-width: 56ch;
+      line-height: 1.55;
+    }
+    .town-rows {
+      margin-top: 1.1rem;
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 0.5rem 0.95rem;
+    }
+    .town-rows dt {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 0.2rem;
+    }
+    .town-rows dd {
+      font-size: 0.97rem;
+      color: var(--ink-2);
+    }
+    .town-rows dd em {
+      font-style: italic;
+      color: var(--alpine-deep);
+    }
+    .town-read {
+      margin-top: 1.1rem;
+      padding: 0.9rem 1rem 0.95rem;
+      border-left: 3px solid var(--aqua);
+      background: var(--surface-2);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-style: italic;
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      color: var(--ink-2);
+      line-height: 1.5;
     }
 
-    .source-card a:hover {
+    /* ----- day flows ----- */
+    .day-types {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+    .day-types button {
+      font-size: 0.86rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--ink-2);
+      transition: all var(--transition);
+    }
+    .day-types button:hover { border-color: var(--alpine); }
+    .day-types button[aria-pressed="true"] {
+      background: var(--alpine);
+      color: #fff;
+      border-color: var(--alpine);
+    }
+
+    .day-flows {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .day-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.3rem 1.4rem;
+      display: flex; flex-direction: column; gap: 0.7rem;
+      transition: opacity var(--transition), border-color var(--transition), transform var(--transition);
+    }
+    .day-card.is-dim {
+      opacity: 0.35;
+      transform: scale(0.99);
+    }
+    .day-card .day-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--aqua-deep);
+    }
+    .day-card h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.32rem;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+    .day-card p {
+      font-size: 0.97rem;
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+    .day-card .flow {
+      font-size: 0.88rem;
+      color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 0.3rem 0.45rem;
+      align-items: baseline;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--border);
+    }
+    .day-card .flow span { color: var(--ink-2); font-weight: 500; }
+    .day-card .flow .arrow { color: var(--faint); }
+
+    /* ----- food strip ----- */
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1rem;
+    }
+    .food-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.2rem 1.3rem 1.4rem;
+      display: flex; flex-direction: column; gap: 0.55rem;
+    }
+    .food-card.tall { grid-column: span 5; grid-row: span 2; }
+    .food-card.wide { grid-column: span 7; }
+    .food-card.med { grid-column: span 4; }
+    .food-card.small { grid-column: span 3; }
+    @media (max-width: 880px) {
+      .food-card.tall, .food-card.wide, .food-card.med, .food-card.small {
+        grid-column: span 12;
+        grid-row: auto;
+      }
+    }
+    .food-card .kicker {
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
       color: var(--alpine);
     }
+    .food-card h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.35rem;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+    .food-card p {
+      font-size: 0.96rem;
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+    .food-card.tall {
+      background:
+        linear-gradient(180deg, rgba(11,31,51,0.0) 30%, rgba(11,31,51,0.7) 100%),
+        url("assets/ride/ride_lake_tree_sevrier.jpg") center/cover no-repeat;
+      color: #fff;
+      border-color: transparent;
+      min-height: 280px;
+      justify-content: flex-end;
+    }
+    .food-card.tall .kicker { color: var(--aqua-bright); }
+    .food-card.tall p { color: rgba(255,255,255,0.9); }
 
-    .source-card p {
-      margin-top: var(--space-3);
+    /* ----- views ----- */
+    .views-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .view-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.2rem 1.3rem 1.35rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .view-card .alt {
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--pine);
+    }
+    .view-card h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.28rem;
+      line-height: 1.15;
+    }
+    .view-card p {
+      font-size: 0.95rem;
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+    .view-card .heights {
+      font-size: 0.82rem;
       color: var(--muted);
-      font-size: 0.85rem;
+      padding-top: 0.4rem;
+      border-top: 1px dashed var(--border);
+      margin-top: 0.3rem;
     }
 
-    /* Footer */
+    /* ----- daytrips ----- */
+    .trips {
+      display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .trip {
+      display: grid;
+      grid-template-columns: 3.5rem 1fr auto;
+      align-items: baseline;
+      gap: 1.1rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: border-color var(--transition);
+    }
+    .trip:hover { border-color: var(--alpine); }
+    .trip .rank {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.4rem;
+      color: var(--alpine);
+    }
+    .trip h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.2rem;
+      line-height: 1.15;
+    }
+    .trip p {
+      font-size: 0.93rem;
+      color: var(--ink-2);
+      margin-top: 0.2rem;
+      line-height: 1.5;
+    }
+    .trip .verdict {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .verdict.go { background: rgba(47, 107, 79, 0.12); color: var(--pine); }
+    .verdict.maybe { background: var(--surface-2); color: var(--alpine-deep); }
+    .verdict.skip { background: rgba(11,31,51,0.06); color: var(--muted); }
+    @media (max-width: 720px) {
+      .trip { grid-template-columns: 2.5rem 1fr; }
+      .trip .verdict { grid-column: 2; justify-self: start; }
+    }
+
+    /* ----- practical ----- */
+    .practical details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .practical summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: var(--ink);
+      list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .practical summary::-webkit-details-marker { display: none; }
+    .practical summary::after {
+      content: "+";
+      font-size: 1.2rem;
+      color: var(--alpine);
+      transition: transform var(--transition);
+    }
+    .practical details[open] summary::after { transform: rotate(45deg); }
+    .practical .detail-body {
+      margin-top: 0.65rem;
+      font-size: 0.94rem;
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+    .practical .detail-body p + p { margin-top: 0.5rem; }
+
+    /* ----- atmospheric strip ----- */
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
+      padding: 0 0.5rem;
+      max-width: var(--content-wide);
+      margin: 0 auto;
+    }
+    @media (max-width: 720px) {
+      .strip { grid-template-columns: 1fr 1fr; }
+    }
+    .strip figure {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .strip img { width: 100%; height: 100%; object-fit: cover; }
+    .strip figcaption {
+      position: absolute; left: 0.7rem; right: 0.7rem; bottom: 0.55rem;
+      color: #fff;
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 0.82rem;
+      text-shadow: 0 2px 10px rgba(11,31,51,0.55);
+    }
+    .strip figure::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(11,31,51,0.55) 100%);
+      pointer-events: none;
+    }
+
+    /* ----- footer ----- */
     .footer {
-      width: min(var(--content), calc(100% - var(--space-6)));
-      margin-inline: auto;
-      padding: var(--space-10) 0 var(--space-12);
-      color: var(--muted);
-      font-size: 0.9rem;
+      max-width: var(--content-wide);
+      margin: 3rem auto 0;
+      padding: 2rem 1.25rem 3rem;
       border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; justify-content: space-between;
     }
+    .footer em { color: var(--ink-2); font-style: italic; }
 
-    .footer a {
-      color: var(--alpine-deep);
-    }
-
-    /* Responsive */
-    @media (max-width: 1040px) {
-      .hero,
-      .orient {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-collage {
-        aspect-ratio: 4 / 5;
-      }
-
-      .activity-card,
-      .activity-card[data-featured='true'] {
-        grid-column: span 12;
-        grid-template-columns: 1fr;
-      }
-
-      .activity-image img {
-        min-height: 240px;
-      }
-
-      .source-grid,
-      .gloss-grid,
-      .mood-grid,
-      .vote-grid,
-      .ambient-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .base-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .base-card {
-        grid-column: span 1;
-      }
-
-      .base-card.featured {
-        grid-column: span 2;
-        grid-template-columns: 1fr;
-      }
-
-      .hero-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 640px) {
-      .nav-links a:not(:last-of-type):not(.nav-cta) {
-        display: none;
-      }
-
-      .brand span {
-        font-size: 0.95rem;
-      }
-
-      .hero {
-        padding-block: var(--space-6);
-      }
-
-      .source-grid,
-      .gloss-grid,
-      .mood-grid,
-      .vote-grid,
-      .ambient-grid,
-      .hero-stats {
-        grid-template-columns: 1fr;
-      }
-
-      .base-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .base-card,
-      .base-card.featured {
-        grid-column: span 1;
-      }
-
-      .map-legend {
-        grid-template-columns: 1fr;
-      }
-
-      .section-head {
-        display: block;
-      }
-
-      .section-head p {
-        margin-top: var(--space-3);
-      }
-
-      .activity-content {
-        padding: var(--space-5);
-      }
-
-      .base-row {
-        grid-template-columns: 80px 1fr;
-      }
+    /* ----- divider ----- */
+    .divider {
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid var(--border);
+      opacity: 0.65;
     }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
+        animation: none !important;
+        transition: none !important;
       }
-
-      .hero-collage figure:hover img { transform: none; }
     }
   </style>
 </head>
-
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
-    <nav class="nav" aria-label="Primary navigation">
-      <a class="brand" href="#top" aria-label="Annecy 2026 home">
-        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true" fill="none">
-          <path d="M5 34C14 31 19 18 24 10C29 18 34 31 43 34" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M8 36C16 40 31 40 40 36" stroke="#42c6d7" stroke-width="3" stroke-linecap="round" />
-          <path d="M18 30C21 28 27 28 30 30" stroke="#42c6d7" stroke-width="3" stroke-linecap="round" />
-        </svg>
-        <span>Annecy 2026</span>
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="#top">
+        <span class="dot" aria-hidden="true"></span>
+        Lac d’Annecy
       </a>
       <div class="nav-links">
-        <a href="#bases">Lake bases</a>
-        <a href="#moods">Moods</a>
-        <a href="#orient">Orientation</a>
-        <a href="#activities">Activities</a>
-        <a href="#hype">Hype check</a>
-        <a href="#translations">Translate</a>
+        <a href="#map-section">Map</a>
+        <a href="#towns">Towns</a>
+        <a href="#days">Days</a>
+        <a href="#food">Food</a>
+        <a href="#views">Views</a>
+        <a href="#trips">Day trips</a>
       </div>
     </nav>
   </header>
 
   <main id="main">
+    <!-- ============ HERO ============ -->
     <section id="top" class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <span class="eyebrow">Lac d'Annecy · Haute-Savoie · August 2026</span>
-        <h1 id="hero-title">Two weeks around Lac d'Annecy.</h1>
-        <p class="lede">
-          A skimmable menu of swims, beach towns, docks, market mornings, and long dinners around the lake —
-          organized by the places we'll actually use.
-        </p>
-        <div class="hero-actions">
-          <a class="button" href="#bases">Town-by-town swim guide →</a>
-          <a class="ghost-button" href="#hype">Vote on the trip</a>
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Sibling field guide · Haute-Savoie</span>
+          <h1 class="hero-title">Lac d’Annecy</h1>
+          <p class="hero-lede">
+            A sibling field guide to the lake: where to swim, ride, eat, wander, and accidentally lose an afternoon.
+          </p>
+          <div class="hero-entry" role="navigation" aria-label="Where to start">
+            <a href="#map-section">
+              <span class="label">Start on the map</span>
+              <span class="lede">Pick a town.</span>
+            </a>
+            <a href="#towns">
+              <span class="label">Reading order</span>
+              <span class="lede">Around the lake.</span>
+            </a>
+            <a href="#days">
+              <span class="label">Vibe-first</span>
+              <span class="lede">What kind of day?</span>
+            </a>
+          </div>
         </div>
-      </div>
-
-      <div class="hero-collage" aria-label="Lac d'Annecy from the lakeside path">
-        <figure class="c-main">
+        <figure class="hero-photo">
           <img
             src="assets/ride/ride_turquoise_eastern_shore.jpg"
-            alt="Turquoise water of Lac d'Annecy with the eastern shore mountain wall behind it"
+            alt="Turquoise water along the eastern shore of Lac d’Annecy."
             loading="eager"
-            decoding="async"
           />
-          <span class="photo-tag">Petit lac · east-shore wall</span>
-        </figure>
-        <figure class="c-a">
-          <img
-            src="assets/ride/ride_balmettes_blue_water_card.jpg"
-            alt="Blue water at Les Balmettes between Sévrier and Saint-Jorioz"
-            loading="eager"
-            decoding="async"
-          />
-          <span class="photo-tag">Balmettes · the blue stretch</span>
-        </figure>
-        <figure class="c-b">
-          <img
-            src="assets/ride/ride_lake_tree_sevrier_card.jpg"
-            alt="Lake water and shade trees at Sévrier"
-            loading="eager"
-            decoding="async"
-          />
-          <span class="photo-tag">Sévrier · home base</span>
+          <figcaption>The water along the eastern shore.</figcaption>
         </figure>
       </div>
     </section>
 
-    <div class="hero-stats" aria-label="Lake facts">
-      <div class="stat">
-        <strong>~14 km</strong>
-        <span>length of Lac d'Annecy, north to south</span>
+    <hr class="divider" />
+
+    <!-- ============ MAP ============ -->
+    <section id="map-section" class="section" aria-labelledby="map-title">
+      <div class="section-head">
+        <span class="section-tag">Start with the lake</span>
+        <h2 id="map-title" class="section-title">The lake is small. The towns aren’t the same.</h2>
+        <p class="section-lede">
+          Tap a marker. The right column tells you what that town actually feels like, what to do in the water, where to eat, and what’s nearby.
+        </p>
       </div>
-      <div class="stat">
-        <strong>~23 °C</strong>
-        <span>typical August water temp</span>
+
+      <div class="map-wrap">
+        <div class="map-stage">
+          <div id="map" role="application" aria-label="Map of Lac d’Annecy"></div>
+        </div>
+        <aside class="map-panel" aria-live="polite">
+          <div class="place-list" id="place-list" role="tablist" aria-label="Towns around the lake"></div>
+          <div class="panel-card" id="panel-card">
+            <span class="panel-eyebrow" id="panel-kicker">Pick a town</span>
+            <h3 id="panel-name">Lac d’Annecy</h3>
+            <p class="vibe" id="panel-vibe">14 km long, glacier-clean, a town every few kilometres. Each one has a different personality. Tap one to see how it actually behaves.</p>
+            <dl class="panel-rows" id="panel-rows" hidden>
+              <dt>Best for</dt><dd id="panel-best"></dd>
+              <dt>Water move</dt><dd id="panel-water"></dd>
+              <dt>Food move</dt><dd id="panel-food"></dd>
+              <dt>Nearby</dt><dd id="panel-near"></dd>
+            </dl>
+            <a class="panel-link" id="panel-link" href="#towns" hidden>Read more on this town</a>
+          </div>
+        </aside>
       </div>
-      <div class="stat">
-        <strong>2 weeks</strong>
-        <span>August 2026, Sévrier home base</span>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ============ TOWNS ============ -->
+    <section id="towns" class="section" aria-labelledby="towns-title">
+      <div class="section-head">
+        <span class="section-tag">Around the lake</span>
+        <h2 id="towns-title" class="section-title">Each town is its own little world.</h2>
+        <p class="section-lede">
+          Going clockwise from where we’ll mostly be. Read these like postcards from someone who keeps coming back, not a database.
+        </p>
       </div>
-      <div class="stat">
-        <strong>0 prep</strong>
-        <span>required to use this guide</span>
+
+      <div class="towns">
+        <!-- Sévrier -->
+        <article class="town" id="sevrier">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_lake_tree_sevrier.jpg" alt="Lake light through pine trees near Sévrier." loading="lazy" />
+            <figcaption>Why the lake loop is not just exercise.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">West shore · home base</span>
+            <h3>Sévrier</h3>
+            <p class="town-pitch">
+              Sévrier is the luxury of the trip because it makes the lake casual. Not dramatic. Not precious. Just: wake up, walk down, swim, come back, get on the bike path, do it again later. This is the town that turns the lake into furniture.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Slow mornings. Repeat swims. Bike-loop launches.</dd>
+              <dt>Water move</dt><dd>Walk-in swim from the public stretch; rinse, towel, go again before lunch.</dd>
+              <dt>Food move</dt><dd>Bakery breakfast, market run for cheese and tomatoes, dinner at the house.</dd>
+              <dt>Best time</dt><dd>Any. Especially the boring afternoon nobody planned.</dd>
+              <dt>Nearby</dt><dd><a href="#annecy">Annecy</a> in 20 min by bike north; <a href="#st-jorioz">Saint-Jorioz</a> 10 min south.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: don’t over-plan from here. Sévrier rewards the day where the only commitment is “we’ll see what time the light is good.”
+            </p>
+          </div>
+        </article>
+
+        <!-- Annecy -->
+        <article class="town" id="annecy">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_open_lake_path.jpg" alt="Open lake path heading toward Annecy." loading="lazy" />
+            <figcaption>The bike path north into town.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">Top of the lake · the city one</span>
+            <h3>Annecy &amp; Vieux Annecy</h3>
+            <p class="town-pitch">
+              You go for the market, the canals, the old town, the gelato, the wandering. You do not need a plan. Annecy is usually better if the plan is “walk until someone points at something edible.” Bike in along the lake path so the city earns itself.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Market mornings. Long aimless walks. Dinner that becomes ice cream.</dd>
+              <dt>Water move</dt><dd>Plage des Marquisats for a city swim; Pâquier lawns for sitting still.</dd>
+              <dt>Food move</dt><dd>Tuesday/Friday/Sunday market in the old town. Tarts, cheese, charcuterie, peaches.</dd>
+              <dt>Best time</dt><dd>Morning for the market, late afternoon for the canals, evening for everything else.</dd>
+              <dt>Nearby</dt><dd>Bike home to <a href="#sevrier">Sévrier</a> at golden hour; the path is the point.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: it’s touristy in the way Venice is touristy — that doesn’t make it less worth it, just don’t try to “do” it. Drift.
+            </p>
+          </div>
+        </article>
+
+        <!-- Saint-Jorioz -->
+        <article class="town" id="st-jorioz">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_balmettes_blue_water.jpg" alt="Blue water at Les Balmettes near Saint-Jorioz." loading="lazy" />
+            <figcaption>Where the swim becomes a long afternoon.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">West shore · sandy beach</span>
+            <h3>Saint-Jorioz</h3>
+            <p class="town-pitch">
+              Not a rocky little towel spot where everyone pretends they’re comfortable. A real sandy beach. Lawn, shade, volleyball, pétanque, a diving board, summer lifeguards — the kind of beach day where the day stretches because nobody’s annoyed.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>The full beach-day setup. Swim, snack, swim again. Kids and adults equally.</dd>
+              <dt>Water move</dt><dd>Plage municipale: shallow entry, supervised in summer, diving board for the show-offs.</dd>
+              <dt>Food move</dt><dd>Beach snack at the buvette; or pack a picnic from the morning market.</dd>
+              <dt>Best time</dt><dd>11–6. Earlier on hot weekends — the lot fills.</dd>
+              <dt>Nearby</dt><dd><a href="#duingt">Duingt</a> 5 min south for lunch; <a href="#sevrier">Sévrier</a> 10 min north.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: this is the only place on the lake that genuinely does “normal beach day.” Don’t waste it on a 90-minute dip.
+            </p>
+          </div>
+        </article>
+
+        <!-- Duingt -->
+        <article class="town" id="duingt">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_clear_water_handlebar.jpg" alt="Glass-clear water near Duingt." loading="lazy" />
+            <figcaption>The water clears completely south of the narrows.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">Where the lake pinches · castle town</span>
+            <h3>Duingt</h3>
+            <p class="town-pitch">
+              Duingt is the bike-to-lunch town. The ride here from Sévrier or Saint-Jorioz is the point — the water gets dramatically clearer south of the narrows, the château sits on its own little promontory, and the town itself is small enough to feel earned.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Bike-and-eat days. A long lunch on the lake side. Slow swim before riding home.</dd>
+              <dt>Water move</dt><dd>Tiny public swim spots either side of the village; clearest water on the lake.</dd>
+              <dt>Food move</dt><dd>Lakeside lunch with a view onto the petit lac and Talloires across the way.</dd>
+              <dt>Best time</dt><dd>Late morning to early afternoon, so the light is on the château.</dd>
+              <dt>Nearby</dt><dd><a href="#doussard">Doussard / Bout-du-Lac</a> 10 min south by bike.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: don’t skip arriving here by bike. Showing up by car kills 80% of why Duingt is good.
+            </p>
+          </div>
+        </article>
+
+        <!-- Doussard / Bout-du-Lac -->
+        <article class="town" id="doussard">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_eastern_shore_dad.jpg" alt="The flat reedy southern end of the lake at Bout-du-Lac." loading="lazy" />
+            <figcaption>Bout-du-Lac, where the lake softens into reeds.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">Bottom of the lake · grassy &amp; flat</span>
+            <h3>Doussard / Bout-du-Lac</h3>
+            <p class="town-pitch">
+              The bottom of the lake. Big grassy beach, shallow approach, mountains parked all around you. It’s the “lay flat in the grass and not move for three hours” kind of beach. Good entry point for SUP and pedal boats — the water is calmer here.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Hot, lazy days. Big group sprawl. SUP / kayak / pedal boat launches.</dd>
+              <dt>Water move</dt><dd>Walk-in entry from the lawns; paddle out toward the reserve and float.</dd>
+              <dt>Food move</dt><dd>Picnic over restaurant — the appeal is the lawn, not the menu.</dd>
+              <dt>Best time</dt><dd>Afternoon, when the sun crosses to the south end.</dd>
+              <dt>Nearby</dt><dd>Voie Verte loops south from here; Forclaz viewpoint is the closer alpine option.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: this is the day where someone falls asleep on the towel and nobody minds.
+            </p>
+          </div>
+        </article>
+
+        <!-- Talloires -->
+        <article class="town" id="talloires">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_balmettes_blue_water_card.jpg" alt="The dramatic east shore near Talloires." loading="lazy" />
+            <figcaption>The east-shore drama, in one frame.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · the postcard one</span>
+            <h3>Talloires</h3>
+            <p class="town-pitch">
+              Talloires is the one that sells the lake. Diving boards, slide, paddling pool, a nautic centre, and the view back across the petit lac to Château de Duingt that everybody photographs and nobody captures. The beach is more “summer club” than “wild swim,” but on the right afternoon that’s exactly what you want.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Showy lake-life day. Diving boards, ping-pong, lunch out, swim, repeat.</dd>
+              <dt>Water move</dt><dd>Plage de Talloires-Montmin: full set-up, paddling pool, slide, diving boards.</dd>
+              <dt>Food move</dt><dd>Lake-edge lunch in town; this is the dinner-out side of the lake.</dd>
+              <dt>Best time</dt><dd>Late afternoon for the light onto Duingt; evening for dinner.</dd>
+              <dt>Nearby</dt><dd><a href="#angon">Angon</a> 5 min south; <a href="#menthon">Menthon</a> 5 min north.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: book dinner if a Saturday. Otherwise just turn up and improvise.
+            </p>
+          </div>
+        </article>
+
+        <!-- Angon -->
+        <article class="town" id="angon">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_clear_water_handlebar_card.jpg" alt="Clear water at Angon, with Château de Duingt across the lake." loading="lazy" />
+            <figcaption>The view back to Duingt from Angon.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · quiet swim with a view</span>
+            <h3>Angon</h3>
+            <p class="town-pitch">
+              Angon is Talloires’ quieter little sibling. A small stream runs into the lake, there’s a bar/restaurant on the beach, beach games, and the same Duingt-château view minus the volume. If Talloires feels too much, walk five minutes south and you’re here.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Long quiet swim. Beach apéro. Couples / smaller hangs.</dd>
+              <dt>Water move</dt><dd>Walk-in from the small public beach; the stream entry keeps it cooler.</dd>
+              <dt>Food move</dt><dd>L’Aquarama-style beach restaurant for lunch with feet basically in the lake.</dd>
+              <dt>Best time</dt><dd>Late afternoon into apéro hour — the light here is unfair.</dd>
+              <dt>Nearby</dt><dd>Cascade d’Angon walk-up, very short, very mossy, very cool.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: this is the “we accidentally stayed for dinner” beach.
+            </p>
+          </div>
+        </article>
+
+        <!-- Menthon -->
+        <article class="town" id="menthon">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_eastern_shore_dad_card.jpg" alt="Pontoons and lawns at Menthon-Saint-Bernard." loading="lazy" />
+            <figcaption>Menthon’s pontoons jut out into deep water.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · pontoon energy</span>
+            <h3>Menthon-Saint-Bernard</h3>
+            <p class="town-pitch">
+              Menthon is polished lake energy: fixed and floating pontoons, diving boards, a lakeside promenade you can wander on after dinner, a snack bar/restaurant, and the cleanest lawns on the lake. Up the hill is Château de Menthon brooding over the whole thing.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Pontoon swims. Diving-board afternoons. Walk-after-dinner kind of nights.</dd>
+              <dt>Water move</dt><dd>Plage de Menthon: walk to the end of the pontoon, jump, repeat.</dd>
+              <dt>Food move</dt><dd>Snack bar at the beach; proper dinners up in the village or back toward Talloires.</dd>
+              <dt>Best time</dt><dd>Late afternoon, into golden hour on the pontoons.</dd>
+              <dt>Nearby</dt><dd><a href="#veyrier">Veyrier-du-Lac</a> 5 min north; Roc de Chère trails inland.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: pontoon day is non-negotiable. This is the one to do it on.
+            </p>
+          </div>
+        </article>
+
+        <!-- Veyrier-du-Lac -->
+        <article class="town" id="veyrier">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_open_lake_path.jpg" alt="Open lake near Veyrier-du-Lac." loading="lazy" />
+            <figcaption>The view back across the lake from La Brune.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · clean swim, no fuss</span>
+            <h3>Veyrier-du-Lac · La Brune</h3>
+            <p class="town-pitch">
+              Veyrier is the locals-but-not-secret swim. La Brune is a Pavillon Bleu beach, free and public, with a clean swim and a view straight back across to the west shore. No diving boards, no slide — just a good, honest swim and a flat lawn.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Quick high-quality swim. Less-busy weekday afternoons.</dd>
+              <dt>Water move</dt><dd>La Brune walk-in; clear water, supervised stretches in summer.</dd>
+              <dt>Food move</dt><dd>Eat back in Annecy or Talloires — Veyrier’s food story is thin.</dd>
+              <dt>Best time</dt><dd>Late morning before the wind kicks up across the petit lac.</dd>
+              <dt>Nearby</dt><dd><a href="#menthon">Menthon</a> 5 min south; Annecy 10 min by bike.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: this is the “we just want to swim and go” option. Don’t overthink it.
+            </p>
+          </div>
+        </article>
+
+        <!-- Roc de Chère -->
+        <article class="town" id="roc-de-chere">
+          <figure class="town-figure">
+            <img src="assets/ride/ride_turquoise_eastern_shore_card.jpg" alt="The forested rocky promontory of Roc de Chère." loading="lazy" />
+            <figcaption>The forested promontory between Talloires and Menthon.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · nature reserve</span>
+            <h3>Roc de Chère</h3>
+            <p class="town-pitch">
+              The forested promontory between Talloires and Menthon. Easy shaded trails, a nature reserve, and clear water below. There are cliff-jumping spots — we are watching them, not jumping off them. Treat it like a quiet woods walk that ends with a swim from a calm pebbly entry.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>A short woods walk that breaks up a swim day. Cooler than open beach.</dd>
+              <dt>Water move</dt><dd>Pebbly walk-in entries on the south side. Avoid the high-rock launches.</dd>
+              <dt>Food move</dt><dd>Pack a snack; eat afterwards in Talloires or Menthon.</dd>
+              <dt>Best time</dt><dd>Mid-afternoon when the open-shore beaches start filling.</dd>
+              <dt>Nearby</dt><dd>Loops back into <a href="#talloires">Talloires</a> or <a href="#menthon">Menthon</a> on foot.</dd>
+            </dl>
+            <p class="town-read">
+              The older sister read: this is a scout-first place. Walk it, look at it, get in only where the entry is friendly.
+            </p>
+          </div>
+        </article>
       </div>
+    </section>
+
+    <!-- ambient strip -->
+    <div class="strip" aria-hidden="true">
+      <figure>
+        <img src="assets/ride/ride_turquoise_eastern_shore_card.jpg" alt="" loading="lazy" />
+        <figcaption>Eastern shore turquoise.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/ride/ride_clear_water_handlebar_card.jpg" alt="" loading="lazy" />
+        <figcaption>Glass-clear, south end.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/ride/ride_lake_tree_sevrier_card.jpg" alt="" loading="lazy" />
+        <figcaption>The light through pines, Sévrier.</figcaption>
+      </figure>
     </div>
 
-    <!-- Lake bases — town-by-town swim/beach/dock guide -->
-    <section id="bases" class="section section-wide" aria-labelledby="bases-title">
+    <hr class="divider" />
+
+    <!-- ============ DAY FLOWS ============ -->
+    <section id="days" class="section section-narrow" aria-labelledby="days-title">
       <div class="section-head">
-        <div>
-          <span class="eyebrow">Where we'll actually go</span>
-          <h2 id="bases-title">Town-by-town swim guide.</h2>
-        </div>
-        <p>
-          The lake is small. Each town has its own personality — sandy beach, pontoon, market morning, long dinner.
-          Pick a base for the day, swim there, eat there, leave when it stops being fun.
+        <span class="section-tag">What kind of day?</span>
+        <h2 id="days-title" class="section-title">Pick the mood. The day picks itself.</h2>
+        <p class="section-lede">
+          Not itineraries. The shape of a day, in story form. Tap a mood to spotlight the days that fit; the towns inside link out.
         </p>
       </div>
 
-      <div class="base-grid">
-        <article class="base-card featured" id="sevrier">
-          <div class="base-photo">
-            <img
-              src="assets/ride/ride_lake_tree_sevrier.jpg"
-              alt="Lac d'Annecy at Sévrier — open lakeside path with shade trees"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="base-body">
-            <div class="base-tags">
-              <span class="base-tag home">Home base</span>
-              <span class="base-tag beach">Plage municipale</span>
-              <span class="base-tag">Voie Verte</span>
-            </div>
-            <h3>Sévrier</h3>
-            <p class="blurb">
-              West-shore village, 10 min from old Annecy. The default swim — walk down, get in, walk back. No plan
-              required. Bike path runs straight outside the door.
-            </p>
-            <dl class="base-rows">
-              <div class="base-row">
-                <dt>Vibe</dt>
-                <dd>Quiet, residential, lake-adjacent. Where we sleep and reset between bigger days.</dd>
-              </div>
-              <div class="base-row">
-                <dt>Water</dt>
-                <dd><strong>Plage municipale de Sévrier</strong> — straightforward swim, paddle/SUP rentals around the marina.</dd>
-              </div>
-              <div class="base-row">
-                <dt>Food</dt>
-                <dd>Le Poisson Rouge for a real lakeside dinner. Bakery + Casino supermarket for everyday.</dd>
-              </div>
-              <div class="base-row">
-                <dt>When</dt>
-                <dd>This is where we default to a swim without making it a plan. Mornings, recovery days, after-dinner walks.</dd>
-              </div>
-            </dl>
-          </div>
-        </article>
-
-        <article class="base-card" id="saint-jorioz">
-          <div class="base-tags">
-            <span class="base-tag beach">Sandy beach</span>
-            <span class="base-tag">Pavillon Bleu</span>
-          </div>
-          <h3>Saint-Jorioz</h3>
-          <p class="blurb">
-            The only real <em>sandy</em> beach on the lake. Lawn, shade, volleyball, pétanque, diving board. Big group day.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Lazy beach day with everything in one place.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Wide swim area, supervised in July/August, easy entry, diving board.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Thursday morning <strong>marché</strong>. Snack stands at the beach.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Hot afternoon. Budget-friendly day. When someone wants <em>real</em> sand.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="duingt">
-          <div class="base-tags">
-            <span class="base-tag town">Storybook village</span>
-            <span class="base-tag">Bike-and-lunch</span>
-          </div>
-          <h3>Duingt</h3>
-          <p class="blurb">
-            The bend in the lake. Tiny village, the famous château-on-the-water, lunch terraces with the view.
-            One of the prettiest stops on the loop.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Bike to lunch and a swim. The "wait, this is real" photo moment.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Small public swim entries near the village — scout a spot, get in, dry off.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd><strong>Le Bon Wagon</strong> for terrace lunch with the lake. Pump track nearby for the brothers.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Mid-loop ride break. Long lunch day.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="doussard">
-          <div class="base-tags">
-            <span class="base-tag quiet">Quiet swim</span>
-            <span class="base-tag">Bout-du-Lac</span>
-          </div>
-          <h3>Doussard / Bout-du-Lac</h3>
-          <p class="blurb">
-            South tip of the lake. Nature reserve, reedy edges, calmer water, fewer people. The "we don't want a scene today" beach.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Recovery day swim. Wildlife / nature trail. Slow afternoon.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Free beach (Douss'plage area). Quiet entries along the south shore.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Bring a picnic from the Sévrier or Saint-Jorioz market. Limited options on site.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Hot Sunday. After a big bike day. When the north end feels too busy.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="talloires">
-          <div class="base-tags">
-            <span class="base-tag dock">Diving board · slide</span>
-            <span class="base-tag">Pretty bay</span>
-          </div>
-          <h3>Talloires</h3>
-          <p class="blurb">
-            Big lake-day energy. Trees, lawn, sand, paddling pool, diving board, slide, a nautical center.
-            Postcard bay, view across to Duingt's château.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>The "do everything in the water" day with the brothers.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Nautical center, diving board, slide, paddling pool. SUP/kayak rentals nearby.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Several lakeside restaurants. Reserve dinner ahead in August.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>The bigger lake day. Pair with east-shore drive or boat shuttle.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="angon">
-          <div class="base-tags">
-            <span class="base-tag dock">Pontoon dining</span>
-            <span class="base-tag">Cascade nearby</span>
-          </div>
-          <h3>Angon</h3>
-          <p class="blurb">
-            Just south of Talloires. Beach with a small stream running through it. Gorgeous water, view to Duingt château,
-            and L'Aquarama on a pontoon over the water.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Long lunch on the water, then swim, then dry off in the grass.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Beach with stream entry, pontoon swimming. <strong>Cascade d'Angon</strong> is a short walk inland (waterfall, ground-level).</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd><strong>L'Aquarama</strong> on the floating pontoon — the most "are we in a movie" lunch on the lake.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Golden hour swim. Slow lunch. Pretty afternoon photos without effort.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="menthon">
-          <div class="base-tags">
-            <span class="base-tag dock">Pontoons · diving boards</span>
-            <span class="base-tag town">Château view</span>
-          </div>
-          <h3>Menthon-Saint-Bernard</h3>
-          <p class="blurb">
-            East-shore beach with a promenade, fixed and floating pontoons, diving boards, snack/restaurant on site.
-            Storybook château on the hill above town.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Pontoon-and-dive afternoon. Pretty evening stop.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Multiple pontoons + diving boards. Easy swim out, lots to climb on.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Beach snack/restaurant. Town has a few proper dinner spots.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Hot afternoon when we want pontoons. Evening drive on the way back from Talloires.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="veyrier">
-          <div class="base-tags">
-            <span class="base-tag beach">Free / public</span>
-            <span class="base-tag">View back to Annecy</span>
-          </div>
-          <h3>Veyrier-du-Lac · La Brune</h3>
-          <p class="blurb">
-            Public Pavillon Bleu beach on the east side, just south of Annecy. Clean swim, sunny grass and sand,
-            volleyball, pétanque, diving board. The view back across the lake is the best part.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Clean east-side swim with the prettiest view back to old Annecy.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Free, supervised in summer, diving board, gentle entry.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Town restaurants up the hill. Build a picnic before you go.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Half-day east side stop. Sunset light is unreal here.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="annecy">
-          <div class="base-tags">
-            <span class="base-tag town">Old town · canals</span>
-            <span class="base-tag">Markets · gelato</span>
-          </div>
-          <h3>Annecy &amp; Vieux Annecy</h3>
-          <p class="blurb">
-            The anchor city. Canals, stone streets, markets, gelato, lakefront walks, restaurants. Marquisats and Albigny
-            give you swim spots within town walking distance.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Wandering, market mornings, long dinners, the festival evenings.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd><strong>Plage des Marquisats</strong> (free, in town) or <strong>Albigny / Plage de l'Impérial</strong> just up the lakefront.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>Tuesday/Friday/Sunday market in the old town. Reserve dinners a day ahead in August.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Arrival day, market morning, evening art walk, anywhere we need a "no logistics" day.</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article class="base-card" id="rocdechere">
-          <div class="base-tags">
-            <span class="base-tag scout">Scout / watch only</span>
-            <span class="base-tag quiet">Nature reserve</span>
-          </div>
-          <h3>Roc de Chère</h3>
-          <p class="blurb">
-            Wooded reserve on the east shore between Menthon and Talloires. Clear water, hidden swim entries, locals
-            jumping from rocks — not our move (group is height-shy). Worth a walk to look.
-          </p>
-          <dl class="base-rows">
-            <div class="base-row">
-              <dt>Best for</dt>
-              <dd>Curiosity walk, water-watch, photos. Not cliff jumping.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Water</dt>
-              <dd>Quiet entries from low rocks if you scout carefully. Skip anything exposed.</dd>
-            </div>
-            <div class="base-row">
-              <dt>Food</dt>
-              <dd>None on site. Pair with Talloires lunch.</dd>
-            </div>
-            <div class="base-row">
-              <dt>When</dt>
-              <dd>Cool half-day walk. Pair with a Talloires/Angon swim afterward.</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-    </section>
-
-    <!-- Moods -->
-    <section id="moods" class="section section-wide" aria-labelledby="moods-title">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">Pick your day</span>
-          <h2 id="moods-title">Choose a mood, not a town.</h2>
-        </div>
-        <p>
-          The lake is small. Towns are 10 minutes apart. What matters is what kind of day you want.
-          Tap a mood, then jump to the matching activities.
-        </p>
+      <div class="day-types" role="tablist" aria-label="Day moods">
+        <button type="button" data-day="all" aria-pressed="true">All days</button>
+        <button type="button" data-day="lazy">Lazy</button>
+        <button type="button" data-day="active">Active</button>
+        <button type="button" data-day="food">Food</button>
+        <button type="button" data-day="view">Big view</button>
       </div>
 
-      <div class="mood-grid">
-        <a class="mood-card" href="#swim">
-          <div class="mood-icon" aria-hidden="true">🌊</div>
-          <h3>Swim and chill</h3>
-          <p>Walk to the lake. Float. Read. Eat. Lowest possible friction.</p>
-          <div class="mood-tags">
-            <span class="chip">Easy</span><span class="chip">Water</span><span class="chip">Daily default</span>
-          </div>
-        </a>
-        <a class="mood-card" href="#docks">
-          <div class="mood-icon" aria-hidden="true">🛟</div>
-          <h3>Pontoon &amp; diving day</h3>
-          <p>Menthon, Talloires, Saint-Jorioz, Veyrier — diving boards and floating docks.</p>
-          <div class="mood-tags">
-            <span class="chip">Water</span><span class="chip">Group</span>
-          </div>
-        </a>
-        <a class="mood-card" href="#bike-path">
-          <div class="mood-icon" aria-hidden="true">🚲</div>
-          <h3>Lakeside ride</h3>
-          <p>Voie Verte from Sévrier to Doussard. Swim stops the whole way.</p>
-          <div class="mood-tags">
-            <span class="chip">Easy → medium</span><span class="chip">Bike</span>
-          </div>
-        </a>
-        <a class="mood-card" href="#markets">
-          <div class="mood-icon" aria-hidden="true">🥖</div>
-          <h3>Market &amp; long dinner</h3>
-          <p>Bread, cheese, tomatoes, gelato, wandering old town. Repeat.</p>
-          <div class="mood-tags">
-            <span class="chip">Easy</span><span class="chip">Food</span>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Orientation / map -->
-    <section id="orient" class="section section-wide" aria-labelledby="orient-title">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">Where things are</span>
-          <h2 id="orient-title">Lac d'Annecy at a glance.</h2>
-        </div>
-        <p>
-          Annecy at the north. Sévrier is our home base on the west shore. Sandy beaches and the loop ride hug the west;
-          pontoons, diving boards and the prettiest bays are on the east. Buses link both shores from town.
-        </p>
-      </div>
-
-      <div class="orient">
-        <figure class="map-card">
-          <iframe
-            title="OpenStreetMap view of Lac d'Annecy"
-            src="https://www.openstreetmap.org/export/embed.html?bbox=6.0570%2C45.7980%2C6.2440%2C45.9440&amp;layer=mapnik&amp;marker=45.8595%2C6.1390"
-            loading="lazy"
-          ></iframe>
-          <figcaption class="map-legend">
-            <div class="legend-item">
-              <span class="legend-dot beach" aria-hidden="true"></span>
-              <span><strong>Sandy / supervised beaches</strong> — Saint-Jorioz, Veyrier (La Brune), Saint-Jorioz municipal, Doussard.</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot dock" aria-hidden="true"></span>
-              <span><strong>Pontoons &amp; diving boards</strong> — Menthon-Saint-Bernard, Talloires nautical center, Angon (L'Aquarama).</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot quiet" aria-hidden="true"></span>
-              <span><strong>Quiet swim missions</strong> — Bout-du-Lac, Roc de Chère reserve, low-key Sévrier entries.</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-dot town" aria-hidden="true"></span>
-              <span><strong>Towns to wander</strong> — Vieux Annecy, Duingt village, Menthon, Talloires.</span>
-            </div>
-          </figcaption>
-        </figure>
-
-        <div class="orient-side">
-          <div class="home-base">
-            <span class="eyebrow">Home base</span>
-            <h3>Sévrier</h3>
-            <p>
-              Practical west-shore village, 10 minutes from old Annecy by bus or bike path.
-              Easy lake access, no logistics overhead, and the Voie Verte starts right outside.
-            </p>
-            <p>
-              <strong>What this means for the day:</strong> walk to the water, ride to old town, swim on the way back. Repeat.
-            </p>
-          </div>
-
-          <div class="shore-key">
-            <h4>Lake bus lines</h4>
-            <div>
-              <strong>Line 50A — west shore</strong>
-              <span>Annecy ↔ Sévrier ↔ Saint-Jorioz ↔ Duingt ↔ Doussard.</span>
-            </div>
-            <div>
-              <strong>Line 60 — east shore</strong>
-              <span>Annecy ↔ Veyrier-du-Lac ↔ Menthon-Saint-Bernard ↔ Talloires ↔ Angon.</span>
-            </div>
-            <div>
-              <strong>Boat shuttle</strong>
-              <span>Compagnie des Bateaux runs a summer shuttle linking towns around the lake — handy when nobody wants to drive.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Ambient lake context — repurposed ride stills oriented to place -->
-    <aside class="ambient" aria-labelledby="ambient-title">
-      <span class="eyebrow">Lake context · personal photos</span>
-      <h2 id="ambient-title">This is what the water actually looks like.</h2>
-      <p>
-        Stills from a lap around the lake — not stock photos, not a poster. Same Sévrier, same Balmettes blue, same
-        east-shore wall, same open path you'll be walking, biking and swimming next to.
-      </p>
-
-      <div class="ambient-grid">
-        <figure class="ambient-card">
-          <div class="ambient-photo">
-            <img src="assets/ride/ride_lake_tree_sevrier_card.jpg" alt="Lac d'Annecy at Sévrier — shade trees and water" loading="lazy" decoding="async" />
-          </div>
-          <figcaption>
-            <strong>Sévrier shoreline</strong>
-            Where we'll default to a swim. Shade, water, no plan needed.
-          </figcaption>
-        </figure>
-        <figure class="ambient-card">
-          <div class="ambient-photo">
-            <img src="assets/ride/ride_balmettes_blue_water_card.jpg" alt="Les Balmettes between Sévrier and Saint-Jorioz — blue lake water" loading="lazy" decoding="async" />
-          </div>
-          <figcaption>
-            <strong>Les Balmettes</strong>
-            Between Sévrier and Saint-Jorioz. The water gets stupid blue here.
-          </figcaption>
-        </figure>
-        <figure class="ambient-card">
-          <div class="ambient-photo">
-            <img src="assets/ride/ride_clear_water_handlebar_card.jpg" alt="Clear shallow lake water near the path" loading="lazy" decoding="async" />
-          </div>
-          <figcaption>
-            <strong>Petit lac, west side</strong>
-            How clear it actually is. You can see the bottom from the path.
-          </figcaption>
-        </figure>
-        <figure class="ambient-card">
-          <div class="ambient-photo">
-            <img src="assets/ride/ride_eastern_shore_dad_card.jpg" alt="East-shore lakeside road with Lac d'Annecy on the right" loading="lazy" decoding="async" />
-          </div>
-          <figcaption>
-            <strong>East shore road</strong>
-            Veyrier → Menthon → Talloires. Pontoons and bays the whole way.
-          </figcaption>
-        </figure>
-      </div>
-    </aside>
-
-    <!-- Activities -->
-    <section id="activities" class="section section-wide" aria-labelledby="activities-title">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">Activity menu</span>
-          <h2 id="activities-title">Pick a day, then go.</h2>
-        </div>
-        <p>
-          Filter by what you feel like. <strong>Easy</strong> = no shoes required.
-          <strong>Medium</strong> = bring snacks. <strong>Spicy</strong> = a real cycling day.
-        </p>
-      </div>
-
-      <div class="filter-bar" role="group" aria-label="Filter activities by category">
-        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
-        <button class="filter-button" type="button" data-filter="easy" aria-pressed="false">Easy</button>
-        <button class="filter-button" type="button" data-filter="water" aria-pressed="false">Water</button>
-        <button class="filter-button" type="button" data-filter="bike" aria-pressed="false">Bike</button>
-        <button class="filter-button" type="button" data-filter="mountain" aria-pressed="false">Mountain</button>
-        <button class="filter-button" type="button" data-filter="food" aria-pressed="false">Food</button>
-      </div>
-
-      <div class="activity-grid">
-        <article class="activity-card" data-featured="true" data-tags="easy water" id="swim">
-          <div class="activity-image">
-            <img
-              src="assets/ride/ride_clear_water_handlebar.jpg"
-              alt="Clear shallow water of Lac d'Annecy from the lakeside path"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill easy">Easy</span>
-              <span class="pill water">Water</span>
-              <span class="pill">Daily default</span>
-            </div>
-            <h3>Lake swims &amp; beach afternoons</h3>
-            <p>
-              Default activity: walk or bike to the nearest beach, swim, snack, repeat. Lac d'Annecy is unusually clear and
-              very swim-friendly all summer. <em>See the town-by-town swim guide above for which beach fits which day.</em>
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">plage</span> = beach. May be grass, pebbles, or sand — only Saint-Jorioz is true ocean-style sand.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/activities/beaches/" target="_blank" rel="noopener noreferrer">Official beach list</a>
-              <a class="text-link" href="https://en.lac-annecy.com/beach-bathing-area/plage-municipale-de-saint-jorioz-saint-jorioz/" target="_blank" rel="noopener noreferrer">Saint-Jorioz beach</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="water easy" id="docks">
-          <div class="activity-image">
-            <img
-              src="assets/ride/ride_turquoise_eastern_shore.jpg"
-              alt="Turquoise water along the east shore of Lac d'Annecy near Menthon"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill water">Water</span>
-              <span class="pill easy">Easy</span>
-              <span class="pill">Brothers approved</span>
-            </div>
-            <h3>Pontoons, diving boards &amp; floating docks</h3>
-            <p>
-              The "we want to jump off something" day. Menthon-Saint-Bernard has fixed and floating pontoons plus diving
-              boards. Talloires has a nautical center with diving board and slide. Saint-Jorioz and Veyrier (La Brune) both
-              have public diving boards. Angon's L'Aquarama puts you on a floating restaurant pontoon.
-            </p>
-            <div class="plain-box">
-              <strong>Heads up:</strong> some private pontoons exist on the lake, but only the ones at public beaches /
-              nautical centers are open to all. Don't assume — scout first, ask a local.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/activities/beaches/" target="_blank" rel="noopener noreferrer">Pontoon beaches</a>
-              <a class="text-link" href="#menthon">Menthon details</a>
-              <a class="text-link" href="#talloires">Talloires details</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="water easy" id="watersports">
-          <div class="activity-image">
-            <img
-              src="assets/ride/ride_open_lake_path.jpg"
-              alt="Open lake water of Lac d'Annecy with mountains across"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill water">Water</span>
-              <span class="pill easy">Easy</span>
-            </div>
-            <h3>SUP, kayak, pedal boat</h3>
-            <p>
-              Rentals at Sévrier, Saint-Jorioz, Talloires, and the old-town lakefront. Calm summer mornings are the move —
-              afternoon thermals can pick up wind on the petit lac. SUP across the bay is a slow, easy win.
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">paddle</span> = SUP. <span class="term">pédalo</span> = pedal boat.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/activities/water-sports/" target="_blank" rel="noopener noreferrer">Water sports list</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="bike easy water" id="bike-path">
-          <div class="activity-image">
-            <img
-              src="assets/ride/ride_balmettes_blue_water.jpg"
-              alt="The Balmettes stretch of the lakeside path with Lac d'Annecy on the right"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill easy">Easy → medium</span>
-              <span class="pill bike">Bike</span>
-            </div>
-            <h3>The lakeside ride (with swim stops)</h3>
-            <p>
-              The classic move: ride south on the Voie Verte from Sévrier toward Doussard, swim wherever it looks good,
-              eat in Duingt, ride back. The full 40 km loop is here if anyone wants it. E-bikes very welcome.
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">voie verte</span> = greenway, the bike/pedestrian path separated from cars.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/cycle-tourism-route/cycling-route-around-lake-annecy-annecy/" target="_blank" rel="noopener noreferrer">Full 40 km loop</a>
-              <a class="text-link" href="https://en.lac-annecy.com/activities/cycling-and-e-biking/" target="_blank" rel="noopener noreferrer">E-bikes &amp; rentals</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="mountain" id="hike">
-          <div class="activity-image">
-            <img
-              src="assets/ride/ride_eastern_shore_dad.jpg"
-              alt="East-shore road of Lac d'Annecy with mountains rising behind"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill">Medium</span>
-              <span class="pill mtn">Mountain</span>
-              <span class="pill">Height-safe</span>
-            </div>
-            <h3>Mountain views from the ground</h3>
-            <p>
-              The big-picture mountain experience without ridges, chains, or exposure. Drive up to the
-              <strong>Col de la Forclaz</strong> for the cinematic view down the petit lac and watch paragliders launch
-              from the lawn (we're not flying). Easy walking trails through forest reserves at Roc de Chère.
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">randonnée</span> = hike. <span class="term">refuge</span> = mountain hut you can hike to and eat at.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/must-sees/breathtaking-panoramas/" target="_blank" rel="noopener noreferrer">Forclaz viewpoint</a>
-              <a class="text-link" href="https://en.lac-annecy.com/must-sees/the-natural-reserves/" target="_blank" rel="noopener noreferrer">Nature reserves</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="easy food" id="markets">
-          <div class="activity-image">
-            <img
-              src="https://en.lac-annecy.com/content/uploads/2022/07/980x670_Le_Marche_de_la_Vieille_Ville-Francoise_Cavazzana-8071-1920px.jpg"
-              alt="The old-town market in Annecy with food stalls"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill easy">Easy</span>
-              <span class="pill food">Food</span>
-            </div>
-            <h3>Markets, bakeries &amp; cooking at the house</h3>
-            <p>
-              Default food mode: bakery in the morning, market food for the house, cheese / fruit / bread always
-              available, and a few real dinners out. Vieux Annecy market runs Tuesday, Friday, Sunday; Saint-Jorioz on
-              Thursday morning.
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">marché</span> = market. <span class="term">boulangerie</span> = bakery. <span class="term">fromagerie</span> = cheese shop.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/event/old-town-market-annecy/" target="_blank" rel="noopener noreferrer">Old Town market</a>
-              <a class="text-link" href="https://en.lac-annecy.com/webzine/from-one-market-to-another/" target="_blank" rel="noopener noreferrer">Markets around the lake</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card" data-tags="easy food water" id="oldtown">
-          <div class="activity-image">
-            <img
-              src="https://en.lac-annecy.com/content/uploads/2022/07/1200x1200_Le_Marche_de_la_Vieille_Ville-Francoise_Cavazzana-8069-1920px.jpg"
-              alt="Vieux Annecy stone streets and canals"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <span class="pill easy">Easy</span>
-              <span class="pill food">Food</span>
-              <span class="pill water">Lakefront</span>
-            </div>
-            <h3>Vieux Annecy wander</h3>
-            <p>
-              The low-planning evening: old town, canals, market, gelato, lakefront walk along Albigny, dinner.
-              Plage des Marquisats is right there if anyone wants a swim before food.
-            </p>
-            <div class="plain-box">
-              <strong>French:</strong> <span class="term">vieille ville</span> = old town. <span class="term">lac</span> = lake.
-            </div>
-            <div class="link-row">
-              <a class="text-link" href="https://en.lac-annecy.com/service/lake-annecy-tourist-office-annecy/" target="_blank" rel="noopener noreferrer">Tourist office</a>
-              <a class="text-link" href="https://en.lac-annecy.com/restaurants/" target="_blank" rel="noopener noreferrer">Restaurant search</a>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Hype check -->
-    <section id="hype" class="section" aria-labelledby="hype-title">
-      <div class="hype">
-        <div class="hype-head">
-          <div>
-            <span class="eyebrow">Vote</span>
-            <h2 id="hype-title">Hype check.</h2>
-          </div>
+      <div class="day-flows">
+        <article class="day-card" data-tags="lazy">
+          <span class="day-tag">Lazy lake day</span>
+          <h3>The day that does itself.</h3>
           <p>
-            Tap the one you're most excited about. We'll pick the day that wins the most votes from the group.
-            (Saved on this device — no account needed.)
+            Wake up in Sévrier. Walk to the water. Swim. Bakery. Lawn. Swim again. Long afternoon at <a href="#st-jorioz">Saint-Jorioz</a> or the southern grass at <a href="#doussard">Doussard</a>. Dinner is whatever’s in the fridge. Nobody got in a car.
           </p>
-        </div>
+          <p class="flow"><span>Sévrier</span><span class="arrow">→</span><span>Saint-Jorioz</span><span class="arrow">→</span><span>Doussard</span><span class="arrow">→</span><span>home</span></p>
+        </article>
 
-        <div class="vote-grid" role="group" aria-label="Hype check options">
-          <button class="vote-card" type="button" data-vote="pontoon" aria-pressed="false">
-            <strong>Menthon pontoons &amp; diving boards</strong>
-            <span>Float, jump, climb back, do it again.</span>
-          </button>
-          <button class="vote-card" type="button" data-vote="sandy" aria-pressed="false">
-            <strong>Sandy beach day at Saint-Jorioz</strong>
-            <span>Real sand, lawn, volleyball, full lazy day.</span>
-          </button>
-          <button class="vote-card" type="button" data-vote="aquarama" aria-pressed="false">
-            <strong>Angon swim &amp; L'Aquarama lunch</strong>
-            <span>Floating-pontoon restaurant, golden-hour swim, château view.</span>
-          </button>
-          <button class="vote-card" type="button" data-vote="oldtown" aria-pressed="false">
-            <strong>Vieux Annecy &amp; market night</strong>
-            <span>Canals, gelato, long dinner, that's it.</span>
-          </button>
-        </div>
-        <p class="hype-status" id="hype-status" aria-live="polite">No vote yet — pick one.</p>
+        <article class="day-card" data-tags="active food">
+          <span class="day-tag">Bike-to-swim</span>
+          <h3>The reason the bike path exists.</h3>
+          <p>
+            Voie Verte south from Sévrier. Stop in <a href="#duingt">Duingt</a> for lunch on the lake. Push to <a href="#doussard">Bout-du-Lac</a> if legs allow, or just turn around. The water under the bridges south of Duingt is the clearest you’ll see all trip.
+          </p>
+          <p class="flow"><span>Sévrier</span><span class="arrow">→</span><span>Saint-Jorioz</span><span class="arrow">→</span><span>Duingt lunch</span><span class="arrow">→</span><span>Bout-du-Lac</span></p>
+        </article>
+
+        <article class="day-card" data-tags="active">
+          <span class="day-tag">Pontoon &amp; clear water</span>
+          <h3>The day that earns the photos.</h3>
+          <p>
+            Cross to the east shore. <a href="#menthon">Menthon</a> for the floating pontoons and diving boards. Walk south through <a href="#roc-de-chere">Roc de Chère</a> woods. Land in <a href="#angon">Angon</a> for a quiet second swim and apéro by the stream.
+          </p>
+          <p class="flow"><span>Menthon pontoons</span><span class="arrow">→</span><span>Roc de Chère walk</span><span class="arrow">→</span><span>Angon swim</span></p>
+        </article>
+
+        <article class="day-card" data-tags="food">
+          <span class="day-tag">Market to dinner</span>
+          <h3>One ingredient at a time.</h3>
+          <p>
+            Bike into <a href="#annecy">Annecy</a> for the morning market. Cheese, charcuterie, peaches, a tart for later. Swim at Marquisats, drift through the canals, sit at the Pâquier. Ride home golden hour. Cook everything you bought.
+          </p>
+          <p class="flow"><span>Annecy market</span><span class="arrow">→</span><span>old town wander</span><span class="arrow">→</span><span>Pâquier</span><span class="arrow">→</span><span>home dinner</span></p>
+        </article>
+
+        <article class="day-card" data-tags="food">
+          <span class="day-tag">Lake-side dinner</span>
+          <h3>The night the lake earns it.</h3>
+          <p>
+            Late swim at <a href="#angon">Angon</a> or <a href="#menthon">Menthon</a>. Rinse. Eat at <a href="#talloires">Talloires</a> with feet basically in the water. Walk the promenade afterwards. Drive home in the dark, windows down. (Easily Andrew-friendly — no drinking-centric.)
+          </p>
+          <p class="flow"><span>Angon swim</span><span class="arrow">→</span><span>Talloires dinner</span><span class="arrow">→</span><span>lake walk</span></p>
+        </article>
+
+        <article class="day-card" data-tags="active view">
+          <span class="day-tag">Big view, feet on earth</span>
+          <h3>Mountains without flinging anyone off.</h3>
+          <p>
+            Drive up to the <a href="#views">Semnoz ridge</a> for a picnic and the whole-lake view. Or watch the paragliders launch from <a href="#views">Forclaz</a> from the ground (it’s the better seat anyway), and have lunch at the farm. We like mountains. We don’t need to fall off them.
+          </p>
+          <p class="flow"><span>Semnoz picnic</span><span class="arrow">·</span><span>or Forclaz from below</span></p>
+        </article>
+
+        <article class="day-card" data-tags="lazy view">
+          <span class="day-tag">Worth-leaving day</span>
+          <h3>Only if it’s actually worth it.</h3>
+          <p>
+            Not every day off-lake earns itself. <a href="#trips">Aravis cheese loop</a> almost always does. Chamonix on a clear day, yes. Geneva, only if someone really wants to. Yvoire and Gorges du Fier are half-day add-ons, not full days.
+          </p>
+          <p class="flow"><span>scroll to day trips</span><span class="arrow">↓</span></p>
+        </article>
       </div>
     </section>
 
-    <!-- Glossary -->
-    <section id="translations" class="section" aria-labelledby="translations-title">
+    <hr class="divider" />
+
+    <!-- ============ FOOD ============ -->
+    <section id="food" class="section" aria-labelledby="food-title">
       <div class="section-head">
-        <div>
-          <span class="eyebrow">Tiny glossary</span>
-          <h2 id="translations-title">French &amp; lake words, translated.</h2>
-        </div>
-        <p>
-          The cheat sheet for anyone who doesn't spend their free time on French geography or lake vocab.
+        <span class="section-tag">Food moves</span>
+        <h2 id="food-title" class="section-title">Eat where the lake actually eats.</h2>
+        <p class="section-lede">
+          Not a restaurant database. The handful of food rituals that make the trip feel like the trip — apéro at the water, cheese damage, lake dinners, and the markets that feed the rest of it.
         </p>
       </div>
 
-      <dl class="gloss-grid">
-        <div class="gloss-card"><dt>Lac d'Annecy</dt><dd>The lake. Don't say "Lake Annecy" out loud — locals say <em>lac d'Annecy</em>.</dd></div>
-        <div class="gloss-card"><dt>Plage</dt><dd>Beach. Often grass or pebbles around the lake. Saint-Jorioz is the only true sand.</dd></div>
-        <div class="gloss-card"><dt>Ponton</dt><dd>Pontoon / floating dock. Some are public (Menthon, Talloires), some are private — scout before swimming up.</dd></div>
-        <div class="gloss-card"><dt>Voie verte</dt><dd>Greenway. The lakeside bike/pedestrian path separated from cars.</dd></div>
-        <div class="gloss-card"><dt>Marché</dt><dd>Market. Mornings only. Bring a tote, leave with cheese and apricots.</dd></div>
-        <div class="gloss-card"><dt>Boulangerie</dt><dd>Bakery. The morning move. Croissant, baguette, pain au chocolat.</dd></div>
-        <div class="gloss-card"><dt>Vieille ville</dt><dd>Old town. In Annecy: canals, arcades, markets, restaurants.</dd></div>
-        <div class="gloss-card"><dt>Petit lac</dt><dd>The narrower, deeper south end of the lake — Duingt to Bout-du-Lac.</dd></div>
-        <div class="gloss-card"><dt>Pavillon Bleu</dt><dd>"Blue Flag" — the certified-clean-water beaches. Saint-Jorioz and Veyrier carry it.</dd></div>
-      </dl>
+      <div class="food-grid">
+        <article class="food-card tall">
+          <span class="kicker">Market mornings</span>
+          <h3>The market is the trip.</h3>
+          <p>Vieux Annecy on Sunday, Tuesday and Friday. Tomatoes, peaches, charcuterie, three cheeses you didn’t mean to buy, a tart for later. Most lunches and dinners on this trip start as a market run.</p>
+        </article>
+
+        <article class="food-card wide">
+          <span class="kicker">Apéro by the water</span>
+          <h3>The most useful meal of the day isn’t a meal.</h3>
+          <p>
+            Late-afternoon apéro at <a href="#angon">Angon</a> or <a href="#menthon">Menthon</a> — saucisson, Reblochon, olives, tomato, bread, lemonade or pastis or fizzy water, doesn’t matter. The swim happens before, the dinner happens later, this is the bit that ties them together.
+          </p>
+        </article>
+
+        <article class="food-card med">
+          <span class="kicker">Cheese damage</span>
+          <h3>Reblochon &amp; friends.</h3>
+          <p>The cheeses you actually want here are local: Reblochon (raw, runny, smelly, perfect), Tomme de Savoie, Beaufort. Buy from the Aravis farms if we do that day trip — direct, raw, much better.</p>
+        </article>
+
+        <article class="food-card small">
+          <span class="kicker">Lake fish</span>
+          <h3>Féra &amp; perch.</h3>
+          <p>If a menu has féra du lac or filets de perche from the lake, get those. They’re the local thing, not steak.</p>
+        </article>
+
+        <article class="food-card med">
+          <span class="kicker">Beach lunch</span>
+          <h3>Feet-in-water restaurants.</h3>
+          <p>Poisson Rouge in Sévrier; L’Aquarama / similar at Angon. The point isn’t the food — it’s eating it ten metres from where you’ll swim back in.</p>
+        </article>
+
+        <article class="food-card wide">
+          <span class="kicker">Savoyard dinner</span>
+          <h3>The one cheesy night.</h3>
+          <p>
+            Tartiflette, raclette or fondue once on the trip — not three times, that’s a tourist mistake in 30°C August. Do it the one cooler evening, ideally up the hill (Talloires village, or the Aravis if we’re there).
+          </p>
+        </article>
+
+        <article class="food-card med">
+          <span class="kicker">Bakery</span>
+          <h3>The boring miracle.</h3>
+          <p>Baguette, pain de campagne, brioche, croissants, a quiche or two. Repeat. The bakery in Sévrier is enough for the whole trip.</p>
+        </article>
+      </div>
     </section>
 
-    <!-- Useful links -->
-    <section id="links" class="section" aria-labelledby="links-title">
+    <hr class="divider" />
+
+    <!-- ============ VIEWS ============ -->
+    <section id="views" class="section section-narrow" aria-labelledby="views-title">
       <div class="section-head">
-        <div>
-          <span class="eyebrow">Useful links</span>
-          <h2 id="links-title">Keep these handy.</h2>
-        </div>
-        <p>
-          Best jumping-off points for booking, double-checking details, or figuring out what an activity actually involves.
+        <span class="section-tag">Big views, feet on earth</span>
+        <h2 id="views-title" class="section-title">Mountains without the height panic.</h2>
+        <p class="section-lede">
+          The point of these is not the summit. The point is being up high enough that the lake makes sense — and being on a wide trail or a road or a lawn while it happens. We like mountains. We do not need to fling ourselves off them.
         </p>
       </div>
 
-      <div class="source-grid">
-        <article class="source-card">
-          <span class="kicker">Official</span>
-          <a href="https://en.lac-annecy.com" target="_blank" rel="noopener noreferrer">Lac d'Annecy Tourist Office</a>
-          <p>Main official hub for activities, restaurants, beaches, practical info, and bookings.</p>
+      <div class="views-grid">
+        <article class="view-card">
+          <span class="alt">~1700 m · road access</span>
+          <h3>Semnoz ridge picnic</h3>
+          <p>Drive up. Walk a flat-ish ridge. Whole-lake view, Mont Blanc on a clear day. Bring a picnic from the market. The drive itself is half the experience.</p>
+          <p class="heights">Ground-level, no edge exposure. The road does the climbing.</p>
         </article>
-        <article class="source-card">
-          <span class="kicker">Beaches</span>
-          <a href="https://en.lac-annecy.com/activities/beaches/" target="_blank" rel="noopener noreferrer">All lake beaches</a>
-          <p>Filter for sand, supervised, free, pontoons, diving boards.</p>
+
+        <article class="view-card">
+          <span class="alt">~1250 m · road + lawn</span>
+          <h3>Col de la Forclaz, watched from below</h3>
+          <p>The big paragliding launch. We are watching, not jumping. Lunch at La Ferme de la Forclaz on the lawn while the wings drop toward the lake — better seat than launching anyway.</p>
+          <p class="heights">Stay on the lawn / restaurant side. Easy to enjoy without going near the edge.</p>
         </article>
-        <article class="source-card">
-          <span class="kicker">Water</span>
-          <a href="https://en.lac-annecy.com/activities/water-sports/" target="_blank" rel="noopener noreferrer">Water sports</a>
-          <p>SUP, kayak, pedal boat, sailing, water-skiing.</p>
+
+        <article class="view-card">
+          <span class="alt">Loop · easy</span>
+          <h3>Circuit des 3 Croix</h3>
+          <p>A short loop above Annecy with three crosses and the same lake-view payoff without the drive up Semnoz. Wide trails, a few clearings, no scrambling.</p>
+          <p class="heights">Forest path. Open viewpoints, no scrambles.</p>
         </article>
-        <article class="source-card">
-          <span class="kicker">Bikes</span>
-          <a href="https://en.lac-annecy.com/activities/cycling-and-e-biking/" target="_blank" rel="noopener noreferrer">Cycling &amp; e-biking</a>
-          <p>Pick between gentle lakeside path, e-bike day, or proper mountain effort.</p>
+
+        <article class="view-card">
+          <span class="alt">Viewpoint · drive-up</span>
+          <h3>Taillefer / Crêt de Châtillon</h3>
+          <p>If we’re already on Semnoz and want one more lookout. Park, walk a few minutes, see the lake from a slightly different angle.</p>
+          <p class="heights">Wide path, lawn-style summit.</p>
         </article>
-        <article class="source-card">
-          <span class="kicker">Mountain views</span>
-          <a href="https://en.lac-annecy.com/must-sees/breathtaking-panoramas/" target="_blank" rel="noopener noreferrer">Panoramas</a>
-          <p>Forclaz and other ground-level viewpoints — big scenery without committing to a big hike.</p>
+
+        <article class="view-card">
+          <span class="alt">~1830 m · cave plateau</span>
+          <h3>Parmelan plateau (caveat)</h3>
+          <p>Limestone plateau, dramatic in photos. The famous via-cable route to the top is an exposure problem for us — skip it. The plateau itself, accessed gently, is fine for a careful walk.</p>
+          <p class="heights">Stick to the gentle approach. Skip Pas de l’Aulp / cabled sections.</p>
         </article>
-        <article class="source-card">
-          <span class="kicker">Food</span>
-          <a href="https://en.lac-annecy.com/webzine/from-one-market-to-another/" target="_blank" rel="noopener noreferrer">Markets around the lake</a>
-          <p>Useful for building low-key food days around market mornings.</p>
-        </article>
-        <article class="source-card">
-          <span class="kicker">Getting around</span>
-          <a href="https://en.lac-annecy.com/practical/how-to-move-there/getting-around-the-lake/" target="_blank" rel="noopener noreferrer">Lake transport</a>
-          <p>Boat shuttles, bus lines, planning non-car movement around the lake.</p>
-        </article>
-        <article class="source-card">
-          <span class="kicker">Restaurants</span>
-          <a href="https://en.lac-annecy.com/restaurants/" target="_blank" rel="noopener noreferrer">Restaurant search</a>
-          <p>Filter by town and vibe. Reserve dinners in old town the day before in summer.</p>
+
+        <article class="view-card">
+          <span class="alt">River canyon · easy</span>
+          <h3>Gorges du Fier</h3>
+          <p>Walkway pinned along a narrow river canyon. Walls are close, water is loud, it’s in shade. Kids- and adults-equally fun, low effort, ~30 min.</p>
+          <p class="heights">Boardwalk has rails. Low/no exposure feel for most people.</p>
         </article>
       </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ============ DAY TRIPS ============ -->
+    <section id="trips" class="section section-narrow" aria-labelledby="trips-title">
+      <div class="section-head">
+        <span class="section-tag">If we leave the lake</span>
+        <h2 id="trips-title" class="section-title">Ranked by whether it’s worth the drive.</h2>
+        <p class="section-lede">
+          Not all day trips are equal. These are the ones siblings ask about, ranked honestly. Lake days are the trip — these are the days the lake gives you off.
+        </p>
+      </div>
+
+      <div class="trips">
+        <article class="trip">
+          <span class="rank">01</span>
+          <div>
+            <h3>Aravis &amp; La Clusaz · Reblochon farms</h3>
+            <p>Closer than Chamonix, prettier than people think, and the cheese is from across the road. A couple of farms sell raw Reblochon directly. Loop down through Thônes on the way home.</p>
+          </div>
+          <span class="verdict go">Worth it</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">02</span>
+          <div>
+            <h3>Chamonix &amp; Mont Blanc valley</h3>
+            <p>The big one. Worth it on a clear day, even just to walk Chamonix and stare at the Aiguilles. Skip the Aiguille du Midi cable car — exposure problem, also a queue. Train up the valley to Montenvers + walk is plenty.</p>
+          </div>
+          <span class="verdict go">Worth it</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">03</span>
+          <div>
+            <h3>Gorges du Fier (½ day)</h3>
+            <p>Already in <a href="#views">views</a>. Do it as a half-day pairing with lunch in Annecy or Sévrier on the way back. Don’t make it the whole trip.</p>
+          </div>
+          <span class="verdict go">Half-day</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">04</span>
+          <div>
+            <h3>Yvoire on Lac Léman</h3>
+            <p>Stone village on Lake Geneva, very pretty, very known. A nice afternoon if we want to swap lakes for a day; not the day to expect peace and quiet in August.</p>
+          </div>
+          <span class="verdict maybe">Maybe</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">05</span>
+          <div>
+            <h3>Megève</h3>
+            <p>Posh ski town in summer mode. Pretty walk-around, good food, expensive coffee. Pleasant if we’re passing on the way to/from Chamonix; not a destination day on its own.</p>
+          </div>
+          <span class="verdict maybe">Pair with Chamonix</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">06</span>
+          <div>
+            <h3>Geneva</h3>
+            <p>Border city, jet d’eau, Old Town, currency change, cleaner streets, prices that aren’t. Worth half a day if a sibling is curious; otherwise the lake is winning.</p>
+          </div>
+          <span class="verdict maybe">Only if curious</span>
+        </article>
+
+        <article class="trip">
+          <span class="rank">07</span>
+          <div>
+            <h3>Gruyères (Switzerland)</h3>
+            <p>Cheesy in two ways. A long drive for what’s basically a fortified village + cheese factory + Giger museum. Charming, but two hours each way during a lake summer is a lot.</p>
+          </div>
+          <span class="verdict skip">Skip this trip</span>
+        </article>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ============ PRACTICAL ============ -->
+    <section id="practical" class="section section-narrow practical" aria-labelledby="practical-title">
+      <div class="section-head">
+        <span class="section-tag">Useful, boring things</span>
+        <h2 id="practical-title" class="section-title">The small stuff, kept small.</h2>
+      </div>
+
+      <details>
+        <summary>Market days &amp; opening rhythm</summary>
+        <div class="detail-body">
+          <p>Annecy old town: Sunday (the big one), Tuesday, Friday — mornings. Sévrier: smaller, weekly. Saint-Jorioz, Talloires: weekly summer markets.</p>
+          <p>August reality: many small businesses close 1–2 weeks for vacation. If a specific bakery/restaurant matters, check the day before.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Beaches: free, paid, lifeguard</summary>
+        <div class="detail-body">
+          <p>Most public beaches around the lake are free with paid options for chairs, parasols, paddling pool, etc. (Talloires, Saint-Jorioz, Menthon). Veyrier’s La Brune is free Pavillon Bleu.</p>
+          <p>Lifeguards generally July–August on the bigger municipal beaches; outside those hours/months it’s swim-at-your-own-risk.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Bikes &amp; the Voie Verte</summary>
+        <div class="detail-body">
+          <p>Voie Verte runs from Annecy down the west shore through Sévrier, Saint-Jorioz, Duingt and into Doussard — fully separated bike path most of the way, one of the best in Europe.</p>
+          <p>Bike rental in Annecy and Sévrier (regular, electric, kids’ bikes). Book ahead in peak August.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Boats, SUP, kayaks</summary>
+        <div class="detail-body">
+          <p>SUP and pedal-boat rental at almost every bigger beach. Electric boat rental (no licence needed, low speeds) from Annecy and Sévrier — fun for a circling lunch loop.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Getting around</summary>
+        <div class="detail-body">
+          <p>Lake bus + boat (Compagnie des Bateaux du Lac d’Annecy) connects most lakeside towns in summer. Useful for one-way bike-then-boat days.</p>
+          <p>Driving: the east-shore road gets clogged on summer afternoons; ride or boat instead when you can.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Heights / safety scout note</summary>
+        <div class="detail-body">
+          <p>Group is height-averse. We’re skipping paragliding launches, via-ferrata, and cliff-jumping spots as activities. We can still watch them happen — Forclaz launch from the lawn, Roc de Chère cliffs from the trail — and that’s usually the better seat.</p>
+          <p>Rope swings: people mention them on this lake. We’re not naming exact spots — scout in person, look at the depth and the entry, only commit if obviously safe.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>French / lake words</summary>
+        <div class="detail-body">
+          <p><strong>Plage</strong> — beach. <strong>Buvette</strong> — beach snack bar. <strong>Ponton</strong> — pontoon. <strong>Voie Verte</strong> — separated bike path. <strong>Apéro</strong> — drinks + small food before dinner; the most important meal that isn’t one. <strong>Marché</strong> — market. <strong>Reblochon</strong> — the cheese; soft, raw, Aravis. <strong>Féra / perche</strong> — lake fish on menus.</p>
+        </div>
+      </details>
     </section>
   </main>
 
   <footer class="footer">
-    <p>
-      Built by Liv as a sibling-friendly Lac d'Annecy guide. Personal photos © Liv &amp; Dad —
-      stills from a lap around the lake. Other images and activity links go to
-      <a href="https://en.lac-annecy.com" target="_blank" rel="noopener noreferrer">en.lac-annecy.com</a>.
-    </p>
+    <div>
+      Made for the brothers, the partner, and the August that’s coming. <em>Lac d’Annecy, Haute-Savoie.</em>
+    </div>
+    <div>
+      Photos along the lake — taken on the bike between Sévrier and the petit lac.
+    </div>
   </footer>
 
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
   <script>
-    // Activity filter
-    (function () {
-      const buttons = Array.from(document.querySelectorAll('[data-filter]'));
-      const cards = Array.from(document.querySelectorAll('.activity-card'));
+    /* ---------- TOWN DATA ---------- */
+    const TOWNS = [
+      {
+        id: 'sevrier',
+        name: 'Sévrier',
+        kicker: 'West shore · home base',
+        coords: [45.8584, 6.1383],
+        vibe: 'The luxury of the trip because it makes the lake casual. Wake up, walk down, swim, repeat.',
+        best: 'Slow mornings, repeat swims, bike-loop launches.',
+        water: 'Walk-in swim from the public stretch. Rinse, towel, go again.',
+        food: 'Market, bakery, dinner cooked at home.',
+        near: 'Annecy 20 min north by bike; Saint-Jorioz 10 min south.'
+      },
+      {
+        id: 'annecy',
+        name: 'Annecy',
+        kicker: 'Top of the lake · the city one',
+        coords: [45.8992, 6.1294],
+        vibe: 'Market, canals, old town, gelato, wandering. Better when the plan is no plan.',
+        best: 'Market mornings, long aimless walks, dinner that becomes ice cream.',
+        water: 'Plage des Marquisats for a city swim; Pâquier lawns for sitting still.',
+        food: 'Sun/Tue/Fri market in the old town. Tarts, cheese, peaches.',
+        near: 'Bike home down the west shore at golden hour.'
+      },
+      {
+        id: 'st-jorioz',
+        name: 'Saint-Jorioz',
+        kicker: 'West shore · sandy beach',
+        coords: [45.8245, 6.1641],
+        vibe: 'A real sandy beach. Lawn, shade, pétanque, a diving board. The full beach-day setup.',
+        best: 'Long beach days. Kids and adults equally.',
+        water: 'Plage municipale: shallow entry, summer lifeguards, diving board.',
+        food: 'Beach snack at the buvette or a packed market picnic.',
+        near: 'Duingt 5 min south for lunch; Sévrier 10 min north.'
+      },
+      {
+        id: 'duingt',
+        name: 'Duingt',
+        kicker: 'Where the lake pinches · castle town',
+        coords: [45.8086, 6.2051],
+        vibe: 'The bike-to-lunch town. Water clears dramatically south of the narrows.',
+        best: 'Bike-and-eat days. Slow swim before riding home.',
+        water: 'Tiny public swim spots either side of the village; clearest water on the lake.',
+        food: 'Lakeside lunch with a view onto the petit lac.',
+        near: 'Doussard 10 min south; Talloires across the petit lac.'
+      },
+      {
+        id: 'doussard',
+        name: 'Doussard / Bout-du-Lac',
+        kicker: 'Bottom of the lake · grassy &amp; flat',
+        coords: [45.7826, 6.2197],
+        vibe: 'Big grassy beach, shallow approach, mountains parked all around you.',
+        best: 'Hot, lazy days. Big group sprawl. SUP / kayak / pedal boat.',
+        water: 'Walk-in entry from the lawns; paddle out and float.',
+        food: 'Picnic over restaurant — the lawn is the appeal.',
+        near: 'Voie Verte loops south; Forclaz viewpoint nearby.'
+      },
+      {
+        id: 'talloires',
+        name: 'Talloires',
+        kicker: 'East shore · the postcard one',
+        coords: [45.8404, 6.2167],
+        vibe: 'The town that sells the lake. Diving boards, slide, the Duingt-château view across the petit lac.',
+        best: 'Showy lake-life day. Diving boards, ping-pong, lunch out, swim, repeat.',
+        water: 'Plage de Talloires-Montmin: paddling pool, slide, diving boards.',
+        food: 'Lake-edge lunch in town; this is the dinner-out side of the lake.',
+        near: 'Angon 5 min south; Menthon 5 min north.'
+      },
+      {
+        id: 'angon',
+        name: 'Angon',
+        kicker: 'East shore · quiet swim with a view',
+        coords: [45.8345, 6.2206],
+        vibe: 'Talloires’ quieter sibling. Stream into the lake, beach restaurant, same château view.',
+        best: 'Long quiet swim. Beach apéro. Smaller hangs.',
+        water: 'Walk-in from the small public beach; stream entry keeps it cooler.',
+        food: 'L’Aquarama-style lunch with feet basically in the lake.',
+        near: 'Cascade d’Angon walk-up; Talloires 5 min north.'
+      },
+      {
+        id: 'menthon',
+        name: 'Menthon-Saint-Bernard',
+        kicker: 'East shore · pontoon energy',
+        coords: [45.8624, 6.1978],
+        vibe: 'Polished lake energy: pontoons, diving boards, the cleanest lawns on the lake.',
+        best: 'Pontoon swims. Diving-board afternoons. Walk-after-dinner nights.',
+        water: 'Plage de Menthon: walk to the end of the pontoon, jump, repeat.',
+        food: 'Snack bar at the beach; proper dinners up in the village.',
+        near: 'Veyrier 5 min north; Roc de Chère trails inland.'
+      },
+      {
+        id: 'veyrier',
+        name: 'Veyrier-du-Lac',
+        kicker: 'East shore · clean swim, no fuss',
+        coords: [45.8830, 6.1717],
+        vibe: 'Locals-but-not-secret swim. La Brune is free, clean, flat-lawn, view back across.',
+        best: 'Quick high-quality swim. Quieter weekday afternoons.',
+        water: 'La Brune walk-in; supervised stretches in summer.',
+        food: 'Eat back in Annecy or Talloires.',
+        near: 'Menthon 5 min south; Annecy 10 min by bike.'
+      },
+      {
+        id: 'roc-de-chere',
+        name: 'Roc de Chère',
+        kicker: 'East shore · nature reserve',
+        coords: [45.8533, 6.2050],
+        vibe: 'Forested promontory between Talloires and Menthon. Shaded trails, clear water below.',
+        best: 'Short woods walk that breaks up a swim day.',
+        water: 'Pebbly walk-in entries on the south side. Avoid the high-rock launches.',
+        food: 'Pack a snack; eat afterwards in Talloires or Menthon.',
+        near: 'Loops back into Talloires or Menthon on foot.'
+      }
+    ];
 
-      buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const filter = button.dataset.filter;
-          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
-          cards.forEach((card) => {
-            const tags = (card.dataset.tags || '').split(' ');
-            card.classList.toggle('is-hidden', filter !== 'all' && !tags.includes(filter));
-          });
+    /* ---------- MAP ---------- */
+    (function () {
+      if (typeof L === 'undefined') return;
+      const map = L.map('map', {
+        scrollWheelZoom: false,
+        zoomControl: true
+      }).setView([45.8500, 6.1850], 11);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18,
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>'
+      }).addTo(map);
+
+      const placeList = document.getElementById('place-list');
+      const kicker = document.getElementById('panel-kicker');
+      const name = document.getElementById('panel-name');
+      const vibe = document.getElementById('panel-vibe');
+      const rows = document.getElementById('panel-rows');
+      const best = document.getElementById('panel-best');
+      const water = document.getElementById('panel-water');
+      const food = document.getElementById('panel-food');
+      const near = document.getElementById('panel-near');
+      const link = document.getElementById('panel-link');
+
+      const markers = {};
+      const buttons = {};
+
+      function setActive(id) {
+        const t = TOWNS.find((x) => x.id === id);
+        if (!t) return;
+        kicker.innerHTML = t.kicker;
+        name.textContent = t.name;
+        vibe.textContent = t.vibe;
+        rows.hidden = false;
+        best.textContent = t.best;
+        water.textContent = t.water;
+        food.textContent = t.food;
+        near.textContent = t.near;
+        link.hidden = false;
+        link.setAttribute('href', '#' + t.id);
+
+        Object.entries(markers).forEach(([k, m]) => {
+          const el = m.getElement && m.getElement();
+          if (el) el.classList.toggle('is-active', k === id);
         });
-      });
-    })();
-
-    // Hype check vote
-    (function () {
-      const KEY = 'annecy2026.vote';
-      const cards = Array.from(document.querySelectorAll('[data-vote]'));
-      const status = document.getElementById('hype-status');
-      const labels = {
-        pontoon: 'Menthon pontoons & diving boards',
-        sandy: 'Sandy beach day at Saint-Jorioz',
-        aquarama: "Angon swim & L'Aquarama lunch",
-        oldtown: 'Vieux Annecy & market night'
-      };
-
-      let saved = null;
-      try { saved = sessionStorage.getItem(KEY); } catch (_) {}
-
-      function paint(value) {
-        cards.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.vote === value)));
-        if (status) {
-          status.textContent = value
-            ? 'Saved on this device: ' + (labels[value] || value) + '. Tap another to change.'
-            : 'No vote yet — pick one.';
-        }
+        Object.entries(buttons).forEach(([k, b]) => {
+          b.setAttribute('aria-pressed', String(k === id));
+        });
       }
 
-      paint(saved);
+      TOWNS.forEach((t) => {
+        const icon = L.divIcon({
+          className: '',
+          html: '<div class="pin" aria-hidden="true"></div>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+        const marker = L.marker(t.coords, { icon, title: t.name }).addTo(map);
+        marker.on('click', () => setActive(t.id));
+        markers[t.id] = marker;
 
-      cards.forEach((card) => {
-        card.addEventListener('click', () => {
-          const value = card.dataset.vote;
-          try { sessionStorage.setItem(KEY, value); } catch (_) {}
-          paint(value);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = t.name;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.addEventListener('click', () => {
+          setActive(t.id);
+          map.flyTo(t.coords, 13, { duration: 0.6 });
+        });
+        placeList.appendChild(btn);
+        buttons[t.id] = btn;
+      });
+
+      // Default selection: Sévrier (home base)
+      setActive('sevrier');
+    })();
+
+    /* ---------- DAY MOOD FILTER ---------- */
+    (function () {
+      const buttons = Array.from(document.querySelectorAll('[data-day]'));
+      const cards = Array.from(document.querySelectorAll('.day-card'));
+      buttons.forEach((b) => {
+        b.addEventListener('click', () => {
+          const tag = b.dataset.day;
+          buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          cards.forEach((c) => {
+            const tags = (c.dataset.tags || '').split(/\s+/);
+            const match = tag === 'all' || tags.includes(tag);
+            c.classList.toggle('is-dim', !match);
+          });
         });
       });
     })();
