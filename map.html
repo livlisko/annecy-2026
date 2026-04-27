@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lac d’Annecy — Activity map</title>
+  <meta
+    name="description"
+    content="Map of Lac d’Annecy: towns, swims, rides, food, views, day trips, water and culture in Haute-Savoie."
+  />
+  <meta property="og:title" content="Lac d’Annecy — Activity map" />
+  <meta
+    property="og:description"
+    content="Every spot we mention, on one map: towns, swims, rides, dinners, viewpoints."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/orientation/orientation_relief.jpg" />
+  <meta name="theme-color" content="#0B1F33" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <style>
+    :root {
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body: 'Inter', system-ui, -apple-system, Arial, sans-serif;
+
+      --text-xs: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
+      --text-sm: clamp(0.86rem, 0.82rem + 0.25vw, 0.96rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.08rem);
+      --text-md: clamp(1.08rem, 1rem + 0.4vw, 1.22rem);
+      --text-lg: clamp(1.25rem, 1.1rem + 0.7vw, 1.55rem);
+      --text-xl: clamp(1.7rem, 1.3rem + 1.6vw, 2.6rem);
+
+      --bg: #f4faff;
+      --bg-deep: #eaf3fa;
+      --surface: #ffffff;
+      --surface-2: #e7f1f8;
+      --surface-3: #d8e7f0;
+      --ink: #0b1f33;
+      --ink-2: #142e47;
+      --muted: #4c6475;
+      --faint: #88a0b1;
+      --aqua: #36b9cc;
+      --aqua-bright: #4fd1de;
+      --aqua-deep: #18879a;
+      --alpine: #1f7fb3;
+      --alpine-deep: #114b73;
+      --pine: #2f6b4f;
+      --glacier: #cfe5f0;
+      --mist: #dde9f1;
+      --border: #c9dce7;
+      --border-strong: #9ec0d3;
+
+      /* Category colors */
+      --cat-town: #1f7fb3;
+      --cat-swim: #36b9cc;
+      --cat-bike: #2f6b4f;
+      --cat-food: #b35a1f;
+      --cat-view: #6b4fa0;
+      --cat-trip: #114b73;
+      --cat-water: #0e6e8a;
+      --cat-culture: #8a1f5a;
+
+      --shadow-sm: 0 2px 6px rgba(11, 31, 51, 0.07);
+      --shadow-md: 0 16px 36px rgba(11, 31, 51, 0.10);
+      --shadow-lg: 0 30px 70px rgba(11, 31, 51, 0.18);
+
+      --radius-sm: 0.5rem;
+      --radius-md: 0.85rem;
+      --radius-lg: 1.15rem;
+      --radius-xl: 1.6rem;
+
+      --content: 1180px;
+      --content-wide: 1340px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.55;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    img, svg, iframe { display: block; max-width: 100%; }
+    img { height: auto; background: var(--mist); }
+
+    a {
+      color: var(--alpine);
+      text-decoration-thickness: 0.07em;
+      text-underline-offset: 0.18em;
+      transition: color var(--transition);
+    }
+    a:hover { color: var(--alpine-deep); }
+
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: transparent; }
+
+    :focus-visible {
+      outline: 2px solid var(--aqua);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    .skip-link {
+      position: absolute; left: 1rem; top: 1rem;
+      transform: translateY(-150%);
+      background: var(--surface); color: var(--ink);
+      padding: 0.5rem 0.85rem; border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md); z-index: 1000;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    /* ----- header ----- */
+    .site-header {
+      position: sticky; top: 0; z-index: 500;
+      backdrop-filter: blur(12px);
+      background: rgba(244, 250, 255, 0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav {
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      gap: 1rem;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand .dot {
+      width: 0.55rem; height: 0.55rem; border-radius: 50%;
+      background: linear-gradient(135deg, var(--aqua), var(--alpine));
+      box-shadow: 0 0 0 4px rgba(54, 185, 204, 0.18);
+    }
+    .nav-links {
+      display: flex; gap: 0.25rem; flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: var(--radius-sm);
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--surface-2); }
+    .nav-links a.is-current {
+      color: var(--ink);
+      background: var(--surface-2);
+    }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+    }
+
+    /* ----- page intro ----- */
+    .page-intro {
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      padding: 1.25rem 1.25rem 0.5rem;
+      display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between;
+      gap: 0.75rem 1.5rem;
+    }
+    .page-intro .eyebrow {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--alpine-deep);
+      background: var(--surface-2);
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.55rem;
+    }
+    .page-intro .eyebrow::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--aqua);
+    }
+    .page-intro h1 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: var(--text-xl);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--ink);
+    }
+    .page-intro p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 56ch;
+      margin-top: 0.4rem;
+    }
+
+    /* ----- map shell ----- */
+    .map-shell {
+      max-width: var(--content-wide);
+      margin: 1rem auto 2rem;
+      padding: 0 1.25rem;
+    }
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 0.4rem 0.5rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--ink-2);
+      font-size: 0.86rem;
+      font-weight: 500;
+      transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+    }
+    .chip:hover { border-color: var(--border-strong); }
+    .chip[aria-pressed="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+    .chip[aria-pressed="true"] .chip-dot {
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+    }
+    .chip .chip-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--cat);
+      flex-shrink: 0;
+    }
+    .chip[data-cat="all"] .chip-dot {
+      background: linear-gradient(135deg, var(--aqua), var(--alpine));
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+    @media (max-width: 960px) {
+      .map-grid { grid-template-columns: 1fr; }
+    }
+
+    .map-stage {
+      position: relative;
+      min-height: 70vh;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      box-shadow: var(--shadow-md);
+    }
+    @media (max-width: 960px) {
+      .map-stage { min-height: 55vh; }
+    }
+    #map {
+      position: absolute; inset: 0;
+    }
+    .leaflet-container {
+      font-family: var(--font-body);
+      background: var(--surface-2);
+    }
+
+    /* Custom markers */
+    .marker {
+      width: 30px; height: 30px;
+      border-radius: 50% 50% 50% 0;
+      background: var(--cat, var(--alpine));
+      transform: rotate(-45deg);
+      border: 2px solid #fff;
+      box-shadow: 0 4px 10px rgba(11, 31, 51, 0.25);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms;
+    }
+    .marker .marker-glyph {
+      transform: rotate(45deg);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 700;
+    }
+    .marker:hover, .marker.is-active {
+      transform: rotate(-45deg) scale(1.12);
+      box-shadow: 0 6px 16px rgba(11, 31, 51, 0.3);
+    }
+
+    /* Popups */
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      width: 260px !important;
+      font-family: var(--font-body);
+    }
+    .leaflet-popup-tip { box-shadow: var(--shadow-md); }
+    .pop {
+      display: flex; flex-direction: column;
+    }
+    .pop-photo {
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      object-fit: cover;
+      background: var(--mist);
+    }
+    .pop-body {
+      padding: 0.7rem 0.85rem 0.85rem;
+      display: flex; flex-direction: column; gap: 0.4rem;
+    }
+    .pop-cat {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cat, var(--alpine-deep));
+    }
+    .pop-cat .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cat, var(--alpine));
+    }
+    .pop h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.12rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+    .pop p {
+      font-size: 0.88rem;
+      color: var(--ink-2);
+      line-height: 1.45;
+    }
+    .pop-link {
+      align-self: start;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--alpine);
+      text-decoration: none;
+      padding-top: 0.15rem;
+    }
+    .pop-link:hover { color: var(--alpine-deep); text-decoration: underline; }
+    .pop-link::after { content: " →"; }
+
+    /* Side list */
+    .side {
+      display: flex; flex-direction: column;
+      gap: 0.75rem;
+      max-height: 70vh;
+      min-height: 0;
+    }
+    @media (max-width: 960px) {
+      .side { max-height: none; }
+    }
+    .side-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 1rem;
+    }
+    .side-head h2 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+    .side-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .place-list {
+      overflow-y: auto;
+      flex: 1 1 auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 0.4rem;
+    }
+    @media (max-width: 960px) {
+      .place-list { max-height: 50vh; }
+    }
+    .group-head {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 0.5rem 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .group-head .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cat);
+    }
+    .place-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.55rem 0.6rem;
+      border-radius: var(--radius-sm);
+      color: var(--ink-2);
+      font-size: 0.92rem;
+      transition: background var(--transition), color var(--transition);
+    }
+    .place-item:hover { background: var(--surface-2); color: var(--ink); }
+    .place-item[aria-pressed="true"] {
+      background: var(--surface-3);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .place-item .pin {
+      width: 14px; height: 14px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: var(--cat);
+      flex-shrink: 0;
+      border: 1.5px solid #fff;
+      box-shadow: 0 1px 3px rgba(11,31,51,0.25);
+    }
+    .place-item.is-hidden { display: none; }
+    .group-empty .group-head { opacity: 0.4; }
+
+    /* Legend / footer */
+    .footer {
+      max-width: var(--content-wide);
+      margin: 0 auto;
+      padding: 1.25rem 1.25rem 2.5rem;
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .footer em { font-family: var(--font-display); font-style: italic; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#map">Skip to map</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="index.html">
+        <span class="dot" aria-hidden="true"></span>
+        Lac d’Annecy
+      </a>
+      <div class="nav-links">
+        <a class="is-current" href="map.html">Map</a>
+        <a href="index.html#towns">Towns</a>
+        <a href="index.html#days">Days</a>
+        <a href="index.html#food">Food</a>
+        <a href="index.html#views">Views</a>
+        <a href="index.html#trips">Trips</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-intro">
+    <div>
+      <span class="eyebrow">Activity map</span>
+      <h1>Everything, on one map.</h1>
+      <p>Towns, swims, rides, dinners, viewpoints and day trips. Tap a marker for a photo and a link back to the notes.</p>
+    </div>
+  </section>
+
+  <section class="map-shell">
+    <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+
+    <div class="map-grid">
+      <div class="map-stage">
+        <div id="map" role="application" aria-label="Map of activities around Lac d’Annecy"></div>
+      </div>
+      <aside class="side" aria-label="List of places">
+        <div class="side-head">
+          <h2>Places</h2>
+          <span class="side-count" id="side-count"></span>
+        </div>
+        <div class="place-list" id="place-list"></div>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>For the brothers and the partner. <em>Lac d’Annecy, Haute-Savoie.</em></div>
+    <div><a href="index.html">Back to the notes</a></div>
+  </footer>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+  <script>
+    /* ---------- CATEGORIES ---------- */
+    const CATEGORIES = [
+      { id: 'town',    label: 'Towns',   color: '#1f7fb3', glyph: '◆' },
+      { id: 'swim',    label: 'Swim',    color: '#36b9cc', glyph: '~' },
+      { id: 'bike',    label: 'Bike',    color: '#2f6b4f', glyph: '%' },
+      { id: 'food',    label: 'Food',    color: '#b35a1f', glyph: '•' },
+      { id: 'view',    label: 'Views',   color: '#6b4fa0', glyph: '▲' },
+      { id: 'water',   label: 'Boats',   color: '#0e6e8a', glyph: '⌒' },
+      { id: 'culture', label: 'Culture', color: '#8a1f5a', glyph: '★' },
+      { id: 'trip',    label: 'Trips',   color: '#114b73', glyph: '→' }
+    ];
+
+    const CAT_BY_ID = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
+
+    /* ---------- PLACES ---------- */
+    /* Photos drawn from local /assets only. Anchors point to existing IDs in index.html. */
+    const PLACES = [
+      // Towns / lake bases
+      {
+        id: 'sevrier', cat: 'town', name: 'Sévrier',
+        coords: [45.8584, 6.1383],
+        blurb: 'Home base on the west shore. Walk to the water, get on the bike path.',
+        photo: 'assets/ride/ride_lake_tree_sevrier.jpg',
+        link: 'index.html#sevrier'
+      },
+      {
+        id: 'annecy', cat: 'town', name: 'Annecy',
+        coords: [45.8992, 6.1294],
+        blurb: 'Top of the lake. Market, canals, old town, gelato. Bike in.',
+        photo: 'assets/ride/ride_open_lake_path.jpg',
+        link: 'index.html#annecy'
+      },
+      {
+        id: 'marquisats', cat: 'swim', name: 'Plage des Marquisats',
+        coords: [45.8950, 6.1360],
+        blurb: 'Town swim. Concrete steps into clean water, two minutes from the old town.',
+        photo: 'assets/ride/ride_balmettes_blue_water.jpg',
+        link: 'index.html#annecy'
+      },
+      {
+        id: 'imperial', cat: 'culture', name: 'Impérial Palace',
+        coords: [45.9030, 6.1430],
+        blurb: 'Grand white hotel on the north shore. Beach beside it. Festival venue.',
+        photo: 'assets/ride/ride_open_lake_path.jpg',
+        link: 'index.html#annecy'
+      },
+      {
+        id: 'chavoire', cat: 'town', name: 'Chavoire',
+        coords: [45.9021, 6.1605],
+        blurb: 'East-shore lake path between Annecy and Veyrier. Tree shade, low wall, water right there.',
+        photo: 'assets/chavoire/chavoire_lake_path.jpg',
+        link: 'index.html#chavoire'
+      },
+      {
+        id: 'veyrier', cat: 'town', name: 'Veyrier-du-Lac',
+        coords: [45.8870, 6.1770],
+        blurb: 'Quiet east-shore village. La Brune beach, small port, Mont Veyrier behind.',
+        photo: 'assets/chavoire/chavoire_piste_lake.jpg',
+        link: 'index.html#veyrier'
+      },
+      {
+        id: 'menthon', cat: 'town', name: 'Menthon-Saint-Bernard',
+        coords: [45.8610, 6.1950],
+        blurb: 'Floating pontoons, château on the hill. Best ratio of swim to crowd.',
+        photo: 'assets/chavoire/chavoire_sunset_ponton.jpg',
+        link: 'index.html#menthon'
+      },
+      {
+        id: 'talloires', cat: 'town', name: 'Talloires',
+        coords: [45.8390, 6.2140],
+        blurb: 'Bay village. Restaurants on the water, ports for boats, calm swim.',
+        photo: 'assets/chavoire/chavoire_sunset_lake.jpg',
+        link: 'index.html#talloires'
+      },
+      {
+        id: 'angon', cat: 'town', name: 'Angon',
+        coords: [45.8280, 6.2160],
+        blurb: 'Small beach south of Talloires. Late-afternoon apéro spot.',
+        photo: 'assets/chavoire/chavoire_path_people.jpg',
+        link: 'index.html#angon'
+      },
+      {
+        id: 'duingt', cat: 'town', name: 'Duingt',
+        coords: [45.8280, 6.2030],
+        blurb: 'Where the lake narrows. Château on the point, clearest water under the bridges.',
+        photo: 'assets/ride/ride_clear_water_handlebar.jpg',
+        link: 'index.html#duingt'
+      },
+      {
+        id: 'st-jorioz', cat: 'town', name: 'Saint-Jorioz',
+        coords: [45.8320, 6.1620],
+        blurb: 'Long west-shore beach. Lawn, paddleboards, families, easy parking.',
+        photo: 'assets/ride/ride_eastern_shore_dad.jpg',
+        link: 'index.html#st-jorioz'
+      },
+      {
+        id: 'doussard', cat: 'town', name: 'Doussard / Bout-du-Lac',
+        coords: [45.7780, 6.2240],
+        blurb: 'South end. Reserve, reed beds, the clearest swim of the lake.',
+        photo: 'assets/ride/ride_turquoise_eastern_shore.jpg',
+        link: 'index.html#doussard'
+      },
+      {
+        id: 'roc-de-chere', cat: 'view', name: 'Roc de Chère',
+        coords: [45.8460, 6.2070],
+        blurb: 'Wooded headland between Talloires and Menthon. Short loops, lake glimpses.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#roc-de-chere'
+      },
+
+      // Swim spots
+      {
+        id: 'st-jorioz-beach', cat: 'swim', name: 'Saint-Jorioz beach',
+        coords: [45.8330, 6.1640],
+        blurb: 'Long west-shore beach. Lawn, paddleboards, easy parking. Default family swim.',
+        photo: 'assets/ride/ride_eastern_shore_dad.jpg',
+        link: 'index.html#st-jorioz'
+      },
+      {
+        id: 'doussard-beach', cat: 'swim', name: 'Bout-du-Lac swim',
+        coords: [45.7790, 6.2210],
+        blurb: 'South-end swim by the reserve. The clearest water on the lake.',
+        photo: 'assets/ride/ride_turquoise_eastern_shore.jpg',
+        link: 'index.html#doussard'
+      },
+      {
+        id: 'angon-beach', cat: 'swim', name: 'Angon beach',
+        coords: [45.8290, 6.2170],
+        blurb: 'Small east-shore beach. Late-afternoon apéro and a swim.',
+        photo: 'assets/chavoire/chavoire_path_people.jpg',
+        link: 'index.html#angon'
+      },
+      {
+        id: 'la-brune', cat: 'swim', name: 'La Brune (Veyrier)',
+        coords: [45.8865, 6.1782],
+        blurb: 'Quiet east-shore beach below Veyrier. Trees, pebbles, clean water.',
+        photo: 'assets/chavoire/chavoire_piste_lake.jpg',
+        link: 'index.html#veyrier'
+      },
+
+      // Bike / routes
+      {
+        id: 'voie-verte', cat: 'bike', name: 'Voie Verte (lake path)',
+        coords: [45.8700, 6.1390],
+        blurb: 'Separated bike path along the west shore. Sévrier to Doussard, mostly flat, lake the whole way.',
+        photo: 'assets/ride/ride_open_lake_path.jpg',
+        link: 'index.html#sevrier'
+      },
+      {
+        id: 'eastern-shore-ride', cat: 'bike', name: 'Eastern shore ride',
+        coords: [45.8900, 6.1700],
+        blurb: 'Annecy to Veyrier via Chavoire. Tree shade, lake wall, fifteen minutes by bike.',
+        photo: 'assets/chavoire/chavoire_piste_trees.jpg',
+        link: 'index.html#chavoire'
+      },
+      {
+        id: 'semnoz-ride', cat: 'bike', name: 'Semnoz climb',
+        coords: [45.7970, 6.1040],
+        blurb: 'Ridge above the west shore. Climb up, picnic at the top, full lake view.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'aravis-mtb', cat: 'bike', name: 'La Clusaz / Aravis',
+        coords: [45.9040, 6.4230],
+        blurb: 'Lift-served MTB and luge in summer. Forty minutes from the lake.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'grand-bornand', cat: 'bike', name: 'Le Grand-Bornand',
+        coords: [45.9420, 6.4270],
+        blurb: 'Quiet Aravis village. Trails, cheese cellars, Reblochon country.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+
+      // Food / markets
+      {
+        id: 'annecy-market', cat: 'food', name: 'Annecy old-town market',
+        coords: [45.8990, 6.1260],
+        blurb: 'Tuesday, Friday, Sunday morning. Cheese, charcuterie, peaches, bread.',
+        photo: 'assets/ride/ride_open_lake_path.jpg',
+        link: 'index.html#food'
+      },
+      {
+        id: 'poisson-rouge', cat: 'food', name: 'Le Poisson Rouge',
+        coords: [45.8540, 6.1420],
+        blurb: 'Sévrier. Lake fish, terrace on the water, easy lunch from home base.',
+        photo: 'assets/ride/ride_lake_tree_sevrier.jpg',
+        link: 'index.html#food'
+      },
+      {
+        id: 'bon-wagon', cat: 'food', name: 'Le Bon Wagon',
+        coords: [45.8285, 6.2030],
+        blurb: 'Duingt. Old train carriage on the lake path. Stop on the ride south.',
+        photo: 'assets/ride/ride_clear_water_handlebar.jpg',
+        link: 'index.html#duingt'
+      },
+      {
+        id: 'aquarama', cat: 'food', name: 'L’Aquarama',
+        coords: [45.8280, 6.2180],
+        blurb: 'Angon beach bar. Drinks and small plates with feet near the water.',
+        photo: 'assets/chavoire/chavoire_path_people.jpg',
+        link: 'index.html#angon'
+      },
+      {
+        id: 'forclaz-ferme', cat: 'food', name: 'Ferme de la Forclaz',
+        coords: [45.8080, 6.2460],
+        blurb: 'Mountain farm restaurant above Talloires. Whole-lake view from the table.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'thones', cat: 'food', name: 'Thônes — Reblochon',
+        coords: [45.8820, 6.3250],
+        blurb: 'Cooperative and market town. Reblochon home turf, on the way to the Aravis.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+
+      // Views
+      {
+        id: 'forclaz-view', cat: 'view', name: 'Col de la Forclaz',
+        coords: [45.8070, 6.2440],
+        blurb: 'Classic lake-from-above. Watch the wings drop in from the lawn — we don’t launch.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'three-crosses', cat: 'view', name: 'Circuit des 3 Croix',
+        coords: [45.8450, 6.1260],
+        blurb: 'Short loop above Sévrier. Three crosses, three lake angles.',
+        photo: 'assets/ride/ride_lake_tree_sevrier.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'taillefer', cat: 'view', name: 'Taillefer (Duingt)',
+        coords: [45.8120, 6.1910],
+        blurb: 'Wooded ridge above Duingt. Pinch-of-the-lake view from the south.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'parmelan', cat: 'view', name: 'Parmelan',
+        coords: [45.9710, 6.2240],
+        blurb: 'Limestone plateau north of Annecy. Big horizon, refuge lunch.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'mont-veyrier', cat: 'view', name: 'Mont Veyrier / Mont Baron',
+        coords: [45.9010, 6.1910],
+        blurb: 'East-shore ridge. Half-day walk for the full lake from the trail, no edge.',
+        photo: 'assets/chavoire/chavoire_piste_lake.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'semnoz-view', cat: 'view', name: 'Semnoz ridge',
+        coords: [45.7970, 6.1040],
+        blurb: 'Picnic ridge above the west shore. Whole-lake view, easy access by car or bike.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'cascade-angon', cat: 'view', name: 'Cascade d’Angon',
+        coords: [45.8250, 6.2210],
+        blurb: 'Short walk up from Angon to the waterfall. Cool corner on a hot day.',
+        photo: 'assets/chavoire/chavoire_lake_path.jpg',
+        link: 'index.html#views'
+      },
+
+      // Boats / water
+      {
+        id: 'menthon-pontoons', cat: 'water', name: 'Menthon pontoons',
+        coords: [45.8615, 6.1965],
+        blurb: 'Floating wooden squares to sun-dry between swims.',
+        photo: 'assets/chavoire/chavoire_sunset_ponton.jpg',
+        link: 'index.html#menthon'
+      },
+      {
+        id: 'talloires-port', cat: 'water', name: 'Port de Talloires',
+        coords: [45.8395, 6.2155],
+        blurb: 'Boat rentals and lake-bus stop. Nice base for a half-day on the water.',
+        photo: 'assets/chavoire/chavoire_sunset_lake.jpg',
+        link: 'index.html#talloires'
+      },
+      {
+        id: 'annecy-port', cat: 'water', name: 'Compagnie des Bateaux',
+        coords: [45.8980, 6.1370],
+        blurb: 'Lake-bus from Annecy to most towns in summer. Bike-one-way friendly.',
+        photo: 'assets/ride/ride_open_lake_path.jpg',
+        link: 'index.html#practical'
+      },
+
+      // Culture / events
+      {
+        id: 'chateau-menthon', cat: 'culture', name: 'Château de Menthon',
+        coords: [45.8595, 6.1945],
+        blurb: 'Storybook castle above Menthon. Tours in summer, easy walk from the village.',
+        photo: 'assets/chavoire/chavoire_sunset_ponton.jpg',
+        link: 'index.html#menthon'
+      },
+      {
+        id: 'gorges-fier', cat: 'culture', name: 'Gorges du Fier',
+        coords: [45.8970, 6.0450],
+        blurb: 'Walkway pinned to a slot canyon west of Annecy. Cool and shaded.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'montrottier', cat: 'culture', name: 'Château de Montrottier',
+        coords: [45.8980, 6.0420],
+        blurb: 'Medieval keep next to the Gorges du Fier. Easy combined visit.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+
+      // Day trips
+      {
+        id: 'chamonix', cat: 'trip', name: 'Chamonix',
+        coords: [45.9237, 6.8694],
+        blurb: 'Mont-Blanc base. Aiguille du Midi cable car on a clear day.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'megeve', cat: 'trip', name: 'Megève',
+        coords: [45.8570, 6.6170],
+        blurb: 'Pretty village halfway to Chamonix. Pleasant lunch stop.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'yvoire', cat: 'trip', name: 'Yvoire',
+        coords: [46.3710, 6.3270],
+        blurb: 'Stone village on Lac Léman. Flowers everywhere. Quick day from Annecy.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'geneva', cat: 'trip', name: 'Geneva',
+        coords: [46.2040, 6.1430],
+        blurb: 'Forty-five minutes north. Old town, lake, jet d’eau if you must.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'gruyeres', cat: 'trip', name: 'Gruyères',
+        coords: [46.5840, 7.0830],
+        blurb: 'Swiss cheese-and-castle village. Long day, worth it once.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      },
+      {
+        id: 'glieres', cat: 'view', name: 'Plateau des Glières',
+        coords: [45.9630, 6.3260],
+        blurb: 'High pasture plateau north-east of Annecy. Cross-country in summer, memorial site.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#views'
+      },
+      {
+        id: 'aravis-col', cat: 'view', name: 'Col des Aravis',
+        coords: [45.8720, 6.4640],
+        blurb: 'Pass between the Aravis valleys. Postcard view of the Mont-Blanc range.',
+        photo: 'assets/orientation/orientation_relief.jpg',
+        link: 'index.html#trips'
+      }
+    ];
+
+    /* ---------- MAP ---------- */
+    const map = L.map('map', {
+      scrollWheelZoom: true,
+      zoomControl: true,
+      worldCopyJump: false
+    }).setView([45.870, 6.205], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 18,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    /* ---------- FILTERS ---------- */
+    const filtersEl = document.getElementById('filters');
+    const active = new Set(CATEGORIES.map((c) => c.id));
+
+    function makeChip(id, label, color) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.dataset.cat = id;
+      btn.setAttribute('aria-pressed', 'true');
+      if (color) btn.style.setProperty('--cat', color);
+      btn.innerHTML = '<span class="chip-dot" aria-hidden="true"></span>' + label;
+      return btn;
+    }
+
+    const allChip = makeChip('all', 'All');
+    allChip.setAttribute('aria-pressed', 'true');
+    filtersEl.appendChild(allChip);
+    CATEGORIES.forEach((c) => filtersEl.appendChild(makeChip(c.id, c.label, c.color)));
+
+    /* ---------- MARKERS + LIST ---------- */
+    const placeListEl = document.getElementById('place-list');
+    const sideCountEl = document.getElementById('side-count');
+    const markers = {};
+    const items = {};
+    const groupEls = {};
+
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+      );
+    }
+
+    function popupHTML(p) {
+      const cat = CAT_BY_ID[p.cat];
+      const color = cat ? cat.color : 'var(--alpine)';
+      const catLabel = cat ? cat.label : p.cat;
+      const photo = p.photo
+        ? `<img class="pop-photo" src="${escapeHTML(p.photo)}" alt="${escapeHTML(p.name)}" loading="lazy" />`
+        : '';
+      const link = p.link
+        ? `<a class="pop-link" href="${escapeHTML(p.link)}">Open in the notes</a>`
+        : '';
+      return `
+        <div class="pop" style="--cat:${color}">
+          ${photo}
+          <div class="pop-body">
+            <span class="pop-cat"><span class="dot"></span>${escapeHTML(catLabel)}</span>
+            <h3>${escapeHTML(p.name)}</h3>
+            <p>${escapeHTML(p.blurb)}</p>
+            ${link}
+          </div>
+        </div>
+      `;
+    }
+
+    function makeMarker(p) {
+      const cat = CAT_BY_ID[p.cat];
+      const color = cat ? cat.color : '#1f7fb3';
+      const glyph = cat ? cat.glyph : '•';
+      const html = `<div class="marker" style="--cat:${color}"><span class="marker-glyph">${glyph}</span></div>`;
+      const icon = L.divIcon({
+        className: 'marker-wrap',
+        html,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -28]
+      });
+      const m = L.marker(p.coords, { icon, title: p.name });
+      m.bindPopup(popupHTML(p), { closeButton: true, maxWidth: 280, minWidth: 240 });
+      m.on('popupopen', () => setActive(p.id, false));
+      return m;
+    }
+
+    function setActive(id, fly) {
+      Object.entries(markers).forEach(([k, m]) => {
+        const el = m.getElement && m.getElement();
+        const inner = el && el.querySelector('.marker');
+        if (inner) inner.classList.toggle('is-active', k === id);
+      });
+      Object.entries(items).forEach(([k, b]) => {
+        b.setAttribute('aria-pressed', String(k === id));
+      });
+      if (fly) {
+        const p = PLACES.find((x) => x.id === id);
+        if (p) {
+          map.flyTo(p.coords, Math.max(map.getZoom(), 13), { duration: 0.6 });
+          markers[id] && markers[id].openPopup();
+        }
+      }
+    }
+
+    // Group by category for the side list
+    CATEGORIES.forEach((c) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'group';
+      wrap.dataset.cat = c.id;
+      const head = document.createElement('div');
+      head.className = 'group-head';
+      head.innerHTML = `<span class="dot" style="--cat:${c.color}"></span>${escapeHTML(c.label)}`;
+      wrap.appendChild(head);
+      placeListEl.appendChild(wrap);
+      groupEls[c.id] = wrap;
+    });
+
+    PLACES.forEach((p) => {
+      const cat = CAT_BY_ID[p.cat];
+      const color = cat ? cat.color : '#1f7fb3';
+      const m = makeMarker(p).addTo(map);
+      markers[p.id] = m;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'place-item';
+      btn.dataset.cat = p.cat;
+      btn.dataset.id = p.id;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.innerHTML = `<span class="pin" style="--cat:${color}" aria-hidden="true"></span><span>${escapeHTML(p.name)}</span>`;
+      btn.addEventListener('click', () => setActive(p.id, true));
+      const group = groupEls[p.cat];
+      if (group) group.appendChild(btn);
+      else placeListEl.appendChild(btn);
+      items[p.id] = btn;
+    });
+
+    /* ---------- FILTER LOGIC ---------- */
+    function applyFilters() {
+      let visible = 0;
+      PLACES.forEach((p) => {
+        const on = active.has(p.cat);
+        const m = markers[p.id];
+        if (on) {
+          if (!map.hasLayer(m)) m.addTo(map);
+          visible += 1;
+        } else if (map.hasLayer(m)) {
+          map.removeLayer(m);
+        }
+        const item = items[p.id];
+        if (item) item.classList.toggle('is-hidden', !on);
+      });
+      // Empty groups
+      CATEGORIES.forEach((c) => {
+        const g = groupEls[c.id];
+        if (!g) return;
+        g.classList.toggle('group-empty', !active.has(c.id));
+      });
+      sideCountEl.textContent = visible + ' / ' + PLACES.length + ' shown';
+      // Sync All chip
+      allChip.setAttribute('aria-pressed', String(active.size === CATEGORIES.length));
+    }
+
+    filtersEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip');
+      if (!btn) return;
+      const id = btn.dataset.cat;
+      if (id === 'all') {
+        if (active.size === CATEGORIES.length) {
+          active.clear();
+        } else {
+          CATEGORIES.forEach((c) => active.add(c.id));
+        }
+      } else {
+        if (active.has(id)) active.delete(id); else active.add(id);
+      }
+      // Update chip pressed states (except 'all', handled in applyFilters)
+      Array.from(filtersEl.querySelectorAll('.chip')).forEach((c) => {
+        const cid = c.dataset.cat;
+        if (cid === 'all') return;
+        c.setAttribute('aria-pressed', String(active.has(cid)));
+      });
+      applyFilters();
+    });
+
+    applyFilters();
+
+    // Fit to lake on load (broad bounds covering all markers)
+    const bounds = L.latLngBounds(PLACES.map((p) => p.coords));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+  </script>
+</body>
+</html>
