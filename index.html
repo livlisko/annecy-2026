@@ -321,6 +321,55 @@
       max-width: 56ch;
     }
 
+    /* ----- orientation inset ----- */
+    .orient {
+      margin-top: 1.25rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    @media (max-width: 720px) {
+      .orient { grid-template-columns: 1fr; }
+    }
+    .orient figure {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      background: var(--mist);
+    }
+    .orient figure img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .orient .orient-body {
+      padding: 1.1rem 1.4rem 1.25rem;
+    }
+    .orient .orient-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--aqua-deep);
+    }
+    .orient h3 {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.4rem;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-top: 0.25rem;
+    }
+    .orient p {
+      margin-top: 0.55rem;
+      font-size: 0.96rem;
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+
     /* ----- map section ----- */
     .map-wrap {
       display: grid;
@@ -940,6 +989,19 @@
           </div>
         </aside>
       </div>
+
+      <div class="orient" aria-label="Where the lake sits">
+        <figure>
+          <img src="assets/orientation/orientation_relief.jpg" alt="Relief map of Lac d’Annecy with Veyrier-du-Lac, Menthon-St-Bernard, Talloires-Montmin and Sévrier labelled, and the Aravis (La Clusaz, Le Grand-Bornand) and Mont-Blanc range behind." loading="lazy" />
+        </figure>
+        <div class="orient-body">
+          <span class="orient-tag">Where this sits</span>
+          <h3>Lake in front. Aravis behind. Mont-Blanc beyond.</h3>
+          <p>
+            Short drives get big fast. La Clusaz, Le Grand-Bornand, Chamonix — all from the same valley.
+          </p>
+        </div>
+      </div>
     </section>
 
     <hr class="divider" />
@@ -979,8 +1041,8 @@
         <!-- Annecy -->
         <article class="town" id="annecy">
           <figure class="town-figure">
-            <img src="assets/ride/ride_open_lake_path.jpg" alt="Open lake path heading toward Annecy." loading="lazy" />
-            <figcaption>Bike path into town.</figcaption>
+            <img src="assets/chavoire/chavoire_piste_trees.jpg" alt="Tree-lined piste cyclable leaving Annecy along the eastern shore toward Chavoire." loading="lazy" />
+            <figcaption>Leaving town, eastern shore.</figcaption>
           </figure>
           <div class="town-body">
             <span class="town-eyebrow">Top of the lake</span>
@@ -992,6 +1054,7 @@
               <dt>Best for</dt><dd>Market mornings, long walks.</dd>
               <dt>Water</dt><dd>Plage des Marquisats; Pâquier lawns.</dd>
               <dt>Food</dt><dd>Sun/Tue/Fri market in the old town.</dd>
+              <dt>Out</dt><dd>South along the lake path to <a href="#chavoire">Chavoire</a> and <a href="#veyrier">Veyrier</a>. Where the lake starts doing the work.</dd>
               <dt>Nearby</dt><dd>Ride home to <a href="#sevrier">Sévrier</a> at golden hour.</dd>
             </dl>
             <p class="town-read">
@@ -1147,8 +1210,8 @@
         <!-- Veyrier-du-Lac -->
         <article class="town" id="veyrier">
           <figure class="town-figure">
-            <img src="assets/ride/ride_open_lake_path.jpg" alt="Open lake near Veyrier-du-Lac." loading="lazy" />
-            <figcaption>La Brune.</figcaption>
+            <img src="assets/chavoire/chavoire_piste_lake.jpg" alt="Piste cyclable along the lake wall at Chavoire, approaching Veyrier-du-Lac." loading="lazy" />
+            <figcaption>Path toward Veyrier-du-Lac.</figcaption>
           </figure>
           <div class="town-body">
             <span class="town-eyebrow">East shore · just a swim</span>
@@ -1159,11 +1222,36 @@
             <dl class="town-rows">
               <dt>Best for</dt><dd>Quick swim. Weekday afternoons.</dd>
               <dt>Water</dt><dd>Walk-in. Supervised in summer.</dd>
+              <dt>Approach</dt><dd>From Annecy along the eastern shore via <a href="#chavoire">Chavoire</a>. Tree shade, lake wall, easy 15 min by bike.</dd>
               <dt>Food</dt><dd>Eat back in Annecy or Talloires.</dd>
               <dt>Nearby</dt><dd><a href="#menthon">Menthon</a> 5 min; Annecy 10 min by bike.</dd>
             </dl>
             <p class="town-read">
               Swim and go.
+            </p>
+          </div>
+        </article>
+
+        <!-- Chavoire / Pensières -->
+        <article class="town" id="chavoire">
+          <figure class="town-figure">
+            <img src="assets/chavoire/chavoire_lake_path.jpg" alt="Tree-lined piste cyclable at Chavoire with Lac d’Annecy immediately to the right." loading="lazy" />
+            <figcaption>Chavoire, eastern shore.</figcaption>
+          </figure>
+          <div class="town-body">
+            <span class="town-eyebrow">East shore · between Annecy &amp; Veyrier</span>
+            <h3>Chavoire / Pensières</h3>
+            <p class="town-pitch">
+              The stretch where Annecy turns into lake. Piste cyclable hugs the wall, trees overhead, water right there.
+            </p>
+            <dl class="town-rows">
+              <dt>Best for</dt><dd>Bike out of town, scout a swim, keep going.</dd>
+              <dt>Water</dt><dd>Wall sits and small pontoons. Clean off the steps.</dd>
+              <dt>Food</dt><dd>Nothing special. Eat in <a href="#annecy">Annecy</a> or <a href="#veyrier">Veyrier</a>.</dd>
+              <dt>Nearby</dt><dd>Veyrier 5 min south; Annecy 10 min north.</dd>
+            </dl>
+            <p class="town-read">
+              The lake starts doing the work.
             </p>
           </div>
         </article>
@@ -1197,12 +1285,12 @@
     <!-- ambient strip -->
     <div class="strip" aria-hidden="true">
       <figure>
-        <img src="assets/ride/ride_turquoise_eastern_shore_card.jpg" alt="" loading="lazy" />
-        <figcaption>East shore.</figcaption>
+        <img src="assets/chavoire/chavoire_lake_path_card.jpg" alt="" loading="lazy" />
+        <figcaption>Chavoire.</figcaption>
       </figure>
       <figure>
-        <img src="assets/ride/ride_clear_water_handlebar_card.jpg" alt="" loading="lazy" />
-        <figcaption>South end.</figcaption>
+        <img src="assets/chavoire/chavoire_path_people_card.jpg" alt="" loading="lazy" />
+        <figcaption>Lake wall.</figcaption>
       </figure>
       <figure>
         <img src="assets/ride/ride_lake_tree_sevrier_card.jpg" alt="" loading="lazy" />
@@ -1253,6 +1341,15 @@
             <a href="#menthon">Menthon</a> for the floating pontoons. Walk through <a href="#roc-de-chere">Roc de Chère</a>. Second swim and apéro at <a href="#angon">Angon</a>.
           </p>
           <p class="flow"><span>Menthon</span><span class="arrow">→</span><span>Roc de Chère</span><span class="arrow">→</span><span>Angon</span></p>
+        </article>
+
+        <article class="day-card" data-tags="lazy active">
+          <span class="day-tag">Bike-to-swim</span>
+          <h3>Out of Annecy.</h3>
+          <p>
+            Pick up the path in <a href="#annecy">Annecy</a>, head south along the eastern shore. <a href="#chavoire">Chavoire</a> for the wall sit. <a href="#veyrier">Veyrier</a> for the clean swim. Coffee back in town.
+          </p>
+          <p class="flow"><span>Annecy</span><span class="arrow">→</span><span>Chavoire</span><span class="arrow">→</span><span>Veyrier</span></p>
         </article>
 
         <article class="day-card" data-tags="food">
@@ -1660,6 +1757,17 @@
         water: 'Walk-in. Supervised in summer.',
         food: 'Eat back in Annecy or Talloires.',
         near: 'Menthon 5 min; Annecy 10 min by bike.'
+      },
+      {
+        id: 'chavoire',
+        name: 'Chavoire / Pensières',
+        kicker: 'East shore · between Annecy &amp; Veyrier',
+        coords: [45.9021, 6.1605],
+        vibe: 'Annecy turns into lake here. Tree shade, wall sits, easy swim scouting.',
+        best: 'Bike out of town and keep going.',
+        water: 'Wall sits and small pontoons. Clean off the steps.',
+        food: 'Eat in Annecy or Veyrier.',
+        near: 'Veyrier 5 min south; Annecy 10 min north.'
       },
       {
         id: 'roc-de-chere',
