@@ -64,8 +64,14 @@
     home: 'Lac d’Annecy', discover: 'Discover', day: 'Choose your day',
     build: 'Build a day', category: 'Discover', areas: 'Lake & areas',
     bike: 'Bike', lake: 'Lake & beaches', food: 'Food & markets',
-    map: 'Map', trips: 'Day trips'
+    map: 'Map', trips: 'Day trips', trip: 'Your trip'
   };
+
+  // Which leg (if any) we're currently inside — powers the "Now" badge.
+  function legNow() {
+    const today = new Date().toISOString().slice(0, 10);
+    return D.TRIP.legs.find((l) => today >= l.start && today < l.end) || null;
+  }
 
   /* ---------- route parsing ---------- */
   function parse() {
@@ -99,7 +105,7 @@
     titleEl.textContent = title;
 
     const navFor = {
-      home: 'home', discover: 'discover', category: 'discover',
+      home: 'home', trip: 'home', discover: 'discover', category: 'discover',
       day: 'day', plan: 'day', build: 'day',
       bike: 'bike', map: 'map'
     }[route.name] || '';
@@ -151,6 +157,21 @@
       <span class="check">[CHECK: …]</span> still need confirming. A relaxed August companion — not a timetable.</p>`;
   }
 
+  function tripStrip() {
+    const now = legNow();
+    const legs = D.TRIP.legs.map((l, i) => `
+      ${i > 0 ? '<span class="ts-arrow" aria-hidden="true">→</span>' : ''}
+      <span class="ts-leg${now && now.id === l.id ? ' is-now' : ''}">
+        <span class="ts-em" aria-hidden="true">${l.emoji}</span>
+        <span class="ts-txt"><strong>${esc(l.label)}</strong>${esc(l.dates)}</span>
+        ${now && now.id === l.id ? '<span class="now-badge">Now</span>' : ''}
+      </span>`).join('');
+    return `<a class="trip-strip" href="#/trip" aria-label="Your trip">
+      ${legs}
+      <span class="ts-go" aria-hidden="true">›</span>
+    </a>`;
+  }
+
   /* ===================================================================
      SCREENS
      =================================================================== */
@@ -191,11 +212,13 @@
         <img class="hero-bg" src="assets/ride/ride_turquoise_eastern_shore.jpg"
              alt="Turquoise water along the eastern shore of Lac d’Annecy" fetchpriority="high" />
         <div class="hero-inner">
-          <span class="eyebrow">August · Haute-Savoie</span>
+          <span class="eyebrow">${esc(D.TRIP.dates)} · Haute-Savoie</span>
           <h1>Lac d’Annecy</h1>
           <p>Swim, ride, eat outside, explore. Let’s find your kind of day.</p>
         </div>
       </section>
+
+      ${tripStrip()}
 
       <div class="step"><span class="step-n">1</span><h2>First, get your bearings</h2></div>
       <a class="orient" href="#/map">
@@ -239,6 +262,69 @@
     `;
   };
 
+  /* ---------- Your trip: legs, stays, changeover ---------- */
+  Views.trip = function () {
+    const now = legNow();
+    const legs = D.TRIP.legs.map((l) => `
+      <div class="leg-card${now && now.id === l.id ? ' is-now' : ''}">
+        <div class="leg-head">
+          <span class="leg-em" aria-hidden="true">${l.emoji}</span>
+          <div><h3>${esc(l.label)}</h3><span class="leg-dates">${esc(l.dates)}</span></div>
+          ${now && now.id === l.id ? '<span class="now-badge">Now</span>' : ''}
+        </div>
+        <p>${esc(l.blurb)}</p>
+      </div>`).join('');
+
+    const stays = D.STAYS.map((s) => `
+      <div class="stay-card">
+        <div class="stay-top">
+          <div>
+            <div class="ac-zone">${esc(s.village)}</div>
+            <h3>${esc(s.name)}</h3>
+          </div>
+          <span class="stay-dates">${esc(s.dates)}</span>
+        </div>
+        <p class="stay-addr">📍 ${esc(s.address)}</p>
+        <dl class="spec" style="margin:.55rem 0 .3rem">
+          <dt>In</dt><dd>${esc(s.checkin)}</dd>
+          <dt>Out</dt><dd>${esc(s.checkout)}</dd>
+        </dl>
+        <div class="ac-tags">${s.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
+        <div class="actions" style="margin:.85rem 0 0">
+          ${s.coords ? `<a class="btn ghost" href="#/map?place=${esc(s.id)}">Show on map</a>` : ''}
+          <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a>
+        </div>
+      </div>`).join('');
+
+    const lesgets = D.LESGETS.map((it) => {
+      const href = it.planId ? `#/plan/${it.planId}` : null;
+      const inner = `<div class="li-top"><h3>${esc(it.name)}</h3>${it.tag ? `<span class="li-tag">${esc(it.tag)}</span>` : ''}</div>
+        <p>${copy(it.desc)}</p>${href ? '<span class="li-link">Open</span>' : ''}`;
+      return href ? `<a class="list-item" href="${href}">${inner}</a>` : `<div class="list-item">${inner}</div>`;
+    }).join('');
+
+    return `
+      <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2>
+        <p>${esc(D.TRIP.dates)} — mountains first, then the lake.</p></div>
+      <div class="leg-row">${legs}</div>
+
+      <div class="section-head"><h2>Leg one: Les Gets</h2>
+        <p>Three bike-park days before the water starts.</p></div>
+      ${lesgets}
+
+      <div class="section-head"><h2>Where you’re sleeping</h2></div>
+      <div class="cards" style="grid-template-columns:1fr">${stays}</div>
+
+      <div class="note-box">🔁 ${esc(D.TRIP.changeover)}</div>
+
+      <div class="actions">
+        <a class="btn" href="#/areas/veyrier">About Veyrier-du-Lac</a>
+        <a class="btn ghost" href="#/areas/les-gets">About Les Gets</a>
+      </div>
+      ${footNote()}
+    `;
+  };
+
   /* ---------- Discover: photo-led categories ---------- */
   Views.discover = function () {
     const worlds = D.CATEGORIES.map((c) => worldCard(c)).join('');
@@ -278,9 +364,18 @@
       <div class="section-head"><h2>Here in August</h2></div>
       <div class="inspire-grid">${season}</div>
 
+      ${creditsBlock()}
       ${footNote()}
     `;
   };
+
+  function creditsBlock() {
+    if (!D.CREDITS.length) return '';
+    const items = D.CREDITS.map((c) =>
+      `<a href="${esc(c.source)}" target="_blank" rel="noopener">${esc(c.subject)}</a> — ${esc(c.author)}, ${esc(c.license)}`
+    ).join(' · ');
+    return `<details class="credits"><summary>Photo credits (Wikimedia Commons)</summary><p>${items}</p></details>`;
+  }
 
   /* ---------- Category detail ---------- */
   Views.category = function (route) {
@@ -587,7 +682,11 @@
     const fromAreas = D.AREAS.map((a) => ({
       id: 'area-' + a.id, cat: 'area', name: a.name, coords: a.coords, blurb: a.why, route: '#/areas/' + a.id
     }));
-    return fromAreas.concat(D.MAP_SPOTS);
+    const fromStays = D.STAYS.filter((s) => s.coords).map((s) => ({
+      id: s.id, cat: 'stay', name: s.name, coords: s.coords,
+      blurb: s.village + ' · ' + s.dates + ' · ' + s.address, route: '#/trip'
+    }));
+    return fromStays.concat(fromAreas, D.MAP_SPOTS);
   }
 
   function initMap(route) {
@@ -672,7 +771,7 @@
   }
 
   function fitLake(map) {
-    const FAR = { aravis: 1, chamonix: 1 };
+    const FAR = { aravis: 1, chamonix: 1, 'les-gets': 1 };
     const pts = D.AREAS.filter((a) => !FAR[a.id]).map((a) => a.coords);
     map.fitBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 13.5 });
   }

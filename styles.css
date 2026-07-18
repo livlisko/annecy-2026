@@ -639,3 +639,54 @@ a { color: var(--alpine); text-underline-offset: .15em; }
 .seg-btn .seg-hint { font-size: .6rem; color: var(--muted); text-align: center; line-height: 1.1; }
 .seg-btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
 .seg-btn[aria-pressed="true"] .seg-hint { color: rgba(255,255,255,.78); }
+
+/* =====================================================================
+   v3 — trip strip, legs, stays, credits
+   ===================================================================== */
+.trip-strip {
+  display: flex; align-items: center; gap: .55rem;
+  margin-top: .8rem; padding: .7rem .9rem;
+  border-radius: var(--r-lg); color: #fff; text-decoration: none;
+  background: linear-gradient(120deg, var(--alpine-deep), var(--alpine) 60%, var(--aqua-deep));
+  box-shadow: var(--shadow-md);
+}
+.trip-strip:active { transform: scale(.99); }
+.trip-strip * { text-decoration: none; }
+.ts-leg { display: inline-flex; align-items: center; gap: .45rem; min-width: 0; }
+.ts-em { font-size: 1.25rem; line-height: 1; }
+.ts-txt { font-size: .72rem; color: rgba(255,255,255,.85); line-height: 1.15; }
+.ts-txt strong { display: block; font-size: .88rem; color: #fff; font-weight: 700; white-space: nowrap; }
+.ts-arrow { color: rgba(255,255,255,.6); flex: 0 0 auto; }
+.ts-go { margin-left: auto; font-size: 1.3rem; color: rgba(255,255,255,.85); flex: 0 0 auto; }
+.now-badge {
+  font-size: .58rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  background: #fff; color: var(--alpine-deep); padding: .14rem .4rem; border-radius: 999px;
+}
+
+.leg-row { display: grid; gap: .7rem; grid-template-columns: 1fr; }
+@media (min-width: 620px) { .leg-row { grid-template-columns: 1fr 1fr; } }
+.leg-card {
+  padding: .95rem 1rem 1rem; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+}
+.leg-card.is-now { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(47,181,200,.15), var(--shadow-sm); }
+.leg-head { display: flex; align-items: center; gap: .6rem; }
+.leg-em { font-size: 1.5rem; line-height: 1; }
+.leg-head h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.12rem; line-height: 1.1; }
+.leg-dates { font-size: .74rem; font-weight: 700; color: var(--aqua-deep); }
+.leg-head .now-badge { margin-left: auto; background: var(--aqua); color: #fff; }
+.leg-card p { font-size: .88rem; color: var(--ink-2); line-height: 1.45; margin-top: .5rem; }
+
+.stay-card {
+  padding: 1rem 1.05rem 1.1rem; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+}
+.stay-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; }
+.stay-top h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.12rem; line-height: 1.15; }
+.stay-dates { font-size: .72rem; font-weight: 700; color: var(--alpine-deep); white-space: nowrap; padding-top: .2rem; }
+.stay-addr { font-size: .85rem; color: var(--ink-2); margin-top: .35rem; }
+
+.credits { margin-top: 1.4rem; font-size: .78rem; color: var(--muted); }
+.credits summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
+.credits p { margin-top: .5rem; line-height: 1.7; }
+.credits a { color: var(--alpine); }

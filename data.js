@@ -47,15 +47,15 @@ window.DATA = (function () {
       day: 'Market mornings, rainy-day wandering, an easy ride in and out.',
       water: 'Plage des Marquisats — concrete steps into clean water.',
       food: 'Sun / Tue / Fri morning market in the old town.',
-      photo: 'assets/ride/ride_open_lake_path.jpg',
+      photo: 'assets/wiki/annecy-old-town.jpg',
       official: 'https://www.lac-annecy.com'
     },
     {
-      id: 'sevrier', name: 'Sévrier', zone: 'West shore · home base',
+      id: 'sevrier', name: 'Sévrier', zone: 'West shore · across the water',
       coords: [45.8584, 6.1383],
       supports: ['lake', 'bikes', 'food'],
-      why: 'The useful one. Walk to the water, get on the bike path, come back wet.',
-      day: 'Default swim, no-car days, easy dinners at home.',
+      why: 'The easy-going west shore, straight across from home — where the Voie Verte bike path runs.',
+      day: 'Voie Verte rides, west-shore beach stops, lake-fish lunch.',
       water: 'Public stretch — walk in, repeat.',
       food: 'Bakery, small market, lake-fish lunch on the water.',
       photo: 'assets/ride/ride_lake_tree_sevrier.jpg'
@@ -108,7 +108,7 @@ window.DATA = (function () {
       day: 'Diving boards, a lunch out, swim, repeat.',
       water: 'Plage de Talloires-Montmin — paddling pool, slide, boards.',
       food: 'Lake-edge lunch; book ahead on Saturdays.',
-      photo: 'assets/chavoire/chavoire_sunset_lake.jpg'
+      photo: 'assets/wiki/talloires.jpg'
     },
     {
       id: 'menthon', name: 'Menthon-Saint-Bernard', zone: 'East shore · pontoons',
@@ -118,18 +118,18 @@ window.DATA = (function () {
       day: 'Pontoon swims and a walk after dinner.',
       water: 'Plage de Menthon — walk the pontoon, jump, repeat.',
       food: 'Beach snack bar; dinners up in the village.',
-      photo: 'assets/chavoire/chavoire_sunset_ponton.jpg',
+      photo: 'assets/wiki/menthon-chateau.jpg',
       official: 'https://www.chateau-de-menthon.com'
     },
     {
-      id: 'veyrier', name: 'Veyrier-du-Lac', zone: 'East shore · quick swim',
+      id: 'veyrier', name: 'Veyrier-du-Lac', zone: 'East shore · home base',
       coords: [45.8830, 6.1717],
-      supports: ['lake', 'bikes'],
-      why: 'La Brune: a free Pavillon Bleu beach with a flat lawn and the view straight across.',
-      day: 'A quick clean swim, easy by bike from Annecy.',
-      water: 'Walk-in, supervised in summer. [CHECK: lifeguard dates]',
-      food: 'Eat back in Annecy or over in Talloires.',
-      photo: 'assets/chavoire/chavoire_piste_lake.jpg'
+      supports: ['lake', 'bikes', 'food'],
+      why: 'Home for the lake weeks. La Brune beach below the village, Annecy ten minutes up the shore path, and the whole east shore on your doorstep.',
+      day: 'The walk-down swim, the default no-car day, every evening.',
+      water: 'La Brune — free Pavillon Bleu beach, flat lawn, walk-in. Supervised in summer. [CHECK: lifeguard dates]',
+      food: 'Village bakery; Annecy’s old town is a short ride up the path. [CHECK: bakery/shop locations in Veyrier]',
+      photo: 'assets/wiki/veyrier.jpg'
     },
     {
       id: 'roc-de-chere', name: 'Roc de Chère', zone: 'East shore · nature reserve',
@@ -149,7 +149,7 @@ window.DATA = (function () {
       day: 'A picnic with a view, or a real climb on the bike.',
       water: '—',
       food: 'Bring a market picnic; a few buvettes up top.',
-      photo: 'assets/orientation/orientation_relief.jpg',
+      photo: 'assets/wiki/semnoz.jpg',
       official: 'https://www.semnoz.fr'
     },
     {
@@ -160,7 +160,7 @@ window.DATA = (function () {
       day: 'A short drive (or a climb) for lunch with the best seat on the lake.',
       water: '—',
       food: 'Farm-restaurant terrace looking down the whole lake.',
-      photo: 'assets/orientation/orientation_relief_card.jpg'
+      photo: 'assets/wiki/forclaz.jpg'
     },
     {
       id: 'aravis', name: 'Aravis / La Clusaz', zone: 'East over the passes · ~40 min',
@@ -170,7 +170,7 @@ window.DATA = (function () {
       day: 'A day trip — cols on the bike, MTB in the park, or a cheese-and-views drive.',
       water: '—',
       food: 'Reblochon direct from Aravis farms; markets in Thônes.',
-      photo: 'assets/orientation/orientation_relief.jpg',
+      photo: 'assets/wiki/aravis-village.jpg',
       official: 'https://www.laclusaz.com'
     },
     {
@@ -181,8 +181,19 @@ window.DATA = (function () {
       day: 'A clear-weather day trip — go when the peaks are out, not when it’s grey.',
       water: '—',
       food: 'Town brasseries; pack the day around the weather.',
-      photo: 'assets/orientation/orientation_relief.jpg',
+      photo: 'assets/wiki/chamonix.jpg',
       official: 'https://www.chamonix.com'
+    },
+    {
+      id: 'les-gets', name: 'Les Gets', zone: 'Portes du Soleil · first stop',
+      coords: [46.1558, 6.6697],
+      supports: ['bikes', 'views', 'wander'],
+      why: 'Where the trip starts: three nights in a bike-park town, with the apartment at the foot of the slopes.',
+      photo: 'assets/wiki/les-gets-village.jpg',
+      day: 'Lift-served MTB, a village wander, mountain air before the lake.',
+      water: '—',
+      food: 'Village restaurants and a grocery run before heading to the lake. [CHECK: which shops/restaurants]',
+      official: 'https://www.lesgets.com'
     }
   ];
   const AREA_BY_ID = Object.fromEntries(AREAS.map(a => [a.id, a]));
@@ -194,7 +205,7 @@ window.DATA = (function () {
     doussard: 'south',
     veyrier: 'east', menthon: 'east', talloires: 'east', angon: 'east', 'roc-de-chere': 'east',
     semnoz: 'heights', forclaz: 'heights',
-    aravis: 'beyond', chamonix: 'beyond'
+    aravis: 'beyond', chamonix: 'beyond', 'les-gets': 'beyond'
   };
   AREAS.forEach(a => { a.region = REGION_OF[a.id] || 'beyond'; });
 
@@ -204,11 +215,11 @@ window.DATA = (function () {
      it earns its place. Each plan points back to an area (for the map). */
   const PLANS = [
     {
-      id: 'sevrier-swim', title: 'Walk-in swim at Sévrier', areaId: 'sevrier',
-      desc: 'Towel under your arm, swim, dry on the grass, walk home.',
+      id: 'home-swim', title: 'Walk down to La Brune', areaId: 'veyrier',
+      desc: 'Towel under your arm, a few minutes downhill from the house, swim, dry on the lawn, wander back up.',
       time: '1–2 hr', cost: 'free',
       modes: ['lake', 'low-effort', 'no-car', 'afternoon'],
-      note: 'The home-base default when nobody can decide.'
+      note: 'The home-base default when nobody can decide. Free Pavillon Bleu beach.'
     },
     {
       id: 'st-jorioz-beach', title: 'Beach day at Saint-Jorioz', areaId: 'st-jorioz',
@@ -233,17 +244,17 @@ window.DATA = (function () {
     },
     {
       id: 'voie-verte-south', title: 'Voie Verte south', areaId: 'doussard',
-      desc: 'Flat, separated bike path from Sévrier toward Bout-du-Lac with the lake the whole way.',
+      desc: 'Ride through Annecy onto the flat, separated west-shore path and follow the lake all the way to Bout-du-Lac.',
       time: 'Half day', cost: 'free',
       modes: ['easy-bike', 'no-car', 'lake', 'low-effort'],
-      note: 'Clearest water under the bridges near Duingt. [CHECK: any path closures]'
+      note: 'From home: shore path into Annecy, then pick up the Voie Verte. Clearest water under the bridges near Duingt. [CHECK: any path closures]'
     },
     {
-      id: 'east-shore-swim', title: 'Bike-to-swim, east shore', areaId: 'veyrier',
-      desc: 'Pick up the path in Annecy, tree shade past Chavoire, clean swim at Veyrier.',
+      id: 'east-shore-swim', title: 'Home ride: shore path to Annecy', areaId: 'veyrier',
+      desc: 'Roll from the house along the lake wall — tree shade at Chavoire, swim stops on the way, coffee in the old town.',
       time: 'Half day', cost: 'free',
       modes: ['easy-bike', 'lake', 'afternoon', 'no-car'],
-      note: 'Coffee back in town after.'
+      note: 'Your default ride: ~10 minutes each way, water the whole time.'
     },
     {
       id: 'menthon-pontoons', title: 'Pontoon day at Menthon', areaId: 'menthon',
@@ -275,7 +286,7 @@ window.DATA = (function () {
       official: 'https://www.lac-annecy.com'
     },
     {
-      id: 'savoyard-night', title: 'One Savoyard cheese night', areaId: 'sevrier',
+      id: 'savoyard-night', title: 'One Savoyard cheese night', areaId: 'veyrier',
       desc: 'Tartiflette, raclette or fondue — once, not three times in August.',
       time: 'Evening', cost: '€€',
       modes: ['food', 'apero', 'rainy'],
@@ -391,21 +402,28 @@ window.DATA = (function () {
       official: 'https://www.laclusaz.com'
     },
     {
-      id: 'no-car-day', title: 'No-car day from the house', areaId: 'sevrier',
-      desc: 'Bakery → bike-path swim → lawn nap → second swim → dinner from the fridge.',
+      id: 'no-car-day', title: 'No-car day from the house', areaId: 'veyrier',
+      desc: 'Bakery → La Brune swim → shaded path into Annecy for coffee → wall-sit at Chavoire → home for dinner.',
       time: 'Full day', cost: '€',
       modes: ['no-car', 'low-effort', 'lake', 'food'],
-      note: 'Everything on foot, by bike or by lake boat.'
+      note: 'Everything on foot or by bike — the east-shore path starts minutes from the door.'
     },
     {
-      id: 'les-gets-bikepark', title: 'Bike-park day at Les Gets',
-      where: 'Les Gets · Portes du Soleil',
-      media: { placeholder: true, emoji: '🚵', tint: 'pine', label: 'Les Gets bike park' },
-      desc: 'Lift-served downhill and flow trails in one of the Alps’ big bike-park towns.',
+      id: 'pool-evening', title: 'Pool + BBQ at Casa Elisa', areaId: 'veyrier',
+      desc: 'Second-week luxury: pool afternoon on the terrace, then barbecue as the light goes gold over the lake.',
+      time: 'Afternoon → evening', cost: 'free',
+      modes: ['low-effort', 'apero', 'no-car', 'afternoon'],
+      note: 'The Aug 22–29 apartment has the private pool, terrace, BBQ and lake view. Zero logistics.'
+    },
+    {
+      id: 'les-gets-bikepark', title: 'Bike-park day at Les Gets', areaId: 'les-gets',
+      media: { photo: 'assets/wiki/les-gets-mtb.jpg' },
+      desc: 'Lift-served downhill and flow trails, starting from the front door — the Aug 12–15 apartment sits at the foot of the slopes.',
       time: 'Full day', cost: '€€',
       modes: ['mtb', 'daytrip'],
       effort: 'big', carNeeded: true,
-      note: '[CHECK: drive time from the lake] · [CHECK: bike-park open dates, lift pass & rental] · [CHECK: official link]'
+      note: 'During the lake weeks it’s a drive; during leg one it’s home turf. [CHECK: bike-park open dates, lift pass & rental]',
+      official: 'https://www.lesgets.com'
     }
   ];
   const PLAN_BY_ID = Object.fromEntries(PLANS.map(p => [p.id, p]));
@@ -498,7 +516,8 @@ window.DATA = (function () {
     {
       group: 'Low-effort lake afternoons',
       items: [
-        { name: 'Walk-in swim at Sévrier', desc: 'From the house, in the water, back on the grass.', tag: 'No plan', planId: 'sevrier-swim' },
+        { name: 'Walk down to La Brune', desc: 'From the house, in the water, back on the lawn.', tag: 'No plan', planId: 'home-swim' },
+        { name: 'Pool + BBQ at Casa Elisa', desc: 'Second-week option: pool, terrace, barbecue, lake view.', tag: 'Aug 22–29', planId: 'pool-evening' },
         { name: 'Lake-bus half day', desc: 'Let the boat do the work; bike one way.', tag: 'Boat', planId: 'boat-half-day' }
       ]
     },
@@ -616,6 +635,7 @@ window.DATA = (function () {
      Markers are the same towns, plans and spots used elsewhere — not a
      random pin dump. Each links back into the app (#/areas/… or #/plan/…). */
   const MAP_CATEGORIES = [
+    { id: 'stay',  label: 'Home',   color: '#d1495b', glyph: '⌂' },
     { id: 'area',  label: 'Areas',  color: '#1f7fb3', glyph: '◆' },
     { id: 'swim',  label: 'Swim',   color: '#36b9cc', glyph: '~' },
     { id: 'bike',  label: 'Bike',   color: '#2f6b4f', glyph: '%' },
@@ -738,7 +758,7 @@ window.DATA = (function () {
   const ZONES = [
     { region: 'top',     emoji: '🏛️', label: 'Annecy',        text: 'Old town, market, canals' },
     { region: 'west',    emoji: '🚲', label: 'West shore',    text: 'Sévrier · Saint-Jorioz · Duingt — beaches & the bike path' },
-    { region: 'east',    emoji: '⛵', label: 'East shore',    text: 'Veyrier · Menthon · Talloires — clear water & pontoons' },
+    { region: 'east',    emoji: '🏠', label: 'East shore · home', text: 'Veyrier (home base) · Menthon · Talloires — clear water & pontoons' },
     { region: 'south',   emoji: '🌾', label: 'South end',     text: 'Doussard / Bout-du-Lac — grassy, calm, mountains close' },
     { region: 'heights', emoji: '🌄', label: 'Above the lake',text: 'Semnoz & Forclaz — the big views' },
     { region: 'beyond',  emoji: '🏔️', label: 'Beyond',        text: 'Aravis · La Clusaz · Les Gets · Chamonix' }
@@ -757,13 +777,13 @@ window.DATA = (function () {
       media: { photo: 'assets/ride/ride_turquoise_eastern_shore.jpg' },
       starters: ['Walk-in swim from Sévrier', 'Pontoon jumps at Menthon', 'Hop between towns on the lake boat', 'Float on the calm water at Bout-du-Lac'],
       modes: ['lake'], mapCat: 'swim',
-      planIds: ['sevrier-swim', 'menthon-pontoons', 'boat-half-day', 'doussard-sprawl']
+      planIds: ['home-swim', 'menthon-pontoons', 'boat-half-day', 'doussard-sprawl']
     },
     {
       id: 'beaches', title: 'Beaches & swim spots', emoji: '🏖️', tint: 'aqua',
       vibe: 'The right beach for the mood — sand, lawns, pontoons or a quiet cove.',
       looksLike: 'Pack the cooler, claim a patch of sand or grass, alternate swims and snacks all afternoon, and stay until the light goes gold.',
-      media: { photo: 'assets/ride/ride_balmettes_blue_water.jpg' },
+      media: { photo: 'assets/wiki/lake-beach.jpg' },
       starters: ['Sandy full-day beach at Saint-Jorioz', 'Grassy sprawl at Bout-du-Lac', 'Free Pavillon Bleu swim at Veyrier', 'Late swim + apéro at Angon'],
       modes: ['beach'], mapCat: 'swim',
       planIds: ['st-jorioz-beach', 'doussard-sprawl', 'angon-apero']
@@ -772,7 +792,7 @@ window.DATA = (function () {
       id: 'old-annecy', title: 'Old Annecy', emoji: '🛶', tint: 'alpine',
       vibe: 'The Venice of the Alps — canals, pastel houses, a castle and the best market around.',
       looksLike: 'Drift through the canal streets with a gelato, raid the morning market for cheese and peaches, swim off the Marquisats steps, then linger over a long dinner.',
-      media: { placeholder: true, emoji: '🛶', label: 'Old Annecy', check: 'add photo of Annecy old town / Palais de l’Île' },
+      media: { photo: 'assets/wiki/annecy-old-town.jpg' },
       starters: ['Morning market, then cook at home', 'Town swim at Plage des Marquisats', 'Wander the canals before dinner', 'Rainy-day arcades & the Palais de l’Île'],
       modes: ['food', 'rainy'], mapCat: 'food', areaIds: ['annecy'],
       planIds: ['market-cook', 'rainy-town']
@@ -790,7 +810,7 @@ window.DATA = (function () {
       id: 'road-cycling', title: 'Big cols & road cycling', emoji: '🚴', tint: 'pine',
       vibe: 'Serious-legs country — famous climbs and a lake loop with a view at every turn.',
       looksLike: 'Set off early, grind up a legendary col, get the postcard Mont-Blanc view from the top, then descend to a swim before the day heats up.',
-      media: { placeholder: true, emoji: '🚴', label: 'Cols & road rides', check: 'add photo of a col / road climb' },
+      media: { photo: 'assets/wiki/col-aravis.jpg' },
       starters: ['Climb the Semnoz from the lake', 'A big Aravis col day', 'The full road loop of the lake'],
       modes: ['big-cycling', 'cols'], mapCat: 'bike',
       planIds: ['semnoz-climb', 'aravis-cols', 'scenic-loop']
@@ -799,7 +819,7 @@ window.DATA = (function () {
       id: 'mtb', title: 'MTB & bike parks', emoji: '🚵', tint: 'pine',
       vibe: 'Lift-served descents, flow trails and pump tracks — gravity days near the lake.',
       looksLike: 'Shuttle to the top of an alpine resort, session berms and flow trails all afternoon, then collapse onto a terrace with a cold drink.',
-      media: { placeholder: true, emoji: '🚵', label: 'MTB & bike park', check: 'add photo of a bike park (Les Gets / La Clusaz)' },
+      media: { photo: 'assets/wiki/les-gets-mtb.jpg' },
       starters: ['Bike-park day at Les Gets', 'Lift MTB at La Clusaz', 'A quick pump-track session'],
       modes: ['mtb'], mapCat: 'bike',
       planIds: ['les-gets-bikepark', 'laclusaz-mtb', 'pump-velodrome']
@@ -808,7 +828,7 @@ window.DATA = (function () {
       id: 'alpine-villages', title: 'Alpine villages & mountain towns', emoji: '🏘️', tint: 'alpine',
       vibe: 'Swap the beach for green mountains, cheese cellars and cooler air for a day.',
       looksLike: 'Drive up into the Aravis, wander a wooden mountain village, buy Reblochon straight from the farm, soak up a ridiculous valley view, and be back at the lake by dinner.',
-      media: { placeholder: true, emoji: '🏘️', label: 'Alpine villages', check: 'add photo of an Aravis village (La Clusaz / Le Grand-Bornand)' },
+      media: { photo: 'assets/wiki/aravis-village.jpg' },
       starters: ['Aravis & Reblochon run', 'A day in La Clusaz', 'Cheese shopping in Thônes'],
       modes: ['daytrip'], mapCat: 'trip', areaIds: ['aravis'],
       planIds: ['aravis-cheese', 'laclusaz-mtb']
@@ -817,7 +837,7 @@ window.DATA = (function () {
       id: 'views', title: 'Big views & clear-weather days', emoji: '🌄', tint: 'purple',
       vibe: 'When the sky is blue, get above the lake for the view that makes everyone gasp.',
       looksLike: 'Pick a clear morning, ride or drive up to a ridge, spread a market picnic with the whole lake and Mont-Blanc laid out below, and walk an easy path along the top.',
-      media: { placeholder: true, emoji: '🌄', label: 'Big views', check: 'add photo from Semnoz / Col de la Forclaz' },
+      media: { photo: 'assets/wiki/semnoz.jpg' },
       starters: ['Picnic on the Semnoz ridge', 'Lunch above the lake at Col de la Forclaz', 'Walk up Mont Veyrier for the full lake'],
       modes: ['views', 'clear'], mapCat: 'view',
       planIds: ['semnoz-picnic', 'forclaz-lunch', 'mont-veyrier-walk']
@@ -826,7 +846,7 @@ window.DATA = (function () {
       id: 'food', title: 'Markets & picnic food', emoji: '🧀', tint: 'sun',
       vibe: 'Cheap, joyful eating — markets, bakeries and lake-fish lunches beat fancy dinners here.',
       looksLike: 'Hit the morning market for cheese, charcuterie and peaches, build an enormous picnic, eat it by the water, and save one cosy Savoyard cheese night for later.',
-      media: { placeholder: true, emoji: '🧀', label: 'Markets & food', check: 'add photo of the Annecy market / cheese' },
+      media: { photo: 'assets/wiki/annecy-market.jpg' },
       starters: ['Build a market picnic', 'Lake-fish lunch on a terrace', 'One Savoyard cheese night', 'Daily bakery run'],
       modes: ['food'], mapCat: 'food',
       planIds: ['market-cook', 'savoyard-night']
@@ -844,7 +864,7 @@ window.DATA = (function () {
       id: 'rainy', title: 'Rainy-day & culture', emoji: '🌧️', tint: 'alpine',
       vibe: 'Grey skies have a plan too — canyons, castles and covered old-town streets.',
       looksLike: 'When the cloud rolls in, walk the dramatic Gorges du Fier canyon, duck into a château, or potter the covered market arcades over a long lunch.',
-      media: { placeholder: true, emoji: '🌧️', label: 'Rainy-day ideas', check: 'add photo of Gorges du Fier / a château' },
+      media: { photo: 'assets/wiki/gorges-fier.jpg' },
       starters: ['Gorges du Fier + a château', 'A long lunch in the old town', 'Forest loop on Roc de Chère'],
       modes: ['rainy'], mapCat: 'view',
       planIds: ['rainy-gorges', 'rainy-town', 'roc-walk']
@@ -853,7 +873,7 @@ window.DATA = (function () {
       id: 'daytrips', title: 'Bigger day trips', emoji: '🧭', tint: 'alpine-deep',
       vibe: 'Worth leaving the lake for — Mont-Blanc, bike parks and storybook villages.',
       looksLike: 'Point the car at the mountains on a clear day, spend it under the glaciers in Chamonix or in a Portes-du-Soleil bike town, and come home tired and happy.',
-      media: { placeholder: true, emoji: '🧭', label: 'Day trips', check: 'add photo of Chamonix / Mont-Blanc' },
+      media: { photo: 'assets/wiki/chamonix.jpg' },
       starters: ['Clear-day trip to Chamonix', 'Bike park at Les Gets', 'Aravis & Reblochon loop'],
       modes: ['daytrip'], mapCat: 'trip',
       planIds: ['chamonix-day', 'les-gets-bikepark', 'aravis-cheese']
@@ -863,7 +883,7 @@ window.DATA = (function () {
 
   /* ---------- DISCOVERIES ("you might not know you can do this") ----- */
   const DISCOVERIES = [
-    { emoji: '🚵', title: 'Les Gets is a world-class bike park', text: 'A short drive into the Portes du Soleil gets you lift-served downhill and flow trails — most lake visitors never realise it’s there.', route: '#/plan/les-gets-bikepark' },
+    { emoji: '🚵', title: 'You’re sleeping in a world-class bike park', text: 'Leg one puts you at the foot of the Les Gets slopes — lift-served downhill and flow trails from the front door, before the lake even starts.', route: '#/trip' },
     { emoji: '🌄', title: 'Semnoz: the whole lake from a deckchair', text: 'You can drive (or ride) straight up to a flat ridge with Mont-Blanc and the entire lake below — barely any hiking needed.', route: '#/plan/semnoz-picnic' },
     { emoji: '🏞️', title: 'There’s a slot canyon 15 minutes away', text: 'The Gorges du Fier is a walkway bolted into a narrow river canyon — a dramatic half-day, great even when it’s grey.', route: '#/plan/rainy-gorges' },
     { emoji: '🥂', title: 'One afternoon = swim + woods + apéro', text: 'Menthon pontoons, a shaded loop on the Roc de Chère reserve, then a drink at Angon — all in a few easy hours.', route: '#/plan/perfect-afternoon' },
@@ -871,11 +891,75 @@ window.DATA = (function () {
     { emoji: '🚡', title: 'Chamonix is a day-trip, not a holiday', text: 'Mont-Blanc, glaciers and the Aiguilles make an easy clear-day outing from the lake.', route: '#/plan/chamonix-day' }
   ];
 
+  /* ---------- TRIP (legs, stays, changeover) -------------------------
+     The real, finalized trip. Coordinates are geocoded from the booking
+     addresses; media wired in the same pass as the wiki photos. */
+  const TRIP = {
+    dates: 'Aug 12 – 29, 2026',
+    legs: [
+      {
+        id: 'lesgets', label: 'Les Gets', emoji: '🚵',
+        dates: 'Aug 12–15', start: '2026-08-12', end: '2026-08-15',
+        blurb: 'Three nights at the foot of the pistes — bike park, village, mountain air.'
+      },
+      {
+        id: 'lake', label: 'Lac d’Annecy', emoji: '🏊',
+        dates: 'Aug 15–29', start: '2026-08-15', end: '2026-08-29',
+        blurb: 'Two weeks in Veyrier-du-Lac on the east shore — the lake out the front door.'
+      }
+    ],
+    changeover: 'Saturday Aug 22: out of the first house by 9:00, into Casa Elisa from 16:00. A ready-made beach day with the bags in the car.'
+  };
+
+  const STAYS = [
+    {
+      id: 'stay-lesgets', legId: 'lesgets',
+      name: 'Appartement au pied des pistes', village: 'Les Gets',
+      address: '627 Route de la Turche, 74260 Les Gets',
+      dates: 'Wed Aug 12 → Sat Aug 15',
+      checkin: 'From 16:00 · self check-in (lockbox — code arrives 48 h before)',
+      checkout: 'By 11:00',
+      coords: [46.15045, 6.66785],
+      features: ['At the foot of the slopes', 'Sleeps 4 max', 'No pets']
+    },
+    {
+      id: 'stay-guerres', legId: 'lake',
+      name: 'House with views (Olivier’s)', village: 'Veyrier-du-Lac',
+      address: '14 Chemin des Guerres, 74290 Veyrier-du-Lac',
+      dates: 'Sat Aug 15 → Sat Aug 22',
+      checkin: 'From 16:00 · host meets you in person — agree a time',
+      checkout: 'By 9:00 — early!',
+      coords: [45.87499, 6.18190],
+      features: ['~300 m from the lake', 'Courtyard parking for 2–3 cars', 'Level access from the courtyard', 'Quiet hours 23:00–7:00']
+    },
+    {
+      id: 'stay-casa-elisa', legId: 'lake',
+      name: 'Casa Elisa', village: 'Veyrier-du-Lac',
+      address: '3 Route de Morat, 74290 Veyrier-du-Lac',
+      dates: 'Sat Aug 22 → Sat Aug 29',
+      checkin: '16:00–21:30 · tell them your arrival time in advance',
+      checkout: 'By 11:00',
+      coords: [45.87580, 6.18525],
+      features: ['Private pool', 'Terrace + BBQ', 'Lake view', 'Air conditioning', 'Free on-site parking', 'Cash deposit on arrival, refunded at checkout', 'Upper floors by stairs only']
+    }
+  ];
+
+  /* ---------- LES GETS leg content ----------------------------------- */
+  const LESGETS = [
+    { name: 'Bike park from the door', desc: 'Lift-served downhill and flow trails — the whole reason to start here.', planId: 'les-gets-bikepark' },
+    { name: 'Rent the big bikes', desc: 'Downhill rigs and pads from a village shop. [CHECK: rental shops & booking]', tag: '[CHECK]' },
+    { name: 'Village wander', desc: 'Small alpine town: terraces, shops, mountain views. [CHECK: what’s open mid-August]', tag: 'Easy' },
+    { name: 'Lift up, walk down', desc: 'Non-bike option: ride a lift for the views and walk back. [CHECK: summer lift schedule]', tag: '[CHECK]' },
+    { name: 'Mont Chéry side', desc: 'The quieter mountain across the village. [CHECK: summer access]', tag: '[CHECK]' },
+    { name: 'Grocery run before the lake', desc: 'Stock up before the Saturday drive to Veyrier — arrival day is a Saturday in August.', tag: 'Practical' }
+  ];
+
   /* ---------- FEATURED (Home) ---------------------------------------- */
-  const FEATURED = ['perfect-afternoon', 'duingt-bike-lunch', 'market-cook', 'semnoz-picnic'];
+  const FEATURED = ['home-swim', 'perfect-afternoon', 'market-cook', 'pool-evening'];
 
   /* ---------- HOME QUICK ACCESS -------------------------------------- */
   const QUICK = [
+    { label: 'Your trip', emoji: '🏠', route: '#/trip' },
     { label: 'Build a day', emoji: '🧩', route: '#/build' },
     { label: 'Map', emoji: '🗺️', route: '#/map' },
     { label: 'Areas', emoji: '📍', route: '#/areas' },
@@ -906,6 +990,25 @@ window.DATA = (function () {
     ]
   };
 
+  /* ---------- PHOTO CREDITS (Wikimedia Commons) ----------------------
+     Filled by the photo-integration pass; rendered on Discover. */
+  const CREDITS = [
+    { subject: 'Old Annecy (Palais de l’Île)', author: 'Tournasol7', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Palais_de_l%27Isle_in_Annecy_04.jpg' },
+    { subject: 'Annecy canal-side market', author: 'Frédérique Voisin-Demery', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Les_chalands_le_long_des_canaux_(Annecy).jpg' },
+    { subject: 'Lake from the Semnoz', author: 'Florian Pépellin', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Sud_du_Lac_d%27Annecy_vu_du_Semnoz_en_fin_d%27%C3%A9t%C3%A9_(2020).JPG' },
+    { subject: 'Col de la Forclaz view', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Espace_spectateur_@_Aire_de_d%C3%A9collage_@_Col_de_la_Forclaz_(51221254562).jpg' },
+    { subject: 'Gorges du Fier walkway', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Gorges_du_Fier_(8900949669).jpg' },
+    { subject: 'Chamonix valley', author: 'Ximonic (Simo Räsänen)', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Chamonix_valley_from_la_Fl%C3%A9g%C3%A8re,2010_07.JPG' },
+    { subject: 'La Clusaz village', author: 'Rundvald', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:La-Clusaz-Eglise-Sainte-Foy-Place-de-l-Eglise-byRundvald.jpg' },
+    { subject: 'Col des Aravis', author: 'chisloup', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:Vue_depuis_le_col_des_aravis_-_panoramio.jpg' },
+    { subject: 'Les Gets village', author: 'Jjt.pub', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:LesGets-20140816.jpg' },
+    { subject: 'Les Gets bike park', author: 'Marcus Hansson', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Les_Gets_Bike_Park_(36455114651).jpg' },
+    { subject: 'Veyrier-du-Lac promenade', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Veyrier-du-Lac_(15151949388).jpg' },
+    { subject: 'Château de Menthon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Menthon_01_v2.jpg' },
+    { subject: 'Baie de Talloires', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Baie_de_Talloires_@_Lac_d%27Annecy_@_Ermitage_de_Saint-Germain_(51166211883).jpg' },
+    { subject: 'Plage d’Albigny', author: 'Benoît Prieur', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Vue_du_lac_d%27Annecy_en_ao%C3%BBt_2022_(3).JPG' }
+  ];
+
   return {
     MODES, MODE_BY_ID,
     AREAS, AREA_BY_ID,
@@ -914,6 +1017,7 @@ window.DATA = (function () {
     MAP_CATEGORIES, MAP_SPOTS,
     STORY, INSPIRE, SEASON,
     ZONES, CATEGORIES, CATEGORY_BY_ID, DISCOVERIES,
+    TRIP, STAYS, LESGETS, CREDITS,
     BUILD, FEATURED, QUICK
   };
 })();
