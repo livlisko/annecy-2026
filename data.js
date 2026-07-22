@@ -58,7 +58,7 @@ window.DATA = (function () {
       day: 'Voie Verte rides, west-shore beach stops, lake-fish lunch.',
       water: 'Public stretch — walk in, repeat.',
       food: 'Bakery, small market, lake-fish lunch on the water.',
-      photo: 'assets/ride/ride_lake_tree_sevrier.jpg'
+      photo: 'assets/wiki/sevrier.jpg'
     },
     {
       id: 'st-jorioz', name: 'Saint-Jorioz', zone: 'West shore · sandy beach',
@@ -68,7 +68,7 @@ window.DATA = (function () {
       day: 'A full, lazy beach day with shade and space.',
       water: 'Sand entry and lawns. Paid + lifeguarded 9:30–17:30 through 31 Aug 2026 (€2.60 adult; €1 after 16:30).',
       food: 'Buvette snack or a market picnic.',
-      photo: 'assets/ride/ride_eastern_shore_dad.jpg'
+      photo: 'assets/wiki/st-jorioz.jpg'
     },
     {
       id: 'duingt', name: 'Duingt', zone: 'The narrows · château',
@@ -78,7 +78,7 @@ window.DATA = (function () {
       day: 'Bike there, lunch, swim, ride home before the heat.',
       water: 'Small public spots — clear, cool, calm.',
       food: 'Lakeside lunch looking onto the petit lac.',
-      photo: 'assets/ride/ride_clear_water_handlebar.jpg'
+      photo: 'assets/wiki/duingt.jpg'
     },
     {
       id: 'doussard', name: 'Doussard / Bout-du-Lac', zone: 'South end · grassy & flat',
@@ -88,7 +88,7 @@ window.DATA = (function () {
       day: 'Hot, lazy days and group sprawl.',
       water: 'Walk in from the lawns; paddle out and drift.',
       food: 'Picnic. The Voie Verte ends near here.',
-      photo: 'assets/ride/ride_turquoise_eastern_shore.jpg'
+      photo: 'assets/wiki/doussard.jpg'
     },
     {
       id: 'angon', name: 'Angon', zone: 'East shore · quieter',
@@ -98,7 +98,7 @@ window.DATA = (function () {
       day: 'A long swim, then beach apéro into the evening.',
       water: 'Free public beach, supervised 12:30–18:30 in summer; cooler near the stream.',
       food: 'Beach bar with your feet near the water.',
-      photo: 'assets/chavoire/chavoire_path_people.jpg'
+      photo: 'assets/wiki/angon.jpg'
     },
     {
       id: 'talloires', name: 'Talloires', zone: 'East shore · bay',
@@ -139,7 +139,7 @@ window.DATA = (function () {
       day: 'A short woods loop to break up a beach day.',
       water: 'Pebbly entries on the south side; scout before you commit.',
       food: 'Snack now, eat in Talloires or Menthon after.',
-      photo: 'assets/ride/ride_turquoise_eastern_shore_card.jpg'
+      photo: 'assets/wiki/roc-de-chere.jpg'
     },
     {
       id: 'semnoz', name: 'Le Semnoz', zone: 'Above the west shore · ~1700 m',
@@ -814,7 +814,7 @@ window.DATA = (function () {
       id: 'lake-life', title: 'Lake life', emoji: '🏊', tint: 'aqua',
       vibe: 'The default joy — clean, cold, turquoise water you just walk into.',
       looksLike: 'Grab a towel, walk to the nearest beach or pontoon, swim out into water so clear you can see your feet, dry on the grass, and do it all again after lunch.',
-      media: { photo: 'assets/ride/ride_turquoise_eastern_shore.jpg' },
+      media: { photo: 'assets/wiki/lake-swim.jpg' },
       starters: ['Walk-in swim from Sévrier', 'Pontoon jumps at Menthon', 'Hop between towns on the lake boat', 'Float on the calm water at Bout-du-Lac'],
       modes: ['lake'], mapCat: 'swim',
       planIds: ['home-swim', 'menthon-pontoons', 'boat-half-day', 'doussard-sprawl']
@@ -841,7 +841,7 @@ window.DATA = (function () {
       id: 'bike-paths', title: 'Bike paths & bike-to-swim', emoji: '🚲', tint: 'pine',
       vibe: 'Flat, car-free riding along the water — the easiest way to see the lake.',
       looksLike: 'Roll out of town on the separated path, stop wherever the water looks good, swim, ride to a lakeside lunch, and freewheel home in the warm evening.',
-      media: { photo: 'assets/ride/ride_open_lake_path.jpg' },
+      media: { photo: 'assets/wiki/voie-verte.jpg' },
       starters: ['Voie Verte south to Duingt for lunch', 'Annecy to Veyrier in the tree shade', 'Path-and-plunge swim laps'],
       modes: ['easy-bike'], mapCat: 'bike',
       planIds: ['voie-verte-south', 'duingt-bike-lunch', 'east-shore-swim']
@@ -895,7 +895,7 @@ window.DATA = (function () {
       id: 'apero', title: 'Apéro & beautiful evenings', emoji: '🥂', tint: 'sun',
       vibe: 'The signature August move: a sunset swim and a drink with your feet near the water.',
       looksLike: 'Arrive at a west-facing beach in the late afternoon, swim as the light turns gold, lay out saucisson and a cold bottle, and watch the sun drop behind the mountains.',
-      media: { photo: 'assets/chavoire/chavoire_sunset_lake.jpg' },
+      media: { photo: 'assets/wiki/lake-sunset.jpg' },
       starters: ['Beach apéro at Angon', 'Pontoons & a walk at Menthon', 'Sunset from the Forclaz lawn'],
       modes: ['apero'], mapCat: 'swim',
       planIds: ['angon-apero', 'perfect-afternoon']
@@ -1091,7 +1091,17 @@ window.DATA = (function () {
     { subject: 'Château de Menthon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Menthon_01_v2.jpg' },
     { subject: 'Baie de Talloires', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Baie_de_Talloires_@_Lac_d%27Annecy_@_Ermitage_de_Saint-Germain_(51166211883).jpg' },
     { subject: 'Plage d’Albigny', author: 'Benoît Prieur', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Vue_du_lac_d%27Annecy_en_ao%C3%BBt_2022_(3).JPG' },
-    { subject: 'Glières monument', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Monument_national_%C3%A0_la_R%C3%A9sistance_@_Plateau_des_Gli%C3%A8res_(51175637332).jpg' }
+    { subject: 'Glières monument', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Monument_national_%C3%A0_la_R%C3%A9sistance_@_Plateau_des_Gli%C3%A8res_(51175637332).jpg' },
+    { subject: 'Lake panorama (hero)', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Col_de_la_Forclaz_@_Hike_to_Pointe_de_la_Rochette_@_Annecy_(35828637062).jpg' },
+    { subject: 'Sévrier', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Plage_de_Sevrier_@_Lac_d%27Annecy_@_Point_de_vue_@_Second_sommet_@_Mont_Baret_(51341230869).jpg' },
+    { subject: 'Saint-Jorioz bay', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Saint-Jorioz_@_Lac_d%27Annecy_@_Taillefer_@_Duingt_(51243283172).jpg' },
+    { subject: 'Château de Duingt', author: 'Rémih', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Ch%C3%A2teauvieux_@_Plage_de_Duingt.jpg' },
+    { subject: 'Bout-du-Lac reserve', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_R%C3%A9serve_naturelle_du_Bout-du-Lac_@_Annecy_(35990130345).jpg' },
+    { subject: 'Angon', author: 'Rémih', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Angon_@_Roc_de_Ch%C3%A8re.jpg' },
+    { subject: 'Roc de Chère cliffs', author: 'William Crochot', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Roc_de_Ch%C3%A8re_-_226.jpg' },
+    { subject: 'Voie Verte', author: 'Nicolas Vigier', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Lac_d%27Annecy_-_005.jpg' },
+    { subject: 'Clear water at Angon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Angon_@_Talloires_(15336193331).jpg' },
+    { subject: 'Sunset at Petit Port', author: 'Robin Férand', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:Sunset_On_Boats_(217507957).jpeg' }
   ];
 
   return {

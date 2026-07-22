@@ -1,5 +1,5 @@
 /* Lac d'Annecy — service worker. App-shell cache for offline + fast loads. */
-const VERSION = 'a26-v7';
+const VERSION = 'a26-v8';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -17,7 +17,7 @@ const CORE_ASSETS = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon.png',
-  './assets/ride/ride_turquoise_eastern_shore.jpg',
+  './assets/wiki/hero-lake.jpg',
   './assets/orientation/orientation_relief_card.jpg'
 ];
 
