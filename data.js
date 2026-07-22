@@ -66,7 +66,7 @@ window.DATA = (function () {
       supports: ['beach', 'lake'],
       why: 'The big sandy beach. Bring towels and do very little.',
       day: 'A full, lazy beach day with shade and space.',
-      water: 'Sand entry, lawns, diving board. [CHECK: summer lifeguard dates]',
+      water: 'Sand entry and lawns. Paid + lifeguarded 9:30–17:30 through 31 Aug 2026 (€2.60 adult; €1 after 16:30).',
       food: 'Buvette snack or a market picnic.',
       photo: 'assets/ride/ride_eastern_shore_dad.jpg'
     },
@@ -96,7 +96,7 @@ window.DATA = (function () {
       supports: ['lake', 'apero', 'wander'],
       why: 'Talloires’ quiet neighbour. A stream into the lake, the same château view, less volume.',
       day: 'A long swim, then beach apéro into the evening.',
-      water: 'Public beach walk-in, cooler near the stream.',
+      water: 'Free public beach, supervised 12:30–18:30 in summer; cooler near the stream.',
       food: 'Beach bar with your feet near the water.',
       photo: 'assets/chavoire/chavoire_path_people.jpg'
     },
@@ -106,7 +106,7 @@ window.DATA = (function () {
       supports: ['lake', 'food', 'apero'],
       why: 'Clear water, docks, boats. The lake gets a little less subtle here, in a good way.',
       day: 'Diving boards, a lunch out, swim, repeat.',
-      water: 'Plage de Talloires-Montmin — paddling pool, slide, boards.',
+      water: 'Plage de Talloires-Montmin — free entry, supervised 12:30–18:30 in summer; paddling pool and boards.',
       food: 'Lake-edge lunch; book ahead on Saturdays.',
       photo: 'assets/wiki/talloires.jpg'
     },
@@ -116,7 +116,7 @@ window.DATA = (function () {
       supports: ['lake', 'beach', 'wander'],
       why: 'Floating pontoons below, a storybook château above. Best ratio of swim to crowd.',
       day: 'Pontoon swims and a walk after dinner.',
-      water: 'Plage de Menthon — walk the pontoon, jump, repeat.',
+      water: 'Plage de Menthon — walk the pontoon, jump, repeat. Paid in summer (€4.60 adult), supervised 10:00–19:00.',
       food: 'Beach snack bar; dinners up in the village.',
       photo: 'assets/wiki/menthon-chateau.jpg',
       official: 'https://www.chateau-de-menthon.com'
@@ -127,8 +127,8 @@ window.DATA = (function () {
       supports: ['lake', 'bikes', 'food'],
       why: 'Home for the lake weeks. La Brune beach below the village, Annecy ten minutes up the shore path, and the whole east shore on your doorstep.',
       day: 'The walk-down swim, the default no-car day, every evening.',
-      water: 'La Brune — free Pavillon Bleu beach, flat lawn, walk-in. Supervised in summer. [CHECK: lifeguard dates]',
-      food: 'Village bakery; Annecy’s old town is a short ride up the path. [CHECK: bakery/shop locations in Veyrier]',
+      water: 'La Brune — free beach, flat lawn, walk-in. Lifeguards daily 11:00–19:00 through 31 Aug 2026.',
+      food: 'Two bakeries, a Petit Casino and a Friday-morning market in the village; Annecy is a short ride up the path.',
       photo: 'assets/wiki/veyrier.jpg'
     },
     {
@@ -163,7 +163,7 @@ window.DATA = (function () {
       photo: 'assets/wiki/forclaz.jpg'
     },
     {
-      id: 'aravis', name: 'Aravis / La Clusaz', zone: 'East over the passes · ~40 min',
+      id: 'aravis', name: 'Aravis / La Clusaz', zone: 'East over the passes · ~30–40 min',
       coords: [45.9040, 6.4230],
       supports: ['daytrip', 'food', 'bikes', 'views'],
       why: 'Reblochon country: green mountain villages, lift-served trails, cheese straight from the farm.',
@@ -174,7 +174,7 @@ window.DATA = (function () {
       official: 'https://www.laclusaz.com'
     },
     {
-      id: 'chamonix', name: 'Chamonix', zone: 'Mont-Blanc valley · ~1h15',
+      id: 'chamonix', name: 'Chamonix', zone: 'Mont-Blanc valley · ~1h20',
       coords: [45.9237, 6.8694],
       supports: ['daytrip', 'views'],
       why: 'The big one. Glaciers, the Aiguilles, an alpine town that means business.',
@@ -192,7 +192,7 @@ window.DATA = (function () {
       photo: 'assets/wiki/les-gets-village.jpg',
       day: 'Lift-served MTB, a village wander, mountain air before the lake.',
       water: '—',
-      food: 'Village restaurants and a grocery run before heading to the lake. [CHECK: which shops/restaurants]',
+      food: 'Village restaurants and shops; do the big grocery run before the Saturday drive to the lake.',
       official: 'https://www.lesgets.com'
     }
   ];
@@ -226,7 +226,7 @@ window.DATA = (function () {
       desc: 'Sand entry, lawns and shade — the easy full-day beach.',
       time: 'Half–full day', cost: '€',
       modes: ['beach', 'lake', 'low-effort', 'clear'],
-      note: 'Paid extras (chairs, paddling pool) on top of the free sand. [CHECK: lifeguard dates]'
+      note: 'Paid entry in summer (€2.60 adult, €1 after 16:30); lifeguards 9:30–17:30 through 31 Aug 2026.'
     },
     {
       id: 'doussard-sprawl', title: 'Sprawl at Bout-du-Lac', areaId: 'doussard',
@@ -247,7 +247,7 @@ window.DATA = (function () {
       desc: 'Ride through Annecy onto the flat, separated west-shore path and follow the lake all the way to Bout-du-Lac.',
       time: 'Half day', cost: 'free',
       modes: ['easy-bike', 'no-car', 'lake', 'low-effort'],
-      note: 'From home: shore path into Annecy, then pick up the Voie Verte. Clearest water under the bridges near Duingt. [CHECK: any path closures]'
+      note: 'From home: shore path into Annecy, then pick up the Voie Verte. Clearest water under the bridges near Duingt.'
     },
     {
       id: 'east-shore-swim', title: 'Home ride: shore path to Annecy', areaId: 'veyrier',
@@ -261,7 +261,7 @@ window.DATA = (function () {
       desc: 'Walk out on the floating pontoons, jump, sun-dry, repeat.',
       time: 'Half day', cost: '€',
       modes: ['lake', 'beach', 'afternoon', 'clear'],
-      note: 'The pontoon day. Do it here.'
+      note: 'The pontoon day. Do it here. Paid in summer (€4.60 adult), supervised 10:00–19:00.'
     },
     {
       id: 'angon-apero', title: 'Swim + apéro at Angon', areaId: 'angon',
@@ -282,7 +282,7 @@ window.DATA = (function () {
       desc: 'Ride in for the morning market — cheese, charcuterie, peaches — swim, ride home, cook it all.',
       time: 'Morning', cost: '€€',
       modes: ['food', 'no-car', 'low-effort'],
-      note: 'Markets Sun (big), Tue, Fri — mornings.',
+      note: 'Old-town market: Tue / Fri / Sun 07:00–13:00 (Tuesday is food-only) — confirmed for 2026.',
       official: 'https://www.lac-annecy.com'
     },
     {
@@ -294,10 +294,10 @@ window.DATA = (function () {
     },
     {
       id: 'boat-half-day', title: 'Lake-bus half day', areaId: 'annecy',
-      desc: 'Take the summer lake boat between towns — bike one way, float back.',
+      desc: 'The Navibus shuttle stops at nine ports — including Veyrier, 15 minutes across from Annecy. Bike one way, float back.',
       time: 'Half day', cost: '€€',
       modes: ['lake', 'low-effort', 'no-car', 'afternoon'],
-      note: 'Compagnie des Bateaux runs most towns in summer. [CHECK: timetable & fares]',
+      note: 'Three departures daily through 28 Aug 2026 (from Annecy 10:00 / 14:30 / 17:15); from €8 one-way, bikes +€6.',
       official: 'https://www.bateaux-annecy.com'
     },
     {
@@ -360,22 +360,22 @@ window.DATA = (function () {
       desc: 'Shuttle up, ride down — lift-served mountain biking in the Aravis in summer.',
       time: 'Full day', cost: '€€',
       modes: ['mtb', 'daytrip'],
-      note: '[CHECK: La Clusaz / Grand-Bornand bike-park open dates, lift pass & trail grades]',
+      note: 'Lifts run daily through 30 Aug 2026; La Clusaz day pass €23.50 (ages 5–14 €19). Grand-Bornand’s Rosay gondola also carries bikes daily to 30 Aug.',
       official: 'https://www.laclusaz.com'
     },
     {
-      id: 'pump-velodrome', title: 'Pump track & track session', areaId: 'annecy',
-      desc: 'Low-commitment wheels: a pump track lap or a session on the track.',
+      id: 'pump-velodrome', title: 'Pump-track laps', areaId: 'annecy',
+      desc: 'Low-commitment wheels: free public pump tracks a short ride or drive away.',
       time: '1 hr', cost: 'free',
       modes: ['mtb', 'low-effort', 'afternoon'],
-      note: '[CHECK: nearest pump track location] · [CHECK: velodrome / track availability]'
+      note: 'Closest: Argonay (~8 km). Best: Duingt — free, open year-round, two loops plus a kids’ circuit. (No velodrome exists in Haute-Savoie; the nearest track is Geneva’s indoor 250 m.)'
     },
     {
       id: 'rainy-gorges', title: 'Gorges du Fier + château', areaId: 'annecy',
       desc: 'A walkway pinned along a slot canyon, paired with the medieval keep next door.',
       time: 'Half day', cost: '€',
       modes: ['rainy', 'views', 'daytrip'],
-      note: 'Cool and shaded — good on a hot day too. [CHECK: seasonal opening]',
+      note: 'Cool and shaded — good on a hot day too. Open daily through 15 Oct 2026; August hours 9:30–19:15 (last entry 18:15), €6 adult / €3 child.',
       official: 'https://www.gorgesdufier.com'
     },
     {
@@ -383,14 +383,14 @@ window.DATA = (function () {
       desc: 'Covered market arcades, the Palais de l’Île, a long lunch, cheese shopping.',
       time: 'Flexible', cost: '€€',
       modes: ['rainy', 'food', 'low-effort', 'no-car'],
-      note: '[CHECK: museum / Palais de l’Île opening hours]'
+      note: 'Palais de l’Île is open daily except Tuesday — summer hours roughly 10:30–18:00, €5.'
     },
     {
       id: 'chamonix-day', title: 'Clear-day trip to Chamonix', areaId: 'chamonix',
       desc: 'Drive over for the town, the glacier valley and the big peaks.',
       time: 'Full day', cost: '€€',
       modes: ['daytrip', 'views', 'clear'],
-      note: 'Go only when the summits are out. [CHECK: lift / Montenvers train info]',
+      note: 'Go only when the summits are out — about 1h20 each way by car. [CHECK: lift / Montenvers train info]',
       official: 'https://www.chamonix.com'
     },
     {
@@ -424,7 +424,8 @@ window.DATA = (function () {
       time: 'Half–full day', cost: 'free',
       modes: ['daytrip', 'views'],
       effort: 'medium', carNeeded: true,
-      note: 'The plateau and monument are open, free ground; pair with the museum + necropolis at Morette on the Thônes road. [CHECK: museum opening days & hours] · [CHECK: drive time] · [CHECK: official site]'
+      note: 'Plateau and monument: free, open ground, ~45 min drive. Morette museum: 10:00–12:30 & 14:00–18:00, €3 — closed Mondays (that’s Aug 17 & 24).',
+      official: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/'
     },
     {
       id: 'les-gets-bikepark', title: 'Bike-park day at Les Gets', areaId: 'les-gets',
@@ -433,7 +434,7 @@ window.DATA = (function () {
       time: 'Full day', cost: '€€',
       modes: ['mtb', 'daytrip'],
       effort: 'big', carNeeded: true,
-      note: 'During the lake weeks it’s a drive; during leg one it’s home turf. [CHECK: bike-park open dates, lift pass & rental]',
+      note: 'Open daily through the stay (full season 19 Jun–13 Sep 2026); Portes du Soleil day pass ~€39, single rides ~€9.50. From the lake it’s a ~1h15 drive; during leg one it’s home turf.',
       official: 'https://www.lesgets.com'
     }
   ];
@@ -498,15 +499,15 @@ window.DATA = (function () {
     {
       group: 'MTB, bike park & pump track',
       items: [
-        { name: 'La Clusaz / Grand-Bornand bike park', desc: 'Lift-served descents in summer. [CHECK: open dates, pass, grades]', meta: 'Day trip · €€', planId: 'laclusaz-mtb', official: 'https://www.laclusaz.com' },
-        { name: 'Pump track', desc: 'Quick wheels close to the lake. [CHECK: nearest pump track location]', meta: 'Casual · free', planId: 'pump-velodrome' },
-        { name: 'Velodrome / track', desc: 'Track session option. [CHECK: velodrome availability & booking]', meta: '[CHECK]', planId: 'pump-velodrome' }
+        { name: 'La Clusaz / Grand-Bornand bike park', desc: 'Lift-served descents daily through 30 Aug 2026; La Clusaz day pass €23.50.', meta: 'Day trip · €€', planId: 'laclusaz-mtb', official: 'https://www.laclusaz.com' },
+        { name: 'Pump tracks', desc: 'Argonay (~8 km) and Duingt (free, year-round, two loops + kids’ circuit).', meta: 'Casual · free', planId: 'pump-velodrome' },
+        { name: 'Velodrome? Nope.', desc: 'No track exists in Haute-Savoie — nearest is Geneva’s indoor 250 m, mainly a winter programme.', meta: 'FYI', planId: 'pump-velodrome' }
       ]
     },
     {
       group: 'Rentals & links',
       items: [
-        { name: 'Bike rental — Annecy & Sévrier', desc: 'Town and lakeside shops; book ahead in August. [CHECK: rental shop & rates]', meta: '[CHECK: rental info]' },
+        { name: 'Bike rental — Veyrier & Annecy', desc: 'Cayoti rents at Veyrier’s Plage du Plant (from ~€22/day); Roul’ ma Poule at Petit Port is a 2.5 km pedal; Takamaka in town has carbon road bikes (~€59/day). Book ahead in August.', meta: 'From ~€22/day' },
         { name: 'Lake destination info', desc: 'Official destination site for routes and services.', meta: 'Official', official: 'https://www.lac-annecy.com' }
       ]
     }
@@ -520,7 +521,7 @@ window.DATA = (function () {
         { name: 'Saint-Jorioz', desc: 'Big sandy west-shore beach, lawns and shade.', tag: 'Sand · €', areaId: 'st-jorioz' },
         { name: 'Bout-du-Lac (Doussard)', desc: 'Grassy south-end beach, calmest water, mountains around.', tag: 'Grass · free', areaId: 'doussard' },
         { name: 'Menthon pontoons', desc: 'Floating pontoons to jump from and dry off on.', tag: 'Pontoon · €', areaId: 'menthon' },
-        { name: 'La Brune, Veyrier', desc: 'Free Pavillon Bleu beach, flat lawn, view across.', tag: 'Free swim', areaId: 'veyrier' },
+        { name: 'La Brune, Veyrier', desc: 'Free beach below the house — lifeguards 11:00–19:00 all August.', tag: 'Free swim', areaId: 'veyrier' },
         { name: 'Plage des Marquisats, Annecy', desc: 'Town swim — steps into clean water by the old town.', tag: 'Town · free', areaId: 'annecy' }
       ]
     },
@@ -529,7 +530,7 @@ window.DATA = (function () {
       items: [
         { name: 'Walk down to La Brune', desc: 'From the house, in the water, back on the lawn.', tag: 'No plan', planId: 'home-swim' },
         { name: 'Pool + BBQ at Casa Elisa', desc: 'Second-week option: pool, terrace, barbecue, lake view.', tag: 'Aug 22–29', planId: 'pool-evening' },
-        { name: 'Lake-bus half day', desc: 'Let the boat do the work; bike one way.', tag: 'Boat', planId: 'boat-half-day' }
+        { name: 'Lake-bus half day', desc: 'The Navibus stops right in Veyrier — let the boat do the work.', tag: 'Boat', planId: 'boat-half-day' }
       ]
     },
     {
@@ -554,14 +555,14 @@ window.DATA = (function () {
     {
       group: 'Markets',
       items: [
-        { name: 'Vieux Annecy market', desc: 'Sun (big), Tue, Fri mornings. Cheese, charcuterie, peaches, bread. Most meals start here.', tag: 'Free to wander', official: 'https://www.lac-annecy.com' },
-        { name: 'Sévrier market', desc: 'Smaller, weekly, walkable from home base. [CHECK: market day]', tag: 'Local' }
+        { name: 'Vieux Annecy market', desc: 'Tue / Fri / Sun, 07:00–13:00. Cheese, charcuterie, peaches, bread. Most meals start here.', tag: 'Free to wander', official: 'https://www.lac-annecy.com' },
+        { name: 'Veyrier Friday market', desc: 'Food market in the village every Friday morning; Sévrier runs Wednesday mornings across the water.', tag: 'Home turf' }
       ]
     },
     {
       group: 'Bakeries & cheese',
       items: [
-        { name: 'Daily bakery run', desc: 'Baguette, pain de campagne, croissants — the Sévrier bakery is enough.', tag: '€' },
+        { name: 'Daily bakery run', desc: 'Two in the village — Maison Andy and La Panière, both on rue de la Tournette. (August closures possible; scout early.)', tag: '€' },
         { name: 'Reblochon, Tomme, Beaufort', desc: 'Buy raw and direct from Aravis farms if you head up — much better.', tag: 'Cheese', areaId: 'aravis' }
       ]
     },
@@ -677,7 +678,7 @@ window.DATA = (function () {
     { id: 'm-mont-veyrier', cat: 'view', name: 'Mont Veyrier / Baron', coords: [45.9010, 6.1910], blurb: 'East-shore ridge, full lake from the trail.', route: '#/plan/mont-veyrier-walk' },
     { id: 'm-gorges', cat: 'view', name: 'Gorges du Fier', coords: [45.8970, 6.0450], blurb: 'Slot-canyon walkway west of Annecy.', route: '#/plan/rainy-gorges' },
     { id: 'm-glieres', cat: 'view', name: 'Plateau des Glières', coords: [45.9630, 6.3260], blurb: 'Where the maquis made their stand — national monument and plateau walks.', route: '#/plan/glieres-day' },
-    { id: 'm-morette', cat: 'trip', name: 'Morette — Resistance museum', coords: [45.89846, 6.28739], blurb: 'Museum + necropolis of the Glières maquis, on the Thônes road. [CHECK: opening]', route: '#/plan/glieres-day' },
+    { id: 'm-morette', cat: 'trip', name: 'Morette — Resistance museum', coords: [45.89846, 6.28739], blurb: 'Museum + necropolis of the Glières maquis, on the Thônes road. Tue–Sun, €3.', route: '#/plan/glieres-day' },
 
     { id: 'm-chamonix', cat: 'trip', name: 'Chamonix', coords: [45.9237, 6.8694], blurb: 'Mont-Blanc valley — a clear-day trip.', route: '#/plan/chamonix-day' },
     { id: 'm-aravis-col', cat: 'trip', name: 'Col des Aravis', coords: [45.8720, 6.4640], blurb: 'Postcard pass with the Mont-Blanc range.', route: '#/plan/aravis-cols' },
@@ -772,8 +773,13 @@ window.DATA = (function () {
   // What’s special about being here in August specifically.
   const SEASON = [
     {
-      title: 'Fête du Lac',
-      text: 'One of Europe’s biggest fireworks-and-light shows, fired out over the water on a Saturday in early August. Seats sell out — book ahead. [CHECK: exact date & tickets]'
+      title: 'Fête du Lac — the one you’ll miss',
+      text: 'The giant fireworks show over the lake is Saturday 1 August 2026 — ten days before you land. Consolation: its 53,000 spectators will be gone, leaving you the lake.'
+    },
+    {
+      title: 'Château nights at Menthon',
+      text: 'The castle above the pontoons runs theatrical night visits on August Wednesdays (to ~26 Aug) — ten minutes from the house. [CHECK: dates & booking]',
+      action: { label: 'About Menthon', route: '#/areas/menthon' }
     },
     {
       title: 'Long light, late swims',
@@ -982,10 +988,10 @@ window.DATA = (function () {
   /* ---------- LES GETS leg content ----------------------------------- */
   const LESGETS = [
     { name: 'Bike park from the door', desc: 'Lift-served downhill and flow trails — the whole reason to start here.', planId: 'les-gets-bikepark' },
-    { name: 'Rent the big bikes', desc: 'Downhill rigs and pads from a village shop. [CHECK: rental shops & booking]', tag: '[CHECK]' },
-    { name: 'Village wander', desc: 'Small alpine town: terraces, shops, mountain views. [CHECK: what’s open mid-August]', tag: 'Easy' },
-    { name: 'Lift up, walk down', desc: 'Non-bike option: ride a lift for the views and walk back. [CHECK: summer lift schedule]', tag: '[CHECK]' },
-    { name: 'Mont Chéry side', desc: 'The quieter mountain across the village. [CHECK: summer access]', tag: '[CHECK]' },
+    { name: 'Rent the big bikes', desc: 'DH rigs and pads from 360 Outdoor (at the Chavannes lifts), The Hub or Intersport — book ahead for August.', tag: 'Book ahead' },
+    { name: 'Village wander', desc: 'Small alpine town: terraces, shops, mountain views — everything runs in high season.', tag: 'Easy' },
+    { name: 'Lift up, walk down', desc: 'Non-bike option: lifts run daily ~9:00–17:30 during the stay; single rides ~€9.50.', tag: 'Easy' },
+    { name: 'Mont Chéry side', desc: 'The quieter mountain across the village — cable car runs daily through 30 Aug.', tag: 'Views' },
     { name: 'Grocery run before the lake', desc: 'Stock up before the Saturday drive to Veyrier — arrival day is a Saturday in August.', tag: 'Practical' }
   ];
 
