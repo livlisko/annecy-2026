@@ -1,5 +1,5 @@
 /* Lac d'Annecy — service worker. App-shell cache for offline + fast loads. */
-const VERSION = 'a26-v6';
+const VERSION = 'a26-v7';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -10,6 +10,10 @@ const CORE_ASSETS = [
   './data.js',
   './app.js',
   './manifest.webmanifest',
+  './assets/fonts/inter-latin.woff2',
+  './assets/fonts/inter-latin-ext.woff2',
+  './assets/fonts/fraunces-latin.woff2',
+  './assets/fonts/fraunces-latin-ext.woff2',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon.png',
