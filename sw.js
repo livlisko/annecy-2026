@@ -1,5 +1,5 @@
 /* Lac d'Annecy — service worker. App-shell cache for offline + fast loads. */
-const VERSION = 'a26-v5';
+const VERSION = 'a26-v6';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 

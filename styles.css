@@ -690,3 +690,17 @@ a { color: var(--alpine); text-underline-offset: .15em; }
 .credits summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
 .credits p { margin-top: .5rem; line-height: 1.7; }
 .credits a { color: var(--alpine); }
+
+/* ---------- v4: confirmed flights ---------- */
+.flights { display: grid; gap: .55rem; grid-template-columns: 1fr; }
+@media (min-width: 620px) { .flights { grid-template-columns: 1fr 1fr; } }
+.flight-card {
+  padding: .8rem .95rem .85rem; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-sm);
+}
+.fc-top { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; }
+.fc-who { font-weight: 800; font-size: .92rem; }
+.fc-date { font-size: .72rem; font-weight: 700; color: var(--alpine-deep); white-space: nowrap; }
+.fc-route { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; margin-top: .25rem; letter-spacing: -.01em; }
+.fc-meta { font-size: .76rem; color: var(--muted); margin-top: .2rem; }
+.fc-note { font-size: .8rem; color: var(--ink-2); line-height: 1.4; margin-top: .45rem; padding-top: .45rem; border-top: 1px dashed var(--border); }

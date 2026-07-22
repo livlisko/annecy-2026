@@ -995,6 +995,49 @@ window.DATA = (function () {
     { name: 'Grocery run before the lake', desc: 'Stock up before the Saturday drive to Veyrier — arrival day is a Saturday in August.', tag: 'Practical' }
   ];
 
+  /* ---------- TRANSPORT (confirmed flights + van) --------------------
+     Source of truth for getting there and back. Confirmation codes are
+     deliberately masked on this public page; full codes live in email.
+     Frequent-flyer numbers, KTNs, phones and payment details are
+     deliberately NOT stored here at all. */
+  const TRANSPORT = {
+    flights: [
+      {
+        who: 'Liv', dir: 'out', date: 'Tue Aug 11 → Wed Aug 12',
+        legs: 'JFK 19:25 → GVA 09:15 (next morning)',
+        flight: 'UA 9719 · operated by SWISS (A330)', conf: 'B69•••',
+        note: 'Lands 15 minutes before the van pickup — straight to the National counter.'
+      },
+      {
+        who: 'Andrew', dir: 'out', date: 'Fri Aug 14 → Sat Aug 15',
+        legs: 'EWR 17:30 → GVA 07:30 (next morning)',
+        flight: 'United', conf: 'ESN•••',
+        note: 'Lands the same morning as the Les Gets → lake move. Collect him at GVA on the drive down.'
+      },
+      {
+        who: 'Andrew', dir: 'back', date: 'Sat Aug 29',
+        legs: 'GVA 09:20 → EWR 12:15',
+        flight: 'United', conf: 'ESN•••'
+      },
+      {
+        who: 'Liv', dir: 'back', date: 'Sat Aug 29',
+        legs: 'GVA 11:40 → JFK 14:20',
+        flight: 'SWISS LX 22 (A330)', conf: 'B69•••'
+      }
+    ],
+    car: {
+      name: 'Full-size van — Renault Kangoo Grand or similar, automatic',
+      conf: 'National #16948•••••',
+      pickup: 'Wed Aug 12, 09:30 · Geneva Airport (GVA)',
+      ret: 'Sat Aug 29, 09:30 · Geneva Airport (GVA)',
+      drivers: 'Liv · Christian · Andrew · Ian (all on the contract)',
+      includes: 'Damage waiver · unlimited mileage · ≈ CHF 1,860 total',
+      find: 'Stay on the Swiss side of the airport → rental counter → shuttle to the P51 car park → finish at the kiosk. Desk open 6:30–23:30.'
+    },
+    privacyNote: 'Full confirmation codes are in your email — kept off this public page on purpose.',
+    departure: 'Departure Saturday (Aug 29) is tight: Andrew flies at 9:20 (at GVA by ~7:15), the van is due back at 9:30, and Liv flies at 11:40. That means one early run leaving Veyrier around 6:15 — arrange early checkout and the deposit handback with Casa Elisa in advance (their normal window only opens at 8:30).'
+  };
+
   /* ---------- FEATURED (Home) ---------------------------------------- */
   const FEATURED = ['home-swim', 'perfect-afternoon', 'market-cook', 'pool-evening'];
 
@@ -1059,7 +1102,7 @@ window.DATA = (function () {
     MAP_CATEGORIES, MAP_SPOTS,
     STORY, HISTORY, INSPIRE, SEASON,
     ZONES, CATEGORIES, CATEGORY_BY_ID, DISCOVERIES,
-    TRIP, STAYS, LESGETS, CREDITS,
+    TRIP, STAYS, LESGETS, TRANSPORT, CREDITS,
     BUILD, FEATURED, QUICK
   };
 })();
