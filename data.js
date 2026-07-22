@@ -416,6 +416,17 @@ window.DATA = (function () {
       note: 'The Aug 22–29 apartment has the private pool, terrace, BBQ and lake view. Zero logistics.'
     },
     {
+      id: 'glieres-day', title: 'Plateau des Glières pilgrimage',
+      where: 'Bornes plateau · NE of the lake',
+      mapPlace: 'm-glieres',
+      media: { photo: 'assets/wiki/glieres.jpg' },
+      desc: 'Drive up to the high plateau where the maquis made their stand — the national monument, big-sky walking, and the Resistance museum at Morette on the way home.',
+      time: 'Half–full day', cost: 'free',
+      modes: ['daytrip', 'views'],
+      effort: 'medium', carNeeded: true,
+      note: 'The plateau and monument are open, free ground; pair with the museum + necropolis at Morette on the Thônes road. [CHECK: museum opening days & hours] · [CHECK: drive time] · [CHECK: official site]'
+    },
+    {
       id: 'les-gets-bikepark', title: 'Bike-park day at Les Gets', areaId: 'les-gets',
       media: { photo: 'assets/wiki/les-gets-mtb.jpg' },
       desc: 'Lift-served downhill and flow trails, starting from the front door — the Aug 12–15 apartment sits at the foot of the slopes.',
@@ -611,7 +622,7 @@ window.DATA = (function () {
     {
       group: 'Bigger effort',
       items: [
-        { name: 'Plateau des Glières', desc: 'High pasture plateau north-east of the lake. [CHECK: access & timing]', areaId: 'aravis' },
+        { name: 'Plateau des Glières', desc: 'The maquis plateau — monument, walks and the Morette Resistance museum on the way.', planId: 'glieres-day' },
         { name: 'Gruyères (CH)', desc: 'Swiss cheese-and-castle village. Long day — worth it once at most.', }
       ]
     },
@@ -665,6 +676,8 @@ window.DATA = (function () {
     { id: 'm-cascade-angon', cat: 'view', name: 'Cascade d’Angon', coords: [45.8250, 6.2210], blurb: 'Cool waterfall walk on a hot day.', route: '#/plan/cascade-angon' },
     { id: 'm-mont-veyrier', cat: 'view', name: 'Mont Veyrier / Baron', coords: [45.9010, 6.1910], blurb: 'East-shore ridge, full lake from the trail.', route: '#/plan/mont-veyrier-walk' },
     { id: 'm-gorges', cat: 'view', name: 'Gorges du Fier', coords: [45.8970, 6.0450], blurb: 'Slot-canyon walkway west of Annecy.', route: '#/plan/rainy-gorges' },
+    { id: 'm-glieres', cat: 'view', name: 'Plateau des Glières', coords: [45.9630, 6.3260], blurb: 'Where the maquis made their stand — national monument and plateau walks.', route: '#/plan/glieres-day' },
+    { id: 'm-morette', cat: 'trip', name: 'Morette — Resistance museum', coords: [45.89846, 6.28739], blurb: 'Museum + necropolis of the Glières maquis, on the Thônes road. [CHECK: opening]', route: '#/plan/glieres-day' },
 
     { id: 'm-chamonix', cat: 'trip', name: 'Chamonix', coords: [45.9237, 6.8694], blurb: 'Mont-Blanc valley — a clear-day trip.', route: '#/plan/chamonix-day' },
     { id: 'm-aravis-col', cat: 'trip', name: 'Col des Aravis', coords: [45.8720, 6.4640], blurb: 'Postcard pass with the Mont-Blanc range.', route: '#/plan/aravis-cols' },
@@ -698,6 +711,27 @@ window.DATA = (function () {
     {
       emoji: '🧀', title: 'Cheese with a backstory',
       text: 'The story goes that Reblochon was born from a sneaky second milking — farmers under-declared their cows to the landlord, then milked again once he’d gone. The Aravis farms still make it.'
+    }
+  ];
+
+  /* The war in these mountains — Haute-Savoie was maquis country.
+     Established history only; visitable-site practicalities are [CHECK]ed. */
+  const HISTORY = [
+    {
+      emoji: '🏔️', title: 'Mountains made for resistance',
+      text: 'After France fell in 1940, these valleys became maquis country. High pastures, deep forests and passes the occupier couldn’t control — and farms that fed and hid the fighters.'
+    },
+    {
+      emoji: '✊', title: 'Glières, winter 1944',
+      text: 'On a snowbound plateau just north-east of the lake, around 450 maquisards gathered to receive Allied weapons drops under the motto « Vivre libre ou mourir ». Attacked in force at the end of March 1944, well over a hundred were killed or deported — and the stand became a rallying cry for the whole French Resistance.'
+    },
+    {
+      emoji: '🪂', title: 'The answer from the sky',
+      text: 'On 1 August 1944 the plateau got its reply: a huge daylight parachute drop of arms. Weeks later, on 19 August, Haute-Savoie did something almost unique — it freed itself. The German garrison surrendered to the Resistance in Annecy before any Allied army arrived.'
+    },
+    {
+      emoji: '🕊️', title: 'You can stand there',
+      text: 'The plateau is an easy drive: the national monument, open walking country, and the Resistance museum and necropolis at Morette on the Thônes road — the same road you’ll take toward the Aravis and the cheese.'
     }
   ];
 
@@ -888,7 +922,8 @@ window.DATA = (function () {
     { emoji: '🏞️', title: 'There’s a slot canyon 15 minutes away', text: 'The Gorges du Fier is a walkway bolted into a narrow river canyon — a dramatic half-day, great even when it’s grey.', route: '#/plan/rainy-gorges' },
     { emoji: '🥂', title: 'One afternoon = swim + woods + apéro', text: 'Menthon pontoons, a shaded loop on the Roc de Chère reserve, then a drink at Angon — all in a few easy hours.', route: '#/plan/perfect-afternoon' },
     { emoji: '🏔️', title: 'The Aravis are right next door', text: 'Forty minutes east is proper mountain-village country — Reblochon farms, cheese cellars and big green valleys.', route: '#/areas/aravis' },
-    { emoji: '🚡', title: 'Chamonix is a day-trip, not a holiday', text: 'Mont-Blanc, glaciers and the Aiguilles make an easy clear-day outing from the lake.', route: '#/plan/chamonix-day' }
+    { emoji: '🚡', title: 'Chamonix is a day-trip, not a holiday', text: 'Mont-Blanc, glaciers and the Aiguilles make an easy clear-day outing from the lake.', route: '#/plan/chamonix-day' },
+    { emoji: '🕊️', title: 'The Resistance made its stand next door', text: 'In 1944 the Maquis des Glières held a snowbound plateau just north-east of the lake. You can walk it — and visit the museum on the Thônes road.', route: '#/plan/glieres-day' }
   ];
 
   /* ---------- TRIP (legs, stays, changeover) -------------------------
@@ -1006,7 +1041,8 @@ window.DATA = (function () {
     { subject: 'Veyrier-du-Lac promenade', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Veyrier-du-Lac_(15151949388).jpg' },
     { subject: 'Château de Menthon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Menthon_01_v2.jpg' },
     { subject: 'Baie de Talloires', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Baie_de_Talloires_@_Lac_d%27Annecy_@_Ermitage_de_Saint-Germain_(51166211883).jpg' },
-    { subject: 'Plage d’Albigny', author: 'Benoît Prieur', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Vue_du_lac_d%27Annecy_en_ao%C3%BBt_2022_(3).JPG' }
+    { subject: 'Plage d’Albigny', author: 'Benoît Prieur', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Vue_du_lac_d%27Annecy_en_ao%C3%BBt_2022_(3).JPG' },
+    { subject: 'Glières monument', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Monument_national_%C3%A0_la_R%C3%A9sistance_@_Plateau_des_Gli%C3%A8res_(51175637332).jpg' }
   ];
 
   return {
@@ -1015,7 +1051,7 @@ window.DATA = (function () {
     PLANS, PLAN_BY_ID,
     BIKE, LAKE, FOOD, TRIPS,
     MAP_CATEGORIES, MAP_SPOTS,
-    STORY, INSPIRE, SEASON,
+    STORY, HISTORY, INSPIRE, SEASON,
     ZONES, CATEGORIES, CATEGORY_BY_ID, DISCOVERIES,
     TRIP, STAYS, LESGETS, CREDITS,
     BUILD, FEATURED, QUICK

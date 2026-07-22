@@ -361,6 +361,17 @@
       <div class="section-head"><h2>The short story of the lake</h2></div>
       <div class="story">${story}</div>
 
+      <div class="section-head"><h2>The war in these mountains</h2>
+        <p>Haute-Savoie was maquis country — and in the end it freed itself.</p></div>
+      <div class="story">${D.HISTORY.map((s) => `
+        <div class="story-item">
+          <span class="story-em" aria-hidden="true">${s.emoji}</span>
+          <div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>
+        </div>`).join('')}</div>
+      <div class="actions" style="margin-top:.9rem">
+        <a class="btn" href="#/plan/glieres-day">🕊️ Go stand where it happened</a>
+      </div>
+
       <div class="section-head"><h2>Here in August</h2></div>
       <div class="inspire-grid">${season}</div>
 
@@ -612,7 +623,8 @@
       <div class="mode-row">${modeChips}</div>
 
       <div class="actions">
-        ${area ? `<a class="btn" href="#/map?place=${esc(area.id)}">Show on map</a>` : ''}
+        ${area ? `<a class="btn" href="#/map?place=${esc(area.id)}">Show on map</a>` :
+          p.mapPlace ? `<a class="btn" href="#/map?place=${esc(p.mapPlace)}">Show on map</a>` : ''}
         ${area ? `<a class="btn ghost" href="#/areas/${esc(area.id)}">About ${esc(area.name)}</a>` : ''}
         ${official}
       </div>
