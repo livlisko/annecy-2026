@@ -303,10 +303,45 @@
       return href ? `<a class="list-item" href="${href}">${inner}</a>` : `<div class="list-item">${inner}</div>`;
     }).join('');
 
+    const T = D.TRANSPORT;
+    const flights = T.flights.map((f) => `
+      <div class="flight-card">
+        <div class="fc-top">
+          <span class="fc-who" data-dir="${esc(f.dir)}">${f.dir === 'out' ? '🛬' : '🛫'} ${esc(f.who)}</span>
+          <span class="fc-date">${esc(f.date)}</span>
+        </div>
+        <div class="fc-route">${esc(f.legs)}</div>
+        <div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>
+        ${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}
+      </div>`).join('');
+
+    const car = `
+      <div class="stay-card">
+        <div class="stay-top">
+          <div><div class="ac-zone">The van · ${esc(T.car.conf)}</div><h3>${esc(T.car.name)}</h3></div>
+        </div>
+        <dl class="spec" style="margin:.55rem 0 .3rem">
+          <dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd>
+          <dt>Return</dt><dd>${esc(T.car.ret)}</dd>
+          <dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd>
+          <dt>Included</dt><dd>${esc(T.car.includes)}</dd>
+        </dl>
+        <p class="fc-note">📍 ${esc(T.car.find)}</p>
+      </div>`;
+
     return `
       <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2>
         <p>${esc(D.TRIP.dates)} — mountains first, then the lake.</p></div>
       <div class="leg-row">${legs}</div>
+
+      <div class="section-head"><h2>Getting there &amp; back</h2>
+        <p>Confirmed flights. ${esc(T.privacyNote)}</p></div>
+      <div class="flights">${flights}</div>
+
+      <div class="section-head"><h2>The van</h2></div>
+      ${car}
+
+      <div class="note-box">⏰ ${esc(T.departure)}</div>
 
       <div class="section-head"><h2>Leg one: Les Gets</h2>
         <p>Three bike-park days before the water starts.</p></div>
