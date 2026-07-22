@@ -209,8 +209,8 @@
 
     return `
       <section class="hero" aria-label="Lac d’Annecy">
-        <img class="hero-bg" src="assets/ride/ride_turquoise_eastern_shore.jpg"
-             alt="Turquoise water along the eastern shore of Lac d’Annecy" fetchpriority="high" />
+        <img class="hero-bg" src="assets/wiki/hero-lake.jpg"
+             alt="Lac d’Annecy from Col de la Forclaz, paragliders overhead" fetchpriority="high" />
         <div class="hero-inner">
           <span class="eyebrow">${esc(D.TRIP.dates)} · Haute-Savoie</span>
           <h1>Lac d’Annecy</h1>
@@ -379,7 +379,7 @@
 
     return `
       <div class="detail-hero" style="min-height:160px">
-        <img src="assets/chavoire/chavoire_sunset_lake.jpg" alt="Sunset over Lac d’Annecy" />
+        <img src="assets/wiki/lake-sunset.jpg" alt="Sunset over Lac d’Annecy" />
         <div class="dh-inner">
           <div class="dh-zone">Get inspired</div>
           <h1>What kind of trip is this?</h1>
