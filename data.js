@@ -1,1087 +1,1182 @@
 /* =====================================================================
-   Lac d'Annecy — single source of truth.
-   Every screen (Home, Day, Areas, Bike, Lake, Food, Map, Trips) reads
-   from this file so the cards, area pages and map all reinforce the
-   same decision flow.
+   Annecy & Les Gets — August 2026 trip companion. Single source of truth.
 
-   Costs use simple labels: 'free' | '€' | '€€'.
-   Where a real official link wasn't certain, copy uses a [CHECK: …]
-   placeholder rather than an invented URL, price, route or opening time.
+   Everything the app shows comes from here: the trip legs and lodging,
+   the ranked activity catalogue, the dated events, transport and weather
+   guidance. Screens are VIEWS over this data — the same activity is never
+   hand-duplicated across Bike / Lake / Food / Discover.
+
+   Provenance: volatile facts carry status / availability / a source id
+   (into SOURCES) and verifiedOn. Anything not confirmed for our exact
+   dates is marked verifyBeforeGo — there are no hidden [CHECK] guesses.
+   Last verification pass: 2026-07-23 (see MAINTENANCE.md).
    ===================================================================== */
 window.DATA = (function () {
   'use strict';
 
-  /* ---------- DAY MODES ----------------------------------------------
-     The taxonomy behind "What kind of day are we having?".
-     Kept deliberately to the agreed set — no over-building. */
-  const MODES = [
-    { id: 'lake',        label: 'Lake day',         emoji: '🏊', hint: 'In and out of the water' },
-    { id: 'beach',       label: 'Beach day',        emoji: '🏖️', hint: 'Towels, lawns, slow hours' },
-    { id: 'easy-bike',   label: 'Easy bike path',   emoji: '🚲', hint: 'Flat Voie Verte, no traffic' },
-    { id: 'big-cycling', label: 'Big cycling day',  emoji: '🚴', hint: 'Real distance, real legs' },
-    { id: 'cols',        label: 'Major cols',       emoji: '⛰️', hint: 'The famous climbs' },
-    { id: 'mtb',         label: 'MTB & park',       emoji: '🚵', hint: 'Trails, pump track, velodrome' },
-    { id: 'food',        label: 'Food & market',    emoji: '🧀', hint: 'Markets, cheese, picnic' },
-    { id: 'apero',       label: 'Apéro & evening',  emoji: '🥂', hint: 'Golden hour by the water' },
-    { id: 'rainy',       label: 'Rainy day',        emoji: '🌧️', hint: 'Good even when grey' },
-    { id: 'daytrip',     label: 'Big day trip',     emoji: '🧭', hint: 'Off the lake, worth the drive' },
-    { id: 'views',       label: 'Views & heights',  emoji: '🏔️', hint: 'Up high, big horizon' },
-    { id: 'low-effort',  label: 'Low-effort',       emoji: '🛋️', hint: 'Almost no planning' },
-    { id: 'clear',       label: 'Clear-weather',    emoji: '☀️', hint: 'Save these for a blue day' },
-    { id: 'no-car',      label: 'No-car day',       emoji: '🚶', hint: 'Walk, swim, ride from home' },
-    { id: 'afternoon',   label: 'Perfect afternoon',emoji: '🌅', hint: 'One great half-day' }
-  ];
-  const MODE_BY_ID = Object.fromEntries(MODES.map(m => [m.id, m]));
+  const VERIFIED = '2026-07-23';
 
-  /* ---------- AREAS --------------------------------------------------
-     One clear mental map of the lake and its edges, ordered roughly as
-     you'd meet them: west shore down, south end, east shore up, then
-     the heights and the bigger trips. Each answers: why go, what kind
-     of day, and what it's best for. */
-  const AREAS = [
+  /* ---------- SOURCES (provenance registry) -------------------------- */
+  const SOURCES = {
+    'lac-annecy':      { url: 'https://en.lac-annecy.com/', type: 'Tourism office', on: VERIFIED },
+    'lake-loop':       { url: 'https://en.lac-annecy.com/cycle-tourism-route/cycling-route-around-lake-annecy-annecy/', type: 'Tourism office', on: VERIFIED },
+    'glieres-gravel':  { url: 'https://en.lac-annecy.com/gravel-bike-route/traversee-des-glieres-parcours-gravel-annecy/', type: 'Tourism office', on: VERIFIED },
+    'forclaz-thones':  { url: 'https://www.thonescoeurdesvallees.com/en/decouvrir/les-cols/col-de-la-forclaz/', type: 'Tourism office', on: VERIFIED },
+    'semnoz-climb':    { url: 'https://www.cols-cyclisme.com/bauges/france/cret-de-chatillon-mont-semnoz-depuis-annecy-c1069.htm', type: 'Cols database', on: VERIFIED },
+    'tour-semnoz':     { url: 'https://hautesavoiemontblanc-tourisme.com/offres/tour-du-semnoz-itineraire-cyclo-annecy-fr-5835541/', type: 'Tourism office', on: VERIFIED },
+    'lesgets-bikepark':{ url: 'https://pass.lesgets.com/en/les-gets-bikepark-summer-2026-calendar-opening-hours/', type: 'Resort operator', on: VERIFIED },
+    'lesgets-tarifs':  { url: 'https://www.lesgets.com/en/', type: 'Resort operator', on: VERIFIED },
+    'lesgets-uci':     { url: 'https://www.lesgets.com/en/events-agenda/uci-mountain-bike-world-cup/', type: 'Organizer', on: VERIFIED },
+    'semnoz-bikepark': { url: 'https://www.semnoz.fr/vtt/', type: 'Resort operator', on: VERIFIED },
+    'semnoz-station':  { url: 'https://www.semnoz.fr/activites-de-la-station/', type: 'Resort operator', on: VERIFIED },
+    'laclusaz-bikepark':{ url: 'https://www.laclusaz.com/en/mountain-bike/bikepark/', type: 'Tourism office', on: VERIFIED },
+    'gb-mtb':          { url: 'https://www.legrandbornand.com/quoi-faire/sports-loisirs-bien-etre/domaine-ete/', type: 'Tourism office', on: VERIFIED },
+    'pumptrack-duingt':{ url: 'https://en.lac-annecy.com/equipment/pumptrack-duingt/', type: 'Tourism office', on: VERIFIED },
+    'la-tournette':    { url: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/la-tournette-depuis-montmin-talloires-montmin/', type: 'Tourism office', on: '2026-07-26' },
+    'thones-vf':       { url: 'https://www.thonescoeurdesvallees.com/en/equipement/via-ferrata-de-la-roche-a-lagathe/', type: 'Tourism office', on: '2026-07-26' },
+    'jallouvre-vf':    { url: 'https://en.legrandbornand.com/what-to-do/via-ferrata-la-tour-du-jallouvre-le-grand-bornand-en-5595979/', type: 'Tourism office', on: VERIFIED },
+    'mont-veyrier':    { url: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/boucle-du-mont-veyrier-annecy/', type: 'Tourism office', on: VERIFIED },
+    'parmelan':        { url: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/le-plateau-du-parmelan-filliere/', type: 'Tourism office', on: VERIFIED },
+    'trois-lacs':      { url: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/le-circuit-des-trois-lacs-semnoz-viuz-la-chiesaz/', type: 'Tourism office', on: VERIFIED },
+    'glieres-walk':    { url: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/a-la-decouverte-du-plateau-des-glieres-filliere/', type: 'Tourism office', on: VERIFIED },
+    'roc-de-chere':    { url: 'https://www.cen-haute-savoie.org/reserves-naturelles/roc-de-chere/', type: 'Nature reserve (Asters)', on: VERIFIED },
+    'accro-talloires': { url: 'https://en.lac-annecy.com/service/acroaventures-talloires-talloires-montmin/', type: 'Tourism office', on: VERIFIED },
+    'canyon-angon':    { url: 'https://en.lac-annecy.com/activite-reservable/canyoning-angon-discovery/', type: 'Tourism office / guide', on: VERIFIED },
+    'canyon-montmin':  { url: 'https://www.annecyguidesmontagne.com/aventures/canyon-montmin-sportif', type: 'Mountain guides', on: VERIFIED },
+    'parapente':       { url: 'https://annecy.takamaka.fr/fr/p/parapente-annecy', type: 'Operator', on: VERIFIED },
+    'ledeck':          { url: 'https://www.ledeck-veyrier.com/en/', type: 'Operator', on: VERIFIED },
+    'cv-sevrier':      { url: 'https://www.cvsevrier.fr/', type: 'Sailing club', on: VERIFIED },
+    'diving':          { url: 'https://en.lac-annecy.com/activite-bookable/first-dive/', type: 'Tourism office', on: VERIFIED },
+    'navibus':         { url: 'https://www.bateaux-annecy.com/our-sightseeing-cruises/navibus/', type: 'Boat operator', on: VERIFIED },
+    'gorges-fier':     { url: 'https://www.gorgesdufier.com/en/useful-info-2026-season.html', type: 'Operator', on: VERIFIED },
+    'halles-haras':    { url: 'https://biltoki.com/halles/halles-du-haras', type: 'Operator', on: VERIFIED },
+    'musee-anim':      { url: 'https://www.citeanimationannecy.com/en/programme/musee-du-cinema-danimation', type: 'Museum', on: VERIFIED },
+    'musees-annecy':   { url: 'https://musees.annecy.fr/visiter/horaires-et-tarifs', type: 'Municipal', on: VERIFIED },
+    'annecy-market':   { url: 'https://www.annecy.fr/annuaires/agendas/detail/marche-de-la-vieille-ville', type: 'Municipal', on: VERIFIED },
+    'pierre-gay':      { url: 'https://www.haute-savoie-tourisme.org/commerces/alimentaire/fromageries/764734-fromagerie-pierre-gay', type: 'Tourism office', on: VERIFIED },
+    'cave-michel':     { url: 'https://www.lac-annecy.com/alti_alliance_post/visite-de-cave-et-atelier-degustation/', type: 'Tourism office', on: VERIFIED },
+    'veyrier-market':  { url: 'https://www.veyrier-du-lac.fr/index.php/marches-et-commerces/', type: 'Municipal', on: VERIFIED },
+    'veyrier-crea':    { url: 'https://www.veyrier-du-lac.fr/marche-des-createurs/', type: 'Municipal', on: VERIFIED },
+    'glieres-sites':   { url: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/', type: 'Departmental', on: VERIFIED },
+    'imperial-fest':   { url: 'https://en.lac-annecy.com/event/imperial-annecy-festival-2026-annecy/', type: 'Tourism office', on: VERIFIED },
+    'cine-plein-air':  { url: 'https://www.annecy.fr/activites/evenements/cine-plein-air-2026', type: 'Municipal', on: VERIFIED },
+    'bouquetin':       { url: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/agenda/27eme-grimpee-cycliste-le-bouquetin-le-grand-bornand-fr-4806997/', type: 'Tourism office', on: VERIFIED },
+    'momes':           { url: 'https://en.legrandbornand.com/what-to-do/events-and-entertainment/highlights/au-bonheur-des-momes-festival/', type: 'Tourism office', on: VERIFIED },
+    'morillon-uci':    { url: 'https://www.ucimtbworldseries.com/', type: 'Organizer', on: VERIFIED },
+    'mobilite':        { url: 'https://mobilites.grandannecy.fr/lac', type: 'Transport authority', on: VERIFIED },
+    'mobil-ete':       { url: 'https://en.lac-annecy.com/mobil-ete/', type: 'Tourism office', on: VERIFIED },
+    'parking-annecy':  { url: 'https://www.annecy.fr/quotidien/deplacement-et-stationnement/travaux-2026', type: 'Municipal', on: VERIFIED },
+    'meteo':           { url: 'https://meteofrance.com/previsions-meteo-france/haute-savoie/74', type: 'Météo-France', on: VERIFIED },
+    'meteo-montagne':  { url: 'https://meteofrance.com/meteo-montagne/alpes-du-nord', type: 'Météo-France', on: VERIFIED },
+    'vigilance':       { url: 'https://vigilance.meteofrance.fr/', type: 'Météo-France', on: VERIFIED },
+    'windfinder':      { url: 'https://fr.windfinder.com/forecast/veyrier_du_lac_lake_annecy', type: 'Wind forecast (private)', on: VERIFIED },
+    'blue-secret':     { url: 'https://blue-secret.com/en/annecy-english-new/', type: 'Operator', on: '2026-07-26' },
+    'skiwake74':       { url: 'https://www.skiwake74.com/en/', type: 'Operator', on: '2026-07-26' },
+    'ncy-sup':         { url: 'https://ncy-sup.com/', type: 'Operator', on: '2026-07-26' },
+    'leshouches':      { url: 'https://leshouches.montblancnaturalresort.com/en/', type: 'Resort operator', on: '2026-07-26' },
+    'coop-thones':     { url: 'https://hautesavoiemontblanc-tourisme.com/en/offers/visite-de-la-cooperative-du-reblochon-fermier-thones-en-5867525/', type: 'Tourism office', on: '2026-07-26' },
+    'cheran-ban':      { url: 'https://mairie-alby-sur-cheran.fr/cheran-baignade-interdite/', type: 'Municipal', on: '2026-07-26' }
+  };
+
+  /* ---------- TRIP: legs, bases, stays (personal, kept in full) ------
+     Two ACTIVITY BASES (Les Gets vs the lake) drive what's relevant;
+     three STAYS drive lodging/logistics. Dates are Europe/Paris. */
+  const BASES = {
+    lesgets: { id: 'lesgets', label: 'Les Gets', coords: [46.1505, 6.6679] },
+    lake:    { id: 'lake', label: 'Veyrier-du-Lac', coords: [45.8758, 6.1852] }
+  };
+
+  const TRIP = {
+    window: { start: '2026-08-12', end: '2026-08-29' },
+    datesLabel: '12–29 August 2026',
+    tz: 'Europe/Paris'
+  };
+
+  // Stays double as the leg model. baseId = which activity world applies.
+  const STAYS = [
     {
-      id: 'annecy', name: 'Annecy', zone: 'Top of the lake',
-      coords: [45.8992, 6.1294],
-      supports: ['food', 'wander', 'lake'],
-      why: 'The old town: canals, market, gelato, a town swim two minutes from the bustle.',
-      day: 'Market mornings, rainy-day wandering, an easy ride in and out.',
-      water: 'Plage des Marquisats — concrete steps into clean water.',
-      food: 'Sun / Tue / Fri morning market in the old town.',
-      photo: 'assets/wiki/annecy-old-town.jpg',
-      official: 'https://www.lac-annecy.com'
+      id: 'stay-lesgets', baseId: 'lesgets', legLabel: 'Leg 1 · Les Gets',
+      name: 'Appartement au pied des pistes', village: 'Les Gets',
+      address: '627 Route de la Turche, 74260 Les Gets',
+      coords: [46.15045, 6.66785],
+      start: '2026-08-12', end: '2026-08-15',
+      dates: 'Wed 12 Aug → Sat 15 Aug',
+      checkin: 'From 16:00 · self check-in (lockbox — code arrives 48 h before)',
+      checkout: 'By 11:00',
+      features: ['At the foot of the slopes', 'Sleeps 4 max', 'No pets'],
+      photo: 'assets/wiki/les-gets-village.jpg'
     },
     {
-      id: 'sevrier', name: 'Sévrier', zone: 'West shore · across the water',
-      coords: [45.8584, 6.1383],
-      supports: ['lake', 'bikes', 'food'],
-      why: 'The easy-going west shore, straight across from home — where the Voie Verte bike path runs.',
-      day: 'Voie Verte rides, west-shore beach stops, lake-fish lunch.',
-      water: 'Public stretch — walk in, repeat.',
-      food: 'Bakery, small market, lake-fish lunch on the water.',
-      photo: 'assets/wiki/sevrier.jpg'
-    },
-    {
-      id: 'st-jorioz', name: 'Saint-Jorioz', zone: 'West shore · sandy beach',
-      coords: [45.8245, 6.1641],
-      supports: ['beach', 'lake'],
-      why: 'The big sandy beach. Bring towels and do very little.',
-      day: 'A full, lazy beach day with shade and space.',
-      water: 'Sand entry and lawns. Paid + lifeguarded 9:30–17:30 through 31 Aug 2026 (€2.60 adult; €1 after 16:30).',
-      food: 'Buvette snack or a market picnic.',
-      photo: 'assets/wiki/st-jorioz.jpg'
-    },
-    {
-      id: 'duingt', name: 'Duingt', zone: 'The narrows · château',
-      coords: [45.8086, 6.2051],
-      supports: ['lake', 'food', 'wander'],
-      why: 'Where the lake pinches. Château on the point, the clearest water under the bridges.',
-      day: 'Bike there, lunch, swim, ride home before the heat.',
-      water: 'Small public spots — clear, cool, calm.',
-      food: 'Lakeside lunch looking onto the petit lac.',
-      photo: 'assets/wiki/duingt.jpg'
-    },
-    {
-      id: 'doussard', name: 'Doussard / Bout-du-Lac', zone: 'South end · grassy & flat',
-      coords: [45.7826, 6.2197],
-      supports: ['beach', 'lake', 'bikes'],
-      why: 'Big grassy beach, mountains on three sides, the calmest water for SUP and floating.',
-      day: 'Hot, lazy days and group sprawl.',
-      water: 'Walk in from the lawns; paddle out and drift.',
-      food: 'Picnic. The Voie Verte ends near here.',
-      photo: 'assets/wiki/doussard.jpg'
-    },
-    {
-      id: 'angon', name: 'Angon', zone: 'East shore · quieter',
-      coords: [45.8345, 6.2206],
-      supports: ['lake', 'apero', 'wander'],
-      why: 'Talloires’ quiet neighbour. A stream into the lake, the same château view, less volume.',
-      day: 'A long swim, then beach apéro into the evening.',
-      water: 'Free public beach, supervised 12:30–18:30 in summer; cooler near the stream.',
-      food: 'Beach bar with your feet near the water.',
-      photo: 'assets/wiki/angon.jpg'
-    },
-    {
-      id: 'talloires', name: 'Talloires', zone: 'East shore · bay',
-      coords: [45.8404, 6.2167],
-      supports: ['lake', 'food', 'apero'],
-      why: 'Clear water, docks, boats. The lake gets a little less subtle here, in a good way.',
-      day: 'Diving boards, a lunch out, swim, repeat.',
-      water: 'Plage de Talloires-Montmin — free entry, supervised 12:30–18:30 in summer; paddling pool and boards.',
-      food: 'Lake-edge lunch; book ahead on Saturdays.',
-      photo: 'assets/wiki/talloires.jpg'
-    },
-    {
-      id: 'menthon', name: 'Menthon-Saint-Bernard', zone: 'East shore · pontoons',
-      coords: [45.8624, 6.1978],
-      supports: ['lake', 'beach', 'wander'],
-      why: 'Floating pontoons below, a storybook château above. Best ratio of swim to crowd.',
-      day: 'Pontoon swims and a walk after dinner.',
-      water: 'Plage de Menthon — walk the pontoon, jump, repeat. Paid in summer (€4.60 adult), supervised 10:00–19:00.',
-      food: 'Beach snack bar; dinners up in the village.',
-      photo: 'assets/wiki/menthon-chateau.jpg',
-      official: 'https://www.chateau-de-menthon.com'
-    },
-    {
-      id: 'veyrier', name: 'Veyrier-du-Lac', zone: 'East shore · home base',
-      coords: [45.8830, 6.1717],
-      supports: ['lake', 'bikes', 'food'],
-      why: 'Home for the lake weeks. La Brune beach below the village, Annecy ten minutes up the shore path, and the whole east shore on your doorstep.',
-      day: 'The walk-down swim, the default no-car day, every evening.',
-      water: 'La Brune — free beach, flat lawn, walk-in. Lifeguards daily 11:00–19:00 through 31 Aug 2026.',
-      food: 'Two bakeries, a Petit Casino and a Friday-morning market in the village; Annecy is a short ride up the path.',
+      id: 'stay-guerres', baseId: 'lake', legLabel: 'Leg 2 · Veyrier-du-Lac',
+      name: 'House with views (Olivier’s)', village: 'Veyrier-du-Lac',
+      address: '14 Chemin des Guerres, 74290 Veyrier-du-Lac',
+      coords: [45.87499, 6.18190],
+      start: '2026-08-15', end: '2026-08-22',
+      dates: 'Sat 15 Aug → Sat 22 Aug',
+      checkin: 'From 16:00 · host meets you in person — agree a time',
+      checkout: 'By 9:00 — early!',
+      features: ['~300 m from the lake', 'Courtyard parking for 2–3 cars', 'Level access from the courtyard', 'Quiet hours 23:00–7:00'],
       photo: 'assets/wiki/veyrier.jpg'
     },
     {
-      id: 'roc-de-chere', name: 'Roc de Chère', zone: 'East shore · nature reserve',
-      coords: [45.8533, 6.2050],
-      supports: ['wander', 'views'],
-      why: 'A forested headland between Talloires and Menthon — shade and quiet between swims.',
-      day: 'A short woods loop to break up a beach day.',
-      water: 'Pebbly entries on the south side; scout before you commit.',
-      food: 'Snack now, eat in Talloires or Menthon after.',
-      photo: 'assets/wiki/roc-de-chere.jpg'
-    },
-    {
-      id: 'semnoz', name: 'Le Semnoz', zone: 'Above the west shore · ~1700 m',
-      coords: [45.7970, 6.1040],
-      supports: ['views', 'bikes'],
-      why: 'The drive-up (or ride-up) ridge with the whole lake below and Mont-Blanc on a clear day.',
-      day: 'A picnic with a view, or a real climb on the bike.',
-      water: '—',
-      food: 'Bring a market picnic; a few buvettes up top.',
-      photo: 'assets/wiki/semnoz.jpg',
-      official: 'https://www.semnoz.fr'
-    },
-    {
-      id: 'forclaz', name: 'Col de la Forclaz', zone: 'Above the east shore · ~1250 m',
-      coords: [45.8070, 6.2440],
-      supports: ['views', 'food'],
-      why: 'The classic lake-from-above. Paragliders peel off the launch while you eat on the lawn.',
-      day: 'A short drive (or a climb) for lunch with the best seat on the lake.',
-      water: '—',
-      food: 'Farm-restaurant terrace looking down the whole lake.',
-      photo: 'assets/wiki/forclaz.jpg'
-    },
-    {
-      id: 'aravis', name: 'Aravis / La Clusaz', zone: 'East over the passes · ~30–40 min',
-      coords: [45.9040, 6.4230],
-      supports: ['daytrip', 'food', 'bikes', 'views'],
-      why: 'Reblochon country: green mountain villages, lift-served trails, cheese straight from the farm.',
-      day: 'A day trip — cols on the bike, MTB in the park, or a cheese-and-views drive.',
-      water: '—',
-      food: 'Reblochon direct from Aravis farms; markets in Thônes.',
-      photo: 'assets/wiki/aravis-village.jpg',
-      official: 'https://www.laclusaz.com'
-    },
-    {
-      id: 'chamonix', name: 'Chamonix', zone: 'Mont-Blanc valley · ~1h20',
-      coords: [45.9237, 6.8694],
-      supports: ['daytrip', 'views'],
-      why: 'The big one. Glaciers, the Aiguilles, an alpine town that means business.',
-      day: 'A clear-weather day trip — go when the peaks are out, not when it’s grey.',
-      water: '—',
-      food: 'Town brasseries; pack the day around the weather.',
-      photo: 'assets/wiki/chamonix.jpg',
-      official: 'https://www.chamonix.com'
-    },
-    {
-      id: 'les-gets', name: 'Les Gets', zone: 'Portes du Soleil · first stop',
-      coords: [46.1558, 6.6697],
-      supports: ['bikes', 'views', 'wander'],
-      why: 'Where the trip starts: three nights in a bike-park town, with the apartment at the foot of the slopes.',
-      photo: 'assets/wiki/les-gets-village.jpg',
-      day: 'Lift-served MTB, a village wander, mountain air before the lake.',
-      water: '—',
-      food: 'Village restaurants and shops; do the big grocery run before the Saturday drive to the lake.',
-      official: 'https://www.lesgets.com'
-    }
-  ];
-  const AREA_BY_ID = Object.fromEntries(AREAS.map(a => [a.id, a]));
-
-  // Which stretch of the lake each area belongs to (for "get your bearings").
-  const REGION_OF = {
-    annecy: 'top',
-    sevrier: 'west', 'st-jorioz': 'west', duingt: 'west',
-    doussard: 'south',
-    veyrier: 'east', menthon: 'east', talloires: 'east', angon: 'east', 'roc-de-chere': 'east',
-    semnoz: 'heights', forclaz: 'heights',
-    aravis: 'beyond', chamonix: 'beyond', 'les-gets': 'beyond'
-  };
-  AREAS.forEach(a => { a.region = REGION_OF[a.id] || 'beyond'; });
-
-  /* ---------- PLANS --------------------------------------------------
-     The decision payload. Simple, useful cards — title, one line, where,
-     rough time, rough cost, a few day-modes, and a short note only when
-     it earns its place. Each plan points back to an area (for the map). */
-  const PLANS = [
-    {
-      id: 'home-swim', title: 'Walk down to La Brune', areaId: 'veyrier',
-      desc: 'Towel under your arm, a few minutes downhill from the house, swim, dry on the lawn, wander back up.',
-      time: '1–2 hr', cost: 'free',
-      modes: ['lake', 'low-effort', 'no-car', 'afternoon'],
-      note: 'The home-base default when nobody can decide. Free Pavillon Bleu beach.'
-    },
-    {
-      id: 'st-jorioz-beach', title: 'Beach day at Saint-Jorioz', areaId: 'st-jorioz',
-      desc: 'Sand entry, lawns and shade — the easy full-day beach.',
-      time: 'Half–full day', cost: '€',
-      modes: ['beach', 'lake', 'low-effort', 'clear'],
-      note: 'Paid entry in summer (€2.60 adult, €1 after 16:30); lifeguards 9:30–17:30 through 31 Aug 2026.'
-    },
-    {
-      id: 'doussard-sprawl', title: 'Sprawl at Bout-du-Lac', areaId: 'doussard',
-      desc: 'Grassy beach, mountains on three sides, the calmest water to float on.',
-      time: 'Full day', cost: 'free',
-      modes: ['beach', 'lake', 'low-effort', 'clear', 'views'],
-      note: 'Best with a group and a SUP. Picnic — bring everything.'
-    },
-    {
-      id: 'duingt-bike-lunch', title: 'Bike to Duingt for lunch', areaId: 'duingt',
-      desc: 'Ride the lake path south, château view, lunch, swim, roll home.',
-      time: 'Half day', cost: '€€',
-      modes: ['easy-bike', 'food', 'lake', 'afternoon', 'no-car'],
-      note: 'Arrive by bike — driving kills the point.'
-    },
-    {
-      id: 'voie-verte-south', title: 'Voie Verte south', areaId: 'doussard',
-      desc: 'Ride through Annecy onto the flat, separated west-shore path and follow the lake all the way to Bout-du-Lac.',
-      time: 'Half day', cost: 'free',
-      modes: ['easy-bike', 'no-car', 'lake', 'low-effort'],
-      note: 'From home: shore path into Annecy, then pick up the Voie Verte. Clearest water under the bridges near Duingt.'
-    },
-    {
-      id: 'east-shore-swim', title: 'Home ride: shore path to Annecy', areaId: 'veyrier',
-      desc: 'Roll from the house along the lake wall — tree shade at Chavoire, swim stops on the way, coffee in the old town.',
-      time: 'Half day', cost: 'free',
-      modes: ['easy-bike', 'lake', 'afternoon', 'no-car'],
-      note: 'Your default ride: ~10 minutes each way, water the whole time.'
-    },
-    {
-      id: 'menthon-pontoons', title: 'Pontoon day at Menthon', areaId: 'menthon',
-      desc: 'Walk out on the floating pontoons, jump, sun-dry, repeat.',
-      time: 'Half day', cost: '€',
-      modes: ['lake', 'beach', 'afternoon', 'clear'],
-      note: 'The pontoon day. Do it here. Paid in summer (€4.60 adult), supervised 10:00–19:00.'
-    },
-    {
-      id: 'angon-apero', title: 'Swim + apéro at Angon', areaId: 'angon',
-      desc: 'Long late swim, then saucisson and a drink with your feet near the water.',
-      time: 'Afternoon → evening', cost: '€€',
-      modes: ['apero', 'lake', 'afternoon'],
-      note: 'The “we stayed for dinner” beach.'
-    },
-    {
-      id: 'perfect-afternoon', title: 'One perfect afternoon', areaId: 'menthon',
-      desc: 'Swim at Menthon → woods loop on Roc de Chère → apéro at Angon.',
-      time: 'Afternoon', cost: '€',
-      modes: ['afternoon', 'lake', 'apero', 'low-effort'],
-      note: 'If you only get one good half-day, this is it.'
-    },
-    {
-      id: 'market-cook', title: 'Annecy market, then cook', areaId: 'annecy',
-      desc: 'Ride in for the morning market — cheese, charcuterie, peaches — swim, ride home, cook it all.',
-      time: 'Morning', cost: '€€',
-      modes: ['food', 'no-car', 'low-effort'],
-      note: 'Old-town market: Tue / Fri / Sun 07:00–13:00 (Tuesday is food-only) — confirmed for 2026.',
-      official: 'https://www.lac-annecy.com'
-    },
-    {
-      id: 'savoyard-night', title: 'One Savoyard cheese night', areaId: 'veyrier',
-      desc: 'Tartiflette, raclette or fondue — once, not three times in August.',
-      time: 'Evening', cost: '€€',
-      modes: ['food', 'apero', 'rainy'],
-      note: 'Save it for a cooler evening, ideally up the hill.'
-    },
-    {
-      id: 'boat-half-day', title: 'Lake-bus half day', areaId: 'annecy',
-      desc: 'The Navibus shuttle stops at nine ports — including Veyrier, 15 minutes across from Annecy. Bike one way, float back.',
-      time: 'Half day', cost: '€€',
-      modes: ['lake', 'low-effort', 'no-car', 'afternoon'],
-      note: 'Three departures daily through 28 Aug 2026 (from Annecy 10:00 / 14:30 / 17:15); from €8 one-way, bikes +€6.',
-      official: 'https://www.bateaux-annecy.com'
-    },
-    {
-      id: 'semnoz-picnic', title: 'Picnic on the Semnoz ridge', areaId: 'semnoz',
-      desc: 'Drive (or ride) up to the flat ridge for the whole-lake view and a market picnic.',
-      time: 'Half day', cost: 'free',
-      modes: ['views', 'clear', 'low-effort', 'food'],
-      note: 'Mont-Blanc on a clear day; no edge exposure on the ridge walk.',
-      official: 'https://www.semnoz.fr'
-    },
-    {
-      id: 'forclaz-lunch', title: 'Lunch above the lake', areaId: 'forclaz',
-      desc: 'Up to Col de la Forclaz for lunch on the lawn while the paragliders drop in.',
-      time: 'Half day', cost: '€€',
-      modes: ['views', 'clear', 'food', 'afternoon'],
-      note: 'Best seat on the lake. We watch from the lawn.'
-    },
-    {
-      id: 'mont-veyrier-walk', title: 'Walk up Mont Veyrier', areaId: 'veyrier',
-      desc: 'Half-day climb on the east-shore ridge for the full lake from the trail.',
-      time: 'Half day', cost: 'free',
-      modes: ['views', 'clear'],
-      note: 'A proper walk-up. [CHECK: trailhead & timing]'
-    },
-    {
-      id: 'roc-walk', title: 'Forest loop on Roc de Chère', areaId: 'roc-de-chere',
-      desc: 'A short, shaded woods loop in the reserve between two swims.',
-      time: '1–2 hr', cost: 'free',
-      modes: ['low-effort', 'views', 'afternoon', 'rainy']
-    },
-    {
-      id: 'cascade-angon', title: 'Cool-off walk to Cascade d’Angon', areaId: 'angon',
-      desc: 'Short, mossy climb to a waterfall — the cool corner on a hot day.',
-      time: '1–2 hr', cost: 'free',
-      modes: ['low-effort', 'afternoon', 'views']
-    },
-    {
-      id: 'semnoz-climb', title: 'Climb the Semnoz by bike', areaId: 'semnoz',
-      desc: 'The local benchmark climb from the lake up to the ridge.',
-      time: 'Half day', cost: 'free',
-      modes: ['big-cycling', 'cols', 'views'],
-      note: '[CHECK: distance, elevation gain & gradient]'
-    },
-    {
-      id: 'aravis-cols', title: 'Big col day in the Aravis', areaId: 'aravis',
-      desc: 'Link the famous passes east of the lake for a real day in the saddle.',
-      time: 'Full day', cost: 'free',
-      modes: ['big-cycling', 'cols', 'views', 'daytrip', 'clear'],
-      note: 'Cols de la Forclaz / des Aravis / de la Croix-Fry nearby. [CHECK: route & which cols]'
-    },
-    {
-      id: 'scenic-loop', title: 'Scenic road loop of the lake', areaId: 'talloires',
-      desc: 'The road circuit of the lake — rolling, scenic, a proper outing.',
-      time: 'Half day', cost: 'free',
-      modes: ['big-cycling', 'views', 'clear'],
-      note: 'Quieter and prettier on the east shore. [CHECK: distance & traffic notes]'
-    },
-    {
-      id: 'laclusaz-mtb', title: 'Lift MTB & bike park', areaId: 'aravis',
-      desc: 'Shuttle up, ride down — lift-served mountain biking in the Aravis in summer.',
-      time: 'Full day', cost: '€€',
-      modes: ['mtb', 'daytrip'],
-      note: 'Lifts run daily through 30 Aug 2026; La Clusaz day pass €23.50 (ages 5–14 €19). Grand-Bornand’s Rosay gondola also carries bikes daily to 30 Aug.',
-      official: 'https://www.laclusaz.com'
-    },
-    {
-      id: 'pump-velodrome', title: 'Pump-track laps', areaId: 'annecy',
-      desc: 'Low-commitment wheels: free public pump tracks a short ride or drive away.',
-      time: '1 hr', cost: 'free',
-      modes: ['mtb', 'low-effort', 'afternoon'],
-      note: 'Closest: Argonay (~8 km). Best: Duingt — free, open year-round, two loops plus a kids’ circuit. (No velodrome exists in Haute-Savoie; the nearest track is Geneva’s indoor 250 m.)'
-    },
-    {
-      id: 'rainy-gorges', title: 'Gorges du Fier + château', areaId: 'annecy',
-      desc: 'A walkway pinned along a slot canyon, paired with the medieval keep next door.',
-      time: 'Half day', cost: '€',
-      modes: ['rainy', 'views', 'daytrip'],
-      note: 'Cool and shaded — good on a hot day too. Open daily through 15 Oct 2026; August hours 9:30–19:15 (last entry 18:15), €6 adult / €3 child.',
-      official: 'https://www.gorgesdufier.com'
-    },
-    {
-      id: 'rainy-town', title: 'Rainy day in the old town', areaId: 'annecy',
-      desc: 'Covered market arcades, the Palais de l’Île, a long lunch, cheese shopping.',
-      time: 'Flexible', cost: '€€',
-      modes: ['rainy', 'food', 'low-effort', 'no-car'],
-      note: 'Palais de l’Île is open daily except Tuesday — summer hours roughly 10:30–18:00, €5.'
-    },
-    {
-      id: 'chamonix-day', title: 'Clear-day trip to Chamonix', areaId: 'chamonix',
-      desc: 'Drive over for the town, the glacier valley and the big peaks.',
-      time: 'Full day', cost: '€€',
-      modes: ['daytrip', 'views', 'clear'],
-      note: 'Go only when the summits are out — about 1h20 each way by car. [CHECK: lift / Montenvers train info]',
-      official: 'https://www.chamonix.com'
-    },
-    {
-      id: 'aravis-cheese', title: 'Aravis & Reblochon run', areaId: 'aravis',
-      desc: 'Mountain villages, a cheese cellar or farm, loop home through Thônes.',
-      time: 'Full day', cost: '€',
-      modes: ['daytrip', 'food', 'views'],
-      note: 'Closer and greener than Chamonix; good on a so-so day.',
-      official: 'https://www.laclusaz.com'
-    },
-    {
-      id: 'no-car-day', title: 'No-car day from the house', areaId: 'veyrier',
-      desc: 'Bakery → La Brune swim → shaded path into Annecy for coffee → wall-sit at Chavoire → home for dinner.',
-      time: 'Full day', cost: '€',
-      modes: ['no-car', 'low-effort', 'lake', 'food'],
-      note: 'Everything on foot or by bike — the east-shore path starts minutes from the door.'
-    },
-    {
-      id: 'pool-evening', title: 'Pool + BBQ at Casa Elisa', areaId: 'veyrier',
-      desc: 'Second-week luxury: pool afternoon on the terrace, then barbecue as the light goes gold over the lake.',
-      time: 'Afternoon → evening', cost: 'free',
-      modes: ['low-effort', 'apero', 'no-car', 'afternoon'],
-      note: 'The Aug 22–29 apartment has the private pool, terrace, BBQ and lake view. Zero logistics.'
-    },
-    {
-      id: 'glieres-day', title: 'Plateau des Glières pilgrimage',
-      where: 'Bornes plateau · NE of the lake',
-      mapPlace: 'm-glieres',
-      media: { photo: 'assets/wiki/glieres.jpg' },
-      desc: 'Drive up to the high plateau where the maquis made their stand — the national monument, big-sky walking, and the Resistance museum at Morette on the way home.',
-      time: 'Half–full day', cost: 'free',
-      modes: ['daytrip', 'views'],
-      effort: 'medium', carNeeded: true,
-      note: 'Plateau and monument: free, open ground, ~45 min drive. Morette museum: 10:00–12:30 & 14:00–18:00, €3 — closed Mondays (that’s Aug 17 & 24).',
-      official: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/'
-    },
-    {
-      id: 'les-gets-bikepark', title: 'Bike-park day at Les Gets', areaId: 'les-gets',
-      media: { photo: 'assets/wiki/les-gets-mtb.jpg' },
-      desc: 'Lift-served downhill and flow trails, starting from the front door — the Aug 12–15 apartment sits at the foot of the slopes.',
-      time: 'Full day', cost: '€€',
-      modes: ['mtb', 'daytrip'],
-      effort: 'big', carNeeded: true,
-      note: 'Open daily through the stay (full season 19 Jun–13 Sep 2026); Portes du Soleil day pass ~€39, single rides ~€9.50. From the lake it’s a ~1h15 drive; during leg one it’s home turf.',
-      official: 'https://www.lesgets.com'
-    }
-  ];
-  const PLAN_BY_ID = Object.fromEntries(PLANS.map(p => [p.id, p]));
-
-  /* Derive lightweight decision fields so "Build a day" and filters work
-     without hand-tagging every plan. Explicit values on a plan win. */
-  function deriveEffort(p) {
-    if (p.effort) return p.effort;
-    if (p.modes.some(m => ['big-cycling', 'cols', 'mtb', 'daytrip'].includes(m))) return 'big';
-    if (p.modes.includes('low-effort')) return 'low';
-    if (/full day/i.test(p.time)) return 'big';
-    if (/1–2 hr|afternoon|morning|evening|flexible/i.test(p.time)) return 'low';
-    return 'medium';
-  }
-  function deriveCar(p) {
-    if (typeof p.carNeeded === 'boolean') return p.carNeeded;
-    if (p.modes.includes('no-car')) return false;
-    if (p.modes.some(m => ['daytrip', 'cols', 'mtb'].includes(m))) return true;
-    const a = AREA_BY_ID[p.areaId];
-    if (a && ['semnoz', 'forclaz', 'aravis', 'chamonix'].includes(a.id)) return true;
-    return false;
-  }
-  PLANS.forEach(p => {
-    p.effort = deriveEffort(p);
-    p.carNeeded = deriveCar(p);
-    p.weather = p.modes.includes('clear') ? 'clear' : 'any';
-  });
-
-  /* ---------- BIKE ---------------------------------------------------
-     A dedicated bike brain: casual to serious. Route specifics are left
-     as [CHECK: …] rather than invented. */
-  const BIKE = [
-    {
-      group: 'Easy lake path · Voie Verte',
-      items: [
-        { name: 'Sévrier → Doussard (Voie Verte)', desc: 'Flat, separated, lake the whole way. The default casual ride.', meta: 'Easy · free', planId: 'voie-verte-south' },
-        { name: 'Annecy → Veyrier (east shore)', desc: 'Tree shade past Chavoire, lake wall, ~15 min by bike.', meta: 'Easy · free', planId: 'east-shore-swim' }
-      ]
-    },
-    {
-      group: 'Bike-to-swim',
-      items: [
-        { name: 'Ride to Duingt for lunch', desc: 'Lake path south, château, lunch, swim, home.', meta: 'Easy · half day', planId: 'duingt-bike-lunch' },
-        { name: 'Path-and-plunge laps', desc: 'String together Marquisats, Chavoire and Veyrier on the east shore.', meta: 'Easy · free', planId: 'east-shore-swim' }
-      ]
-    },
-    {
-      group: 'Major climbs & cols',
-      items: [
-        { name: 'Le Semnoz', desc: 'The local benchmark — lake to ridge. [CHECK: length & gradient]', meta: 'Hard · free', planId: 'semnoz-climb' },
-        { name: 'Col de la Forclaz', desc: 'Steep climb to the paraglider launch and the lake-from-above view.', meta: 'Hard · free', areaId: 'forclaz' },
-        { name: 'Aravis passes', desc: 'Forclaz / Aravis / Croix-Fry country east of the lake. [CHECK: which cols]', meta: 'Epic · free', planId: 'aravis-cols' }
-      ]
-    },
-    {
-      group: 'Scenic road rides',
-      items: [
-        { name: 'Full lake road loop', desc: 'Rolling circuit; prettier and quieter on the east shore. [CHECK: distance]', meta: 'Medium · free', planId: 'scenic-loop' }
-      ]
-    },
-    {
-      group: 'MTB, bike park & pump track',
-      items: [
-        { name: 'La Clusaz / Grand-Bornand bike park', desc: 'Lift-served descents daily through 30 Aug 2026; La Clusaz day pass €23.50.', meta: 'Day trip · €€', planId: 'laclusaz-mtb', official: 'https://www.laclusaz.com' },
-        { name: 'Pump tracks', desc: 'Argonay (~8 km) and Duingt (free, year-round, two loops + kids’ circuit).', meta: 'Casual · free', planId: 'pump-velodrome' },
-        { name: 'Velodrome? Nope.', desc: 'No track exists in Haute-Savoie — nearest is Geneva’s indoor 250 m, mainly a winter programme.', meta: 'FYI', planId: 'pump-velodrome' }
-      ]
-    },
-    {
-      group: 'Rentals & links',
-      items: [
-        { name: 'Bike rental — Veyrier & Annecy', desc: 'Cayoti rents at Veyrier’s Plage du Plant (from ~€22/day); Roul’ ma Poule at Petit Port is a 2.5 km pedal; Takamaka in town has carbon road bikes (~€59/day). Book ahead in August.', meta: 'From ~€22/day' },
-        { name: 'Lake destination info', desc: 'Official destination site for routes and services.', meta: 'Official', official: 'https://www.lac-annecy.com' }
-      ]
-    }
-  ];
-
-  /* ---------- LAKE & BEACHES ----------------------------------------- */
-  const LAKE = [
-    {
-      group: 'Beaches & swimming',
-      items: [
-        { name: 'Saint-Jorioz', desc: 'Big sandy west-shore beach, lawns and shade.', tag: 'Sand · €', areaId: 'st-jorioz' },
-        { name: 'Bout-du-Lac (Doussard)', desc: 'Grassy south-end beach, calmest water, mountains around.', tag: 'Grass · free', areaId: 'doussard' },
-        { name: 'Menthon pontoons', desc: 'Floating pontoons to jump from and dry off on.', tag: 'Pontoon · €', areaId: 'menthon' },
-        { name: 'La Brune, Veyrier', desc: 'Free beach below the house — lifeguards 11:00–19:00 all August.', tag: 'Free swim', areaId: 'veyrier' },
-        { name: 'Plage des Marquisats, Annecy', desc: 'Town swim — steps into clean water by the old town.', tag: 'Town · free', areaId: 'annecy' }
-      ]
-    },
-    {
-      group: 'Low-effort lake afternoons',
-      items: [
-        { name: 'Walk down to La Brune', desc: 'From the house, in the water, back on the lawn.', tag: 'No plan', planId: 'home-swim' },
-        { name: 'Pool + BBQ at Casa Elisa', desc: 'Second-week option: pool, terrace, barbecue, lake view.', tag: 'Aug 22–29', planId: 'pool-evening' },
-        { name: 'Lake-bus half day', desc: 'The Navibus stops right in Veyrier — let the boat do the work.', tag: 'Boat', planId: 'boat-half-day' }
-      ]
-    },
-    {
-      group: 'Bike-to-beach',
-      items: [
-        { name: 'East-shore bike-to-swim', desc: 'Annecy out to Veyrier on the shaded path.', tag: 'Easy', planId: 'east-shore-swim' },
-        { name: 'Voie Verte to Duingt', desc: 'Ride south to the clearest water for a lunch swim.', tag: 'Easy', planId: 'duingt-bike-lunch' }
-      ]
-    },
-    {
-      group: 'Picnic & clear-weather favourites',
-      items: [
-        { name: 'Doussard lawns', desc: 'Best picnic + float on a hot blue day.', tag: 'Clear day', areaId: 'doussard' },
-        { name: 'Duingt narrows', desc: 'Glass-clear water under the bridges; arrive by bike.', tag: 'Clear day', areaId: 'duingt' },
-        { name: 'Roc de Chère shade', desc: 'Forest loop to break up a beach day.', tag: 'Shade', planId: 'roc-walk' }
-      ]
-    }
-  ];
-
-  /* ---------- FOOD / MARKETS / APÉRO --------------------------------- */
-  const FOOD = [
-    {
-      group: 'Markets',
-      items: [
-        { name: 'Vieux Annecy market', desc: 'Tue / Fri / Sun, 07:00–13:00. Cheese, charcuterie, peaches, bread. Most meals start here.', tag: 'Free to wander', official: 'https://www.lac-annecy.com' },
-        { name: 'Veyrier Friday market', desc: 'Food market in the village every Friday morning; Sévrier runs Wednesday mornings across the water.', tag: 'Home turf' }
-      ]
-    },
-    {
-      group: 'Bakeries & cheese',
-      items: [
-        { name: 'Daily bakery run', desc: 'Two in the village — Maison Andy and La Panière, both on rue de la Tournette. (August closures possible; scout early.)', tag: '€' },
-        { name: 'Reblochon, Tomme, Beaufort', desc: 'Buy raw and direct from Aravis farms if you head up — much better.', tag: 'Cheese', areaId: 'aravis' }
-      ]
-    },
-    {
-      group: 'Picnic supplies & lake snacks',
-      items: [
-        { name: 'Market picnic', desc: 'Bread, tomato, saucisson, three cheeses you didn’t mean to buy.', tag: '€', planId: 'market-cook' },
-        { name: 'Buvettes & beach bars', desc: 'Snacks and drinks at the bigger beaches (Saint-Jorioz, Angon, Menthon).', tag: '€' }
-      ]
-    },
-    {
-      group: 'Casual lakeside meals',
-      items: [
-        { name: 'Lake fish lunch', desc: 'If a menu has féra or filets de perche, order that.', tag: '€€' },
-        { name: 'Duingt lake-path stop', desc: 'A bite on the ride south, feet near the water.', tag: '€', areaId: 'duingt' },
-        { name: 'One Savoyard night', desc: 'Tartiflette or fondue once — save it for a cool evening.', tag: '€€', planId: 'savoyard-night' }
-      ]
-    },
-    {
-      group: 'Apéro & beautiful evenings',
-      items: [
-        { name: 'Angon beach apéro', desc: 'Late swim, then a drink with your feet near the water.', tag: 'Golden hour', planId: 'angon-apero' },
-        { name: 'Menthon after dinner', desc: 'Pontoons and a walk under the château as the light drops.', tag: 'Evening', areaId: 'menthon' },
-        { name: 'Forclaz lawn', desc: 'Highest, widest evening view over the lake.', tag: 'View', areaId: 'forclaz' }
-      ]
-    },
-    {
-      group: 'Wander before or after',
-      items: [
-        { name: 'Annecy canals & old town', desc: 'Drift, don’t plan — best before or after a meal.', tag: 'Stroll', areaId: 'annecy' },
-        { name: 'Talloires bay', desc: 'Ports, docks and a short waterfront wander.', tag: 'Stroll', areaId: 'talloires' }
-      ]
-    }
-  ];
-
-  /* ---------- DAY TRIPS (grouped by usefulness / effort) ------------- */
-  const TRIPS = [
-    {
-      group: 'Very worth it',
-      items: [
-        { name: 'Aravis & La Clusaz', desc: 'Closer than Chamonix. Reblochon from the farm, loop home via Thônes.', planId: 'aravis-cheese' },
-        { name: 'Chamonix (clear day)', desc: 'The big peaks and the glacier valley — when the weather is with you.', planId: 'chamonix-day' }
-      ]
-    },
-    {
-      group: 'Half-day',
-      items: [
-        { name: 'Gorges du Fier', desc: 'Slot-canyon walkway + a château next door. Pair with lunch on the way back.', planId: 'rainy-gorges' }
-      ]
-    },
-    {
-      group: 'Clear-weather only',
-      items: [
-        { name: 'Semnoz ridge picnic', desc: 'Whole-lake view and Mont-Blanc — pointless in cloud.', planId: 'semnoz-picnic' },
-        { name: 'Col de la Forclaz', desc: 'Lake-from-above lunch; save it for blue skies.', planId: 'forclaz-lunch' }
-      ]
-    },
-    {
-      group: 'Bigger effort',
-      items: [
-        { name: 'Plateau des Glières', desc: 'The maquis plateau — monument, walks and the Morette Resistance museum on the way.', planId: 'glieres-day' },
-        { name: 'Gruyères (CH)', desc: 'Swiss cheese-and-castle village. Long day — worth it once at most.', }
-      ]
-    },
-    {
-      group: 'Maybe',
-      items: [
-        { name: 'Yvoire (Lac Léman)', desc: 'Flowery stone village on Lake Geneva. Very busy in August.' },
-        { name: 'Geneva', desc: 'Old town and lakefront ~45 min north, if someone’s curious.' },
-        { name: 'Megève', desc: 'Pretty pass-through on the Chamonix run — not a day on its own.' }
-      ]
-    },
-    {
-      group: 'Probably skip',
-      items: [
-        { name: 'Far Swiss detours', desc: 'Two hours each way eats the day. Stay on the lake unless someone really wants it.' }
-      ]
-    }
-  ];
-
-  /* ---------- MAP PLACES --------------------------------------------
-     Markers are the same towns, plans and spots used elsewhere — not a
-     random pin dump. Each links back into the app (#/areas/… or #/plan/…). */
-  const MAP_CATEGORIES = [
-    { id: 'stay',  label: 'Home',   color: '#d1495b', glyph: '⌂' },
-    { id: 'area',  label: 'Areas',  color: '#1f7fb3', glyph: '◆' },
-    { id: 'swim',  label: 'Swim',   color: '#36b9cc', glyph: '~' },
-    { id: 'bike',  label: 'Bike',   color: '#2f6b4f', glyph: '%' },
-    { id: 'food',  label: 'Food',   color: '#b35a1f', glyph: '•' },
-    { id: 'view',  label: 'Views',  color: '#6b4fa0', glyph: '▲' },
-    { id: 'trip',  label: 'Trips',  color: '#114b73', glyph: '→' }
-  ];
-
-  // Areas become 'area' markers automatically; extra spots added below.
-  const MAP_SPOTS = [
-    { id: 'm-marquisats', cat: 'swim', name: 'Plage des Marquisats', coords: [45.8950, 6.1360], blurb: 'Annecy town swim — steps into clean water.', route: '#/areas/annecy' },
-    { id: 'm-stjorioz-beach', cat: 'swim', name: 'Saint-Jorioz beach', coords: [45.8330, 6.1640], blurb: 'Long sandy west-shore beach.', route: '#/plan/st-jorioz-beach' },
-    { id: 'm-doussard-beach', cat: 'swim', name: 'Bout-du-Lac swim', coords: [45.7790, 6.2210], blurb: 'Clearest water on the lake.', route: '#/plan/doussard-sprawl' },
-    { id: 'm-angon-beach', cat: 'swim', name: 'Angon beach', coords: [45.8290, 6.2170], blurb: 'Swim then apéro at the water’s edge.', route: '#/plan/angon-apero' },
-    { id: 'm-labrune', cat: 'swim', name: 'La Brune (Veyrier)', coords: [45.8865, 6.1782], blurb: 'Free Pavillon Bleu beach.', route: '#/areas/veyrier' },
-    { id: 'm-menthon-pont', cat: 'swim', name: 'Menthon pontoons', coords: [45.8615, 6.1965], blurb: 'Floating pontoons to jump from.', route: '#/plan/menthon-pontoons' },
-
-    { id: 'm-voieverte', cat: 'bike', name: 'Voie Verte (lake path)', coords: [45.8700, 6.1390], blurb: 'Flat separated path, Sévrier to Doussard.', route: '#/plan/voie-verte-south' },
-    { id: 'm-eastshore', cat: 'bike', name: 'East-shore path', coords: [45.8900, 6.1700], blurb: 'Annecy to Veyrier in the tree shade.', route: '#/plan/east-shore-swim' },
-    { id: 'm-semnoz-climb', cat: 'bike', name: 'Semnoz climb', coords: [45.7970, 6.1040], blurb: 'The local benchmark climb.', route: '#/plan/semnoz-climb' },
-    { id: 'm-laclusaz', cat: 'bike', name: 'La Clusaz bike park', coords: [45.9040, 6.4230], blurb: 'Lift-served MTB in summer.', route: '#/plan/laclusaz-mtb' },
-
-    { id: 'm-market', cat: 'food', name: 'Annecy old-town market', coords: [45.8990, 6.1260], blurb: 'Tue / Fri / Sun mornings.', route: '#/plan/market-cook' },
-    { id: 'm-thones', cat: 'food', name: 'Thônes — Reblochon', coords: [45.8820, 6.3250], blurb: 'Reblochon home turf on the way to the Aravis.', route: '#/plan/aravis-cheese' },
-
-    { id: 'm-three-crosses', cat: 'view', name: 'Circuit des 3 Croix', coords: [45.8450, 6.1260], blurb: 'Short loop above the west shore, three lake angles.', route: '#/day?mode=views' },
-    { id: 'm-cascade-angon', cat: 'view', name: 'Cascade d’Angon', coords: [45.8250, 6.2210], blurb: 'Cool waterfall walk on a hot day.', route: '#/plan/cascade-angon' },
-    { id: 'm-mont-veyrier', cat: 'view', name: 'Mont Veyrier / Baron', coords: [45.9010, 6.1910], blurb: 'East-shore ridge, full lake from the trail.', route: '#/plan/mont-veyrier-walk' },
-    { id: 'm-gorges', cat: 'view', name: 'Gorges du Fier', coords: [45.8970, 6.0450], blurb: 'Slot-canyon walkway west of Annecy.', route: '#/plan/rainy-gorges' },
-    { id: 'm-glieres', cat: 'view', name: 'Plateau des Glières', coords: [45.9630, 6.3260], blurb: 'Where the maquis made their stand — national monument and plateau walks.', route: '#/plan/glieres-day' },
-    { id: 'm-morette', cat: 'trip', name: 'Morette — Resistance museum', coords: [45.89846, 6.28739], blurb: 'Museum + necropolis of the Glières maquis, on the Thônes road. Tue–Sun, €3.', route: '#/plan/glieres-day' },
-
-    { id: 'm-chamonix', cat: 'trip', name: 'Chamonix', coords: [45.9237, 6.8694], blurb: 'Mont-Blanc valley — a clear-day trip.', route: '#/plan/chamonix-day' },
-    { id: 'm-aravis-col', cat: 'trip', name: 'Col des Aravis', coords: [45.8720, 6.4640], blurb: 'Postcard pass with the Mont-Blanc range.', route: '#/plan/aravis-cols' },
-    { id: 'm-yvoire', cat: 'trip', name: 'Yvoire', coords: [46.3710, 6.3270], blurb: 'Stone village on Lac Léman.', route: '#/trips' },
-    { id: 'm-geneva', cat: 'trip', name: 'Geneva', coords: [46.2040, 6.1430], blurb: 'Old town and lakefront, ~45 min north.', route: '#/trips' }
-  ];
-
-  /* ---------- DISCOVER ----------------------------------------------
-     For "we don't even know what's here". Short, characterful context
-     plus inspiration that routes back into a real plan. Established
-     facts only; specific dates/figures are left as [CHECK: …]. */
-
-  // The short story of the lake — history & context, kept tight.
-  const STORY = [
-    {
-      emoji: '🧊', title: 'Carved by ice',
-      text: 'The lake sits in a trough that Ice-Age glaciers scooped out, then filled as they melted. The walls of peaks around it are what the ice left behind.'
-    },
-    {
-      emoji: '💧', title: 'The cleanest lake in Europe',
-      text: 'By the 1960s it was badly polluted. The towns around the shore built one of Europe’s first lake-wide sewer systems and brought it back — that glass-clear water is the result, and it’s fiercely protected.'
-    },
-    {
-      emoji: '🛶', title: 'The Venice of the Alps',
-      text: 'Annecy’s old town is laced with canals off the river Thiou. The Palais de l’Île — the little ship-shaped building midstream — has been a house, a court and a prison since the 12th century.'
-    },
-    {
-      emoji: '🏰', title: 'A castle on every shoulder',
-      text: 'Château d’Annecy watches the old town, Château de Menthon perches on its hill, and Duingt’s tower guards the narrows. Half the skyline is medieval.'
-    },
-    {
-      emoji: '🧀', title: 'Cheese with a backstory',
-      text: 'The story goes that Reblochon was born from a sneaky second milking — farmers under-declared their cows to the landlord, then milked again once he’d gone. The Aravis farms still make it.'
-    }
-  ];
-
-  /* The war in these mountains — Haute-Savoie was maquis country.
-     Established history only; visitable-site practicalities are [CHECK]ed. */
-  const HISTORY = [
-    {
-      emoji: '🏔️', title: 'Mountains made for resistance',
-      text: 'After France fell in 1940, these valleys became maquis country. High pastures, deep forests and passes the occupier couldn’t control — and farms that fed and hid the fighters.'
-    },
-    {
-      emoji: '✊', title: 'Glières, winter 1944',
-      text: 'On a snowbound plateau just north-east of the lake, around 450 maquisards gathered to receive Allied weapons drops under the motto « Vivre libre ou mourir ». Attacked in force at the end of March 1944, well over a hundred were killed or deported — and the stand became a rallying cry for the whole French Resistance.'
-    },
-    {
-      emoji: '🪂', title: 'The answer from the sky',
-      text: 'On 1 August 1944 the plateau got its reply: a huge daylight parachute drop of arms. Weeks later, on 19 August, Haute-Savoie did something almost unique — it freed itself. The German garrison surrendered to the Resistance in Annecy before any Allied army arrived.'
-    },
-    {
-      emoji: '🕊️', title: 'You can stand there',
-      text: 'The plateau is an easy drive: the national monument, open walking country, and the Resistance museum and necropolis at Morette on the Thônes road — the same road you’ll take toward the Aravis and the cheese.'
-    }
-  ];
-
-  // "Did you know?" — each surprises, then points at something to actually do.
-  const INSPIRE = [
-    {
-      title: 'You can swim clean across it',
-      text: 'The water’s pure enough that people swim shore to shore. You don’t have to go far — a pontoon swim off Menthon feels just as good.',
-      action: { label: 'Plan a lake day', route: '#/day?mode=lake' }
-    },
-    {
-      title: 'There’s a car-free path the length of the lake',
-      text: 'The Voie Verte runs traffic-free down the whole west shore. Most visitors never leave the road and miss it entirely.',
-      action: { label: 'Ride the easy path', route: '#/day?mode=easy-bike' }
-    },
-    {
-      title: 'The best view isn’t from the lake',
-      text: 'It’s from above it. Col de la Forclaz and the Semnoz ridge look straight down on the whole thing — worth a half-day on a clear one.',
-      action: { label: 'Go up high', route: '#/day?mode=views' }
-    },
-    {
-      title: 'The water is clearest where it pinches',
-      text: 'Down at Duingt the lake narrows and goes glass-clear under the bridges. Arrive by bike and it’s a perfect lunch swim.',
-      action: { label: 'See Duingt', route: '#/areas/duingt' }
-    },
-    {
-      title: 'Reblochon tastes different at the source',
-      text: 'Buy it raw, straight from an Aravis farm 40 minutes away, and it’s a completely different cheese to the supermarket one.',
-      action: { label: 'Aravis & cheese', route: '#/areas/aravis' }
-    },
-    {
-      title: 'Mornings belong to the market',
-      text: 'The old-town market, three days a week, is where most meals here begin. Build the day around it rather than around a restaurant.',
-      action: { label: 'Food & markets', route: '#/food' }
-    }
-  ];
-
-  // What’s special about being here in August specifically.
-  const SEASON = [
-    {
-      title: 'Fête du Lac — the one you’ll miss',
-      text: 'The giant fireworks show over the lake is Saturday 1 August 2026 — ten days before you land. Consolation: its 53,000 spectators will be gone, leaving you the lake.'
-    },
-    {
-      title: 'Château nights at Menthon',
-      text: 'The castle above the pontoons runs theatrical night visits on August Wednesdays (to ~26 Aug) — ten minutes from the house. [CHECK: dates & booking]',
-      action: { label: 'About Menthon', route: '#/areas/menthon' }
-    },
-    {
-      title: 'Long light, late swims',
-      text: 'August evenings stay warm and the light lasts. Beach apéro into a sunset swim is the signature move.',
-      action: { label: 'Apéro & evening', route: '#/day?mode=apero' }
-    },
-    {
-      title: 'Some places shut for a week or two',
-      text: 'Small bakeries and restaurants take their own August holidays. Worth checking the day before you count on one.'
-    }
-  ];
-
-  /* ---------- ZONES (get your bearings) -----------------------------
-     The simple mental map for someone who's never been. Each opens the
-     areas filtered to that stretch of the lake. */
-  const ZONES = [
-    { region: 'top',     emoji: '🏛️', label: 'Annecy',        text: 'Old town, market, canals' },
-    { region: 'west',    emoji: '🚲', label: 'West shore',    text: 'Sévrier · Saint-Jorioz · Duingt — beaches & the bike path' },
-    { region: 'east',    emoji: '🏠', label: 'East shore · home', text: 'Veyrier (home base) · Menthon · Talloires — clear water & pontoons' },
-    { region: 'south',   emoji: '🌾', label: 'South end',     text: 'Doussard / Bout-du-Lac — grassy, calm, mountains close' },
-    { region: 'heights', emoji: '🌄', label: 'Above the lake',text: 'Semnoz & Forclaz — the big views' },
-    { region: 'beyond',  emoji: '🏔️', label: 'Beyond',        text: 'Aravis · La Clusaz · Les Gets · Chamonix' }
-  ];
-
-  /* ---------- CATEGORIES (the "worlds" nearby) ----------------------
-     Photo-led inspiration. Each is a kind of day you might not know was
-     possible, with lifelike starter ideas and links into real plans and
-     the map. tint → cover colour; media → real photo or labelled
-     placeholder ([CHECK: add photo …]). */
-  const CATEGORIES = [
-    {
-      id: 'lake-life', title: 'Lake life', emoji: '🏊', tint: 'aqua',
-      vibe: 'The default joy — clean, cold, turquoise water you just walk into.',
-      looksLike: 'Grab a towel, walk to the nearest beach or pontoon, swim out into water so clear you can see your feet, dry on the grass, and do it all again after lunch.',
-      media: { photo: 'assets/wiki/lake-swim.jpg' },
-      starters: ['Walk-in swim from Sévrier', 'Pontoon jumps at Menthon', 'Hop between towns on the lake boat', 'Float on the calm water at Bout-du-Lac'],
-      modes: ['lake'], mapCat: 'swim',
-      planIds: ['home-swim', 'menthon-pontoons', 'boat-half-day', 'doussard-sprawl']
-    },
-    {
-      id: 'beaches', title: 'Beaches & swim spots', emoji: '🏖️', tint: 'aqua',
-      vibe: 'The right beach for the mood — sand, lawns, pontoons or a quiet cove.',
-      looksLike: 'Pack the cooler, claim a patch of sand or grass, alternate swims and snacks all afternoon, and stay until the light goes gold.',
-      media: { photo: 'assets/wiki/lake-beach.jpg' },
-      starters: ['Sandy full-day beach at Saint-Jorioz', 'Grassy sprawl at Bout-du-Lac', 'Free Pavillon Bleu swim at Veyrier', 'Late swim + apéro at Angon'],
-      modes: ['beach'], mapCat: 'swim',
-      planIds: ['st-jorioz-beach', 'doussard-sprawl', 'angon-apero']
-    },
-    {
-      id: 'old-annecy', title: 'Old Annecy', emoji: '🛶', tint: 'alpine',
-      vibe: 'The Venice of the Alps — canals, pastel houses, a castle and the best market around.',
-      looksLike: 'Drift through the canal streets with a gelato, raid the morning market for cheese and peaches, swim off the Marquisats steps, then linger over a long dinner.',
-      media: { photo: 'assets/wiki/annecy-old-town.jpg' },
-      starters: ['Morning market, then cook at home', 'Town swim at Plage des Marquisats', 'Wander the canals before dinner', 'Rainy-day arcades & the Palais de l’Île'],
-      modes: ['food', 'rainy'], mapCat: 'food', areaIds: ['annecy'],
-      planIds: ['market-cook', 'rainy-town']
-    },
-    {
-      id: 'bike-paths', title: 'Bike paths & bike-to-swim', emoji: '🚲', tint: 'pine',
-      vibe: 'Flat, car-free riding along the water — the easiest way to see the lake.',
-      looksLike: 'Roll out of town on the separated path, stop wherever the water looks good, swim, ride to a lakeside lunch, and freewheel home in the warm evening.',
-      media: { photo: 'assets/wiki/voie-verte.jpg' },
-      starters: ['Voie Verte south to Duingt for lunch', 'Annecy to Veyrier in the tree shade', 'Path-and-plunge swim laps'],
-      modes: ['easy-bike'], mapCat: 'bike',
-      planIds: ['voie-verte-south', 'duingt-bike-lunch', 'east-shore-swim']
-    },
-    {
-      id: 'road-cycling', title: 'Big cols & road cycling', emoji: '🚴', tint: 'pine',
-      vibe: 'Serious-legs country — famous climbs and a lake loop with a view at every turn.',
-      looksLike: 'Set off early, grind up a legendary col, get the postcard Mont-Blanc view from the top, then descend to a swim before the day heats up.',
-      media: { photo: 'assets/wiki/col-aravis.jpg' },
-      starters: ['Climb the Semnoz from the lake', 'A big Aravis col day', 'The full road loop of the lake'],
-      modes: ['big-cycling', 'cols'], mapCat: 'bike',
-      planIds: ['semnoz-climb', 'aravis-cols', 'scenic-loop']
-    },
-    {
-      id: 'mtb', title: 'MTB & bike parks', emoji: '🚵', tint: 'pine',
-      vibe: 'Lift-served descents, flow trails and pump tracks — gravity days near the lake.',
-      looksLike: 'Shuttle to the top of an alpine resort, session berms and flow trails all afternoon, then collapse onto a terrace with a cold drink.',
-      media: { photo: 'assets/wiki/les-gets-mtb.jpg' },
-      starters: ['Bike-park day at Les Gets', 'Lift MTB at La Clusaz', 'A quick pump-track session'],
-      modes: ['mtb'], mapCat: 'bike',
-      planIds: ['les-gets-bikepark', 'laclusaz-mtb', 'pump-velodrome']
-    },
-    {
-      id: 'alpine-villages', title: 'Alpine villages & mountain towns', emoji: '🏘️', tint: 'alpine',
-      vibe: 'Swap the beach for green mountains, cheese cellars and cooler air for a day.',
-      looksLike: 'Drive up into the Aravis, wander a wooden mountain village, buy Reblochon straight from the farm, soak up a ridiculous valley view, and be back at the lake by dinner.',
-      media: { photo: 'assets/wiki/aravis-village.jpg' },
-      starters: ['Aravis & Reblochon run', 'A day in La Clusaz', 'Cheese shopping in Thônes'],
-      modes: ['daytrip'], mapCat: 'trip', areaIds: ['aravis'],
-      planIds: ['aravis-cheese', 'laclusaz-mtb']
-    },
-    {
-      id: 'views', title: 'Big views & clear-weather days', emoji: '🌄', tint: 'purple',
-      vibe: 'When the sky is blue, get above the lake for the view that makes everyone gasp.',
-      looksLike: 'Pick a clear morning, ride or drive up to a ridge, spread a market picnic with the whole lake and Mont-Blanc laid out below, and walk an easy path along the top.',
-      media: { photo: 'assets/wiki/semnoz.jpg' },
-      starters: ['Picnic on the Semnoz ridge', 'Lunch above the lake at Col de la Forclaz', 'Walk up Mont Veyrier for the full lake'],
-      modes: ['views', 'clear'], mapCat: 'view',
-      planIds: ['semnoz-picnic', 'forclaz-lunch', 'mont-veyrier-walk']
-    },
-    {
-      id: 'food', title: 'Markets & picnic food', emoji: '🧀', tint: 'sun',
-      vibe: 'Cheap, joyful eating — markets, bakeries and lake-fish lunches beat fancy dinners here.',
-      looksLike: 'Hit the morning market for cheese, charcuterie and peaches, build an enormous picnic, eat it by the water, and save one cosy Savoyard cheese night for later.',
-      media: { photo: 'assets/wiki/annecy-market.jpg' },
-      starters: ['Build a market picnic', 'Lake-fish lunch on a terrace', 'One Savoyard cheese night', 'Daily bakery run'],
-      modes: ['food'], mapCat: 'food',
-      planIds: ['market-cook', 'savoyard-night']
-    },
-    {
-      id: 'apero', title: 'Apéro & beautiful evenings', emoji: '🥂', tint: 'sun',
-      vibe: 'The signature August move: a sunset swim and a drink with your feet near the water.',
-      looksLike: 'Arrive at a west-facing beach in the late afternoon, swim as the light turns gold, lay out saucisson and a cold bottle, and watch the sun drop behind the mountains.',
-      media: { photo: 'assets/wiki/lake-sunset.jpg' },
-      starters: ['Beach apéro at Angon', 'Pontoons & a walk at Menthon', 'Sunset from the Forclaz lawn'],
-      modes: ['apero'], mapCat: 'swim',
-      planIds: ['angon-apero', 'perfect-afternoon']
-    },
-    {
-      id: 'rainy', title: 'Rainy-day & culture', emoji: '🌧️', tint: 'alpine',
-      vibe: 'Grey skies have a plan too — canyons, castles and covered old-town streets.',
-      looksLike: 'When the cloud rolls in, walk the dramatic Gorges du Fier canyon, duck into a château, or potter the covered market arcades over a long lunch.',
-      media: { photo: 'assets/wiki/gorges-fier.jpg' },
-      starters: ['Gorges du Fier + a château', 'A long lunch in the old town', 'Forest loop on Roc de Chère'],
-      modes: ['rainy'], mapCat: 'view',
-      planIds: ['rainy-gorges', 'rainy-town', 'roc-walk']
-    },
-    {
-      id: 'daytrips', title: 'Bigger day trips', emoji: '🧭', tint: 'alpine-deep',
-      vibe: 'Worth leaving the lake for — Mont-Blanc, bike parks and storybook villages.',
-      looksLike: 'Point the car at the mountains on a clear day, spend it under the glaciers in Chamonix or in a Portes-du-Soleil bike town, and come home tired and happy.',
-      media: { photo: 'assets/wiki/chamonix.jpg' },
-      starters: ['Clear-day trip to Chamonix', 'Bike park at Les Gets', 'Aravis & Reblochon loop'],
-      modes: ['daytrip'], mapCat: 'trip',
-      planIds: ['chamonix-day', 'les-gets-bikepark', 'aravis-cheese']
-    }
-  ];
-  const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
-
-  /* ---------- DISCOVERIES ("you might not know you can do this") ----- */
-  const DISCOVERIES = [
-    { emoji: '🚵', title: 'You’re sleeping in a world-class bike park', text: 'Leg one puts you at the foot of the Les Gets slopes — lift-served downhill and flow trails from the front door, before the lake even starts.', route: '#/trip' },
-    { emoji: '🌄', title: 'Semnoz: the whole lake from a deckchair', text: 'You can drive (or ride) straight up to a flat ridge with Mont-Blanc and the entire lake below — barely any hiking needed.', route: '#/plan/semnoz-picnic' },
-    { emoji: '🏞️', title: 'There’s a slot canyon 15 minutes away', text: 'The Gorges du Fier is a walkway bolted into a narrow river canyon — a dramatic half-day, great even when it’s grey.', route: '#/plan/rainy-gorges' },
-    { emoji: '🥂', title: 'One afternoon = swim + woods + apéro', text: 'Menthon pontoons, a shaded loop on the Roc de Chère reserve, then a drink at Angon — all in a few easy hours.', route: '#/plan/perfect-afternoon' },
-    { emoji: '🏔️', title: 'The Aravis are right next door', text: 'Forty minutes east is proper mountain-village country — Reblochon farms, cheese cellars and big green valleys.', route: '#/areas/aravis' },
-    { emoji: '🚡', title: 'Chamonix is a day-trip, not a holiday', text: 'Mont-Blanc, glaciers and the Aiguilles make an easy clear-day outing from the lake.', route: '#/plan/chamonix-day' },
-    { emoji: '🕊️', title: 'The Resistance made its stand next door', text: 'In 1944 the Maquis des Glières held a snowbound plateau just north-east of the lake. You can walk it — and visit the museum on the Thônes road.', route: '#/plan/glieres-day' }
-  ];
-
-  /* ---------- TRIP (legs, stays, changeover) -------------------------
-     The real, finalized trip. Coordinates are geocoded from the booking
-     addresses; media wired in the same pass as the wiki photos. */
-  const TRIP = {
-    dates: 'Aug 12 – 29, 2026',
-    legs: [
-      {
-        id: 'lesgets', label: 'Les Gets', emoji: '🚵',
-        dates: 'Aug 12–15', start: '2026-08-12', end: '2026-08-15',
-        blurb: 'Three nights at the foot of the pistes — bike park, village, mountain air.'
-      },
-      {
-        id: 'lake', label: 'Lac d’Annecy', emoji: '🏊',
-        dates: 'Aug 15–29', start: '2026-08-15', end: '2026-08-29',
-        blurb: 'Two weeks in Veyrier-du-Lac on the east shore — the lake out the front door.'
-      }
-    ],
-    changeover: 'Saturday Aug 22: out of the first house by 9:00, into Casa Elisa from 16:00. A ready-made beach day with the bags in the car.'
-  };
-
-  const STAYS = [
-    {
-      id: 'stay-lesgets', legId: 'lesgets',
-      name: 'Appartement au pied des pistes', village: 'Les Gets',
-      address: '627 Route de la Turche, 74260 Les Gets',
-      dates: 'Wed Aug 12 → Sat Aug 15',
-      checkin: 'From 16:00 · self check-in (lockbox — code arrives 48 h before)',
-      checkout: 'By 11:00',
-      coords: [46.15045, 6.66785],
-      features: ['At the foot of the slopes', 'Sleeps 4 max', 'No pets']
-    },
-    {
-      id: 'stay-guerres', legId: 'lake',
-      name: 'House with views (Olivier’s)', village: 'Veyrier-du-Lac',
-      address: '14 Chemin des Guerres, 74290 Veyrier-du-Lac',
-      dates: 'Sat Aug 15 → Sat Aug 22',
-      checkin: 'From 16:00 · host meets you in person — agree a time',
-      checkout: 'By 9:00 — early!',
-      coords: [45.87499, 6.18190],
-      features: ['~300 m from the lake', 'Courtyard parking for 2–3 cars', 'Level access from the courtyard', 'Quiet hours 23:00–7:00']
-    },
-    {
-      id: 'stay-casa-elisa', legId: 'lake',
+      id: 'stay-casa-elisa', baseId: 'lake', legLabel: 'Leg 3 · Veyrier-du-Lac',
       name: 'Casa Elisa', village: 'Veyrier-du-Lac',
       address: '3 Route de Morat, 74290 Veyrier-du-Lac',
-      dates: 'Sat Aug 22 → Sat Aug 29',
+      coords: [45.87580, 6.18525],
+      start: '2026-08-22', end: '2026-08-29',
+      dates: 'Sat 22 Aug → Sat 29 Aug',
       checkin: '16:00–21:30 · tell them your arrival time in advance',
       checkout: 'By 11:00',
-      coords: [45.87580, 6.18525],
-      features: ['Private pool', 'Terrace + BBQ', 'Lake view', 'Air conditioning', 'Free on-site parking', 'Cash deposit on arrival, refunded at checkout', 'Upper floors by stairs only']
+      features: ['Private pool', 'Terrace + BBQ', 'Lake view', 'Air conditioning', 'Free on-site parking', 'Cash deposit on arrival, refunded at checkout', 'Upper floors by stairs only'],
+      photo: 'assets/wiki/veyrier.jpg'
     }
   ];
 
-  /* ---------- LES GETS leg content ----------------------------------- */
-  const LESGETS = [
-    { name: 'Bike park from the door', desc: 'Lift-served downhill and flow trails — the whole reason to start here.', planId: 'les-gets-bikepark' },
-    { name: 'Rent the big bikes', desc: 'DH rigs and pads from 360 Outdoor (at the Chavannes lifts), The Hub or Intersport — book ahead for August.', tag: 'Book ahead' },
-    { name: 'Village wander', desc: 'Small alpine town: terraces, shops, mountain views — everything runs in high season.', tag: 'Easy' },
-    { name: 'Lift up, walk down', desc: 'Non-bike option: lifts run daily ~9:00–17:30 during the stay; single rides ~€9.50.', tag: 'Easy' },
-    { name: 'Mont Chéry side', desc: 'The quieter mountain across the village — cable car runs daily through 30 Aug.', tag: 'Views' },
-    { name: 'Grocery run before the lake', desc: 'Stock up before the Saturday drive to Veyrier — arrival day is a Saturday in August.', tag: 'Practical' }
-  ];
-
-  /* ---------- TRANSPORT (confirmed flights + van) --------------------
-     Source of truth for getting there and back. Confirmation codes are
-     deliberately masked on this public page; full codes live in email.
-     Frequent-flyer numbers, KTNs, phones and payment details are
-     deliberately NOT stored here at all. */
+  // Confirmed flights + van. Confirmation codes masked on this public page.
   const TRANSPORT = {
     flights: [
-      {
-        who: 'Liv', dir: 'out', date: 'Tue Aug 11 → Wed Aug 12',
-        legs: 'JFK 19:25 → GVA 09:15 (next morning)',
-        flight: 'UA 9719 · operated by SWISS (A330)', conf: 'B69•••',
-        note: 'Lands 15 minutes before the van pickup — straight to the National counter.'
-      },
-      {
-        who: 'Andrew', dir: 'out', date: 'Fri Aug 14 → Sat Aug 15',
-        legs: 'EWR 17:30 → GVA 07:30 (next morning)',
-        flight: 'United', conf: 'ESN•••',
-        note: 'Lands the same morning as the Les Gets → lake move. Collect him at GVA on the drive down.'
-      },
-      {
-        who: 'Andrew', dir: 'back', date: 'Sat Aug 29',
-        legs: 'GVA 09:20 → EWR 12:15',
-        flight: 'United', conf: 'ESN•••'
-      },
-      {
-        who: 'Liv', dir: 'back', date: 'Sat Aug 29',
-        legs: 'GVA 11:40 → JFK 14:20',
-        flight: 'SWISS LX 22 (A330)', conf: 'B69•••'
-      }
+      { who: 'Liv', dir: 'out', date: 'Tue 11 → Wed 12 Aug', legs: 'JFK 19:25 → GVA 09:15 (next morning)', flight: 'UA 9719 · operated by SWISS (A330)', conf: 'B69•••', note: 'Lands 15 min before the van pickup — straight to the National counter.' },
+      { who: 'Andrew', dir: 'out', date: 'Fri 14 → Sat 15 Aug', legs: 'EWR 17:30 → GVA 07:30 (next morning)', flight: 'United', conf: 'ESN•••', note: 'Lands the morning of the Les Gets → lake move — collect him at GVA on the drive down.' },
+      { who: 'Andrew', dir: 'back', date: 'Sat 29 Aug', legs: 'GVA 09:20 → EWR 12:15', flight: 'United', conf: 'ESN•••' },
+      { who: 'Liv', dir: 'back', date: 'Sat 29 Aug', legs: 'GVA 11:40 → JFK 14:20', flight: 'SWISS LX 22 (A330)', conf: 'B69•••' }
     ],
     car: {
-      name: 'Full-size van — Renault Kangoo Grand or similar, automatic',
-      conf: 'National #16948•••••',
-      pickup: 'Wed Aug 12, 09:30 · Geneva Airport (GVA)',
-      ret: 'Sat Aug 29, 09:30 · Geneva Airport (GVA)',
+      name: 'Full-size van — Renault Kangoo Grand or similar, automatic', conf: 'National #16948•••••',
+      pickup: 'Wed 12 Aug, 09:30 · Geneva Airport (GVA)', ret: 'Sat 29 Aug, 09:30 · Geneva Airport (GVA)',
       drivers: 'Liv · Christian · Andrew · Ian (all on the contract)',
       includes: 'Damage waiver · unlimited mileage · ≈ CHF 1,860 total',
       find: 'Stay on the Swiss side of the airport → rental counter → shuttle to the P51 car park → finish at the kiosk. Desk open 6:30–23:30.'
     },
     privacyNote: 'Full confirmation codes are in your email — kept off this public page on purpose.',
-    departure: 'Departure Saturday (Aug 29) is tight: Andrew flies at 9:20 (at GVA by ~7:15), the van is due back at 9:30, and Liv flies at 11:40. That means one early run leaving Veyrier around 6:15 — arrange early checkout and the deposit handback with Casa Elisa in advance (their normal window only opens at 8:30).'
+    departure: 'Departure Saturday (29 Aug) is tight: Andrew flies 09:20 (at GVA by ~07:15), the van is due back 09:30, Liv flies 11:40 — one early run leaving Veyrier ~06:15. Arrange early checkout + deposit handback with Casa Elisa in advance (their normal window opens 08:30).'
   };
 
-  /* ---------- FEATURED (Home) ---------------------------------------- */
-  const FEATURED = ['home-swim', 'perfect-afternoon', 'market-cook', 'pool-evening'];
+  /* ---------- AREAS (the mental map of the lake and its edges) -------- */
+  const AREAS = [
+    { id: 'annecy', name: 'Annecy', zone: 'Top of the lake', region: 'top', coords: [45.8992, 6.1294], supports: ['food','culture','lake'], photo: 'assets/wiki/annecy-old-town.jpg', official: 'https://en.lac-annecy.com/',
+      why: 'The old town: canals, the Tuesday/Friday/Sunday market, the château and Palais de l’Île, and a town swim two minutes from the bustle.' },
+    { id: 'veyrier', name: 'Veyrier-du-Lac', zone: 'East shore · home base', region: 'east', coords: [45.8830, 6.1717], supports: ['lake','bikes','food'], photo: 'assets/wiki/veyrier.jpg',
+      why: 'Home for the two lake weeks. La Brune beach below the village, a paddle base on the beach, bus line 20 and the shaded shore path into Annecy.' },
+    { id: 'menthon', name: 'Menthon-Saint-Bernard', zone: 'East shore · pontoons', region: 'east', coords: [45.8624, 6.1978], supports: ['lake','culture'], photo: 'assets/wiki/menthon-chateau.jpg',
+      why: 'Floating pontoons below, a storybook château above, and the foot of the Forclaz climb.' },
+    { id: 'talloires', name: 'Talloires-Montmin', zone: 'East shore · bay', region: 'east', coords: [45.8404, 6.2167], supports: ['lake','food','adrenaline'], photo: 'assets/wiki/talloires.jpg',
+      why: 'A pretty bay and the launchpad for Angon canyoning, the treetop park and the Forclaz climb.' },
+    { id: 'angon', name: 'Angon', zone: 'East shore · quieter', region: 'east', coords: [45.8345, 6.2206], supports: ['lake','adrenaline'], photo: 'assets/wiki/angon.jpg',
+      why: 'A quiet beach, a waterfall walk and the Angon canyon — same château view as Talloires, less volume.' },
+    { id: 'roc-de-chere', name: 'Roc de Chère', zone: 'East shore · nature reserve', region: 'east', coords: [45.8533, 6.2050], supports: ['walk','views'], photo: 'assets/wiki/roc-de-chere.jpg', official: 'https://www.cen-haute-savoie.org/reserves-naturelles/roc-de-chere/',
+      why: 'A protected forested headland — marked woodland paths and lake viewpoints between two swims. Stay on the trails.' },
+    { id: 'sevrier', name: 'Sévrier', zone: 'West shore', region: 'west', coords: [45.8584, 6.1383], supports: ['lake','bikes'], photo: 'assets/wiki/sevrier.jpg',
+      why: 'The easy-going west shore where the traffic-free Voie Verte greenway runs, plus the sailing club.' },
+    { id: 'st-jorioz', name: 'Saint-Jorioz', zone: 'West shore · sandy beach', region: 'west', coords: [45.8245, 6.1641], supports: ['lake'], photo: 'assets/wiki/st-jorioz.jpg',
+      why: 'The big sandy beach on the greenway — towels, lawns, lifeguards in season.' },
+    { id: 'duingt', name: 'Duingt', zone: 'The narrows · château', region: 'west', coords: [45.8086, 6.2051], supports: ['lake','bikes'], photo: 'assets/wiki/duingt.jpg',
+      why: 'Where the lake pinches — château on the point, the clearest water, and a free lakeside pump track.' },
+    { id: 'doussard', name: 'Doussard / Bout-du-Lac', zone: 'South end · grassy & flat', region: 'south', coords: [45.7826, 6.2197], supports: ['lake','bikes'], photo: 'assets/wiki/doussard.jpg',
+      why: 'Grassy south-end beach and reserve, the calmest water for SUP, and the paragliding landing field.' },
+    { id: 'semnoz', name: 'Le Semnoz', zone: 'Above the lake · ~1650 m', region: 'heights', coords: [45.7970, 6.1040], supports: ['views','bikes'], photo: 'assets/wiki/semnoz.jpg', official: 'https://www.semnoz.fr/',
+      why: 'The nearest summit: a road climb, a summer bike park and luge, and a ridge with the whole lake and Mont-Blanc.' },
+    { id: 'forclaz', name: 'Col de la Forclaz', zone: 'Above the east shore · ~1150 m', region: 'heights', coords: [45.8070, 6.2440], supports: ['views','adrenaline','food'], photo: 'assets/wiki/forclaz.jpg',
+      why: 'The lake-from-above balcony: a col climb, the tandem-paragliding launch, and a lawn lunch with the best seat on the water.' },
+    { id: 'glieres', name: 'Plateau des Glières', zone: 'Bornes plateau · ~1450 m', region: 'beyond', coords: [45.9630, 6.3260], supports: ['walk','culture','views'], photo: 'assets/wiki/glieres.jpg', official: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/',
+      why: 'A high pasture with 50 km of marked trails, the Resistance monument, and the Morette museum on the Thônes road.' },
+    { id: 'aravis', name: 'Aravis · La Clusaz & Le Grand-Bornand', zone: 'East over the passes · ~30–50 min', region: 'beyond', coords: [45.9040, 6.4230], supports: ['bikes','food','views','adrenaline'], photo: 'assets/wiki/aravis-village.jpg', official: 'https://www.laclusaz.com/en/',
+      why: 'Reblochon country: two lift-served bike parks, the Jallouvre via ferrata, cheese from the farm and the famous cols.' },
+    { id: 'chamonix', name: 'Chamonix', zone: 'Mont-Blanc valley · ~1h20', region: 'beyond', coords: [45.9237, 6.8694], supports: ['views'], photo: 'assets/wiki/chamonix.jpg', official: 'https://www.chamonix.com/',
+      why: 'The big one — glaciers, the Aiguilles, an alpine town that means business. A clear-weather day trip.' },
+    { id: 'les-gets', name: 'Les Gets', zone: 'Portes du Soleil · Leg 1', region: 'beyond', coords: [46.1558, 6.6697], supports: ['bikes','views','food'], photo: 'assets/wiki/les-gets-village.jpg', official: 'https://www.lesgets.com/en/',
+      why: 'Where the trip starts: a 128 km bike park across two mountains, a walkable village, and the mountain air before the lake.' }
+  ];
+  const AREA_BY_ID = Object.fromEntries(AREAS.map(a => [a.id, a]));
 
-  /* ---------- HOME QUICK ACCESS -------------------------------------- */
-  const QUICK = [
-    { label: 'Your trip', emoji: '🏠', route: '#/trip' },
-    { label: 'Build a day', emoji: '🧩', route: '#/build' },
-    { label: 'Map', emoji: '🗺️', route: '#/map' },
-    { label: 'Areas', emoji: '📍', route: '#/areas' },
-    { label: 'Bike', emoji: '🚴', route: '#/bike' },
-    { label: 'Lake', emoji: '🏊', route: '#/lake' },
-    { label: 'Food', emoji: '🧀', route: '#/food' },
-    { label: 'Trips', emoji: '🧭', route: '#/trips' },
-    { label: 'Rainy day', emoji: '🌧️', route: '#/day?mode=rainy' }
+  /* ---------- ACTIVITIES (the ranked catalogue) ----------------------
+     base: 'lake' | 'lesgets' | 'both'  (hard: must match the active base)
+     duration: 'evening' | '2h' | 'half' | 'full'
+     effort: 'recovery' | 'easy' | 'moderate' | 'big'
+     transport: which ways reach it from the base (hard filter)
+     themes: water | bikes | views | food | culture | adrenaline | rainy | recovery
+     status/availability/verifyBeforeGo + src → provenance. */
+  const ACTIVITIES = [
+
+    /* ===== WATER & SWIMMING (lake base) ===== */
+    {
+      id: 'home-swim', title: 'Walk down to La Brune', base: 'lake', cat: 'swim', subtype: 'Village swim',
+      areaId: 'veyrier', coords: [45.8865, 6.1782],
+      summary: 'A few minutes downhill from the house: free beach, flat lawn, lifeguards, back up for lunch.',
+      why: 'The zero-logistics home default — the reason a car-free day works from Veyrier.',
+      duration: '2h', effort: 'easy', transport: ['walk','bike'], themes: ['water','recovery'],
+      scenic: 2, novelty: 1, group: 'all',
+      access: 'Walk or freewheel down from the village; bus line 20 Barattes stop is close.',
+      facilities: 'Free entry, flat lawn, lifeguards daily 11:00–19:00 to 31 Aug 2026; snack kiosk.',
+      weather: { rain: 'poor', heat: 'exposed', storm: 'avoid', best: 'any', note: 'Best swimming is late morning before the afternoon breeze.' },
+      pairWith: ['veyrier-market','sup-veyrier'], status: 'open', src: 'lac-annecy',
+      travel: { lake: { min: 6, mode: 'walk' } }, featured: true, media: { photo: 'assets/wiki/lake-swim.jpg' }
+    },
+    {
+      id: 'menthon-pontoons', title: 'Pontoon day at Menthon', base: 'lake', cat: 'swim', subtype: 'Beach & pontoons',
+      areaId: 'menthon', coords: [45.8615, 6.1965],
+      summary: 'Floating pontoons to jump off and sun-dry on, château on the hill above.',
+      duration: 'half', effort: 'easy', transport: ['bike','busboat','car'], themes: ['water'],
+      scenic: 3, novelty: 1, group: 'all',
+      facilities: 'Paid beach in summer (~€4.60 adult), supervised 10:00–19:00; snack bar.',
+      weather: { rain: 'poor', heat: 'exposed', best: 'clear' },
+      pairWith: ['forclaz-lunch','roc-walk'], status: 'seasonal', availability: 'Supervised summer season.',
+      src: 'lac-annecy', travel: { lake: { min: 12, mode: 'car/bike' } }, media: { photo: 'assets/wiki/menthon-chateau.jpg' }
+    },
+    {
+      id: 'angon-apero', title: 'Swim + apéro at Angon', base: 'lake', cat: 'swim', subtype: 'Evening swim',
+      areaId: 'angon', coords: [45.8290, 6.2170],
+      summary: 'Late swim off the quiet beach, then saucisson and a cold bottle as the light goes gold.',
+      duration: 'evening', effort: 'easy', transport: ['bike','busboat','car'], themes: ['water','food'],
+      scenic: 3, novelty: 1, group: 'all',
+      facilities: 'Free supervised beach 12:30–18:30 in summer; beach bar.',
+      weather: { rain: 'poor', best: 'clear', note: 'West-facing light — the sunset move.' },
+      pairWith: ['cascade-angon'], status: 'seasonal', src: 'lac-annecy',
+      travel: { lake: { min: 15, mode: 'car' } }, featured: true, media: { photo: 'assets/wiki/angon.jpg' }
+    },
+    {
+      id: 'st-jorioz-beach', title: 'Beach day at Saint-Jorioz', base: 'lake', cat: 'swim', subtype: 'Family beach',
+      areaId: 'st-jorioz', coords: [45.8330, 6.1640],
+      summary: 'The big sandy west-shore beach — lawns, shade, lifeguards, easy to reach by bus or boat.',
+      duration: 'full', effort: 'easy', transport: ['busboat','car','bike'], themes: ['water'],
+      scenic: 2, novelty: 1, group: 'all',
+      facilities: 'Paid + lifeguarded 9:30–17:30 to 31 Aug 2026 (€2.60 adult, €1 after 16:30); buvette.',
+      access: 'Bus line 15 (west shore) or the Navibus; on the Voie Verte greenway.',
+      weather: { rain: 'poor', heat: 'exposed', best: 'clear' },
+      status: 'seasonal', src: 'mobilite', travel: { lake: { min: 20, mode: 'car/bus' } }, media: { photo: 'assets/wiki/st-jorioz.jpg' }
+    },
+    {
+      id: 'doussard-sup', title: 'SUP & sprawl at Bout-du-Lac', base: 'lake', cat: 'paddle', subtype: 'Paddle & beach',
+      areaId: 'doussard', coords: [45.7790, 6.2210],
+      summary: 'Grassy south-end beach and reserve with the calmest water on the lake — the paddle end.',
+      duration: 'full', effort: 'easy', transport: ['car','bike'], themes: ['water'],
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'poor', wind: 'calm-am', best: 'clear', note: 'Paddle in the morning — the afternoon thermal breeze picks up.' },
+      pairWith: ['forclaz-lunch'], status: 'open', src: 'lac-annecy',
+      travel: { lake: { min: 25, mode: 'car' } }, media: { photo: 'assets/wiki/doussard.jpg' }
+    },
+    {
+      id: 'sup-veyrier', title: 'Paddle from the home beach (Le Deck)', base: 'lake', cat: 'paddle', subtype: 'SUP / pedalo / e-boat',
+      areaId: 'veyrier', coords: [45.8865, 6.1782],
+      summary: 'The nautical base right at Plage de la Brune rents SUPs, pedalos and licence-free electric boats — straight from the home beach.',
+      duration: '2h', effort: 'easy', transport: ['walk','bike'], themes: ['water'],
+      scenic: 3, novelty: 2, group: 'all',
+      booking: 'recommended', bookingUrl: 'https://www.ledeck-veyrier.com/en/',
+      price: 'SUP €15/1h, €30/2h, €90/day (vest included); pedalo €25/1h; GoBoat electric from €130/1.5h',
+      gear: 'Buoyancy vest mandatory, included.',
+      weather: { rain: 'poor', wind: 'calm-am', best: 'morning', note: 'Glassy water is the early morning; afternoons get choppy.' },
+      status: 'operator-active', availability: 'Summer lakeside base — confirm daily hours before going.', verifyBeforeGo: true,
+      src: 'ledeck', travel: { lake: { min: 6, mode: 'walk' } }
+    },
+    {
+      id: 'navibus-hop', title: 'Lake by boat: Navibus hop', base: 'lake', cat: 'boat', subtype: 'Lake shuttle',
+      areaId: 'veyrier', coords: [45.8865, 6.1782],
+      summary: 'The hop-on/hop-off electric boat calls at Veyrier — take a bike one way and ride back, or just do the slow scenic loop.',
+      why: 'The best no-car way to reach the far shore or turn the greenway into a one-way ride.',
+      duration: 'half', effort: 'recovery', transport: ['walk','busboat'], themes: ['water','recovery'],
+      scenic: 3, novelty: 2, group: 'all',
+      booking: 'recommended', price: 'Point-to-point ~€6–22 by route; bikes reportedly +€1 (verify)',
+      access: 'Departs the Veyrier-du-Lac port. 3 departures daily every day 6 Jul–28 Aug 2026; from 29 Aug only Tue/Wed/Fri/Sun.',
+      weather: { rain: 'ok', best: 'any', note: 'Runs in most weather; a good grey-sky option.' },
+      status: 'seasonal', availability: 'Peak daily service through 28 Aug; reduced from 29 Aug (departure day — likely no boat).', verifyBeforeGo: true,
+      src: 'navibus', travel: { lake: { min: 5, mode: 'walk' } }
+    },
+    {
+      id: 'diving-baptism', title: 'First scuba dive on the lake', base: 'lake', cat: 'paddle', subtype: 'Discover scuba',
+      areaId: 'annecy', coords: [45.8950, 6.1360],
+      summary: 'A guided first dive (baptême) to a shallow seagrass shelf — one-to-one with an instructor, wetsuit provided.',
+      why: 'The lake’s icon dive is the sunken 1971 steamer “France” at 42 m — certified divers only; the baptême is everyone else’s way in.',
+      duration: '2h', effort: 'easy', transport: ['bike','busboat','car'], themes: ['water','adrenaline'],
+      scenic: 2, novelty: 3, group: 'all', groupNote: 'From age 8; children 8–12 need water above 18°.',
+      booking: 'required', bookingUrl: 'https://en.lac-annecy.com/activite-bookable/first-dive/', price: 'From €90',
+      skill: 'Basic comfort in water; no certification needed for a first dive.',
+      weather: { rain: 'ok', best: 'any', note: 'Underwater — weather barely matters; summer visibility up to ~20 m.' },
+      status: 'seasonal', availability: 'Summer diving season; book a slot.', verifyBeforeGo: true, src: 'diving',
+      travel: { lake: { min: 12, mode: 'car' } }
+    },
+    {
+      id: 'sailing-sevrier', title: 'Sail or windsurf at Sévrier', base: 'lake', cat: 'paddle', subtype: 'Sailing club',
+      areaId: 'sevrier', coords: [45.8584, 6.1383],
+      summary: 'The Sévrier sailing school rents catamarans, dinghies and windsurf boards, or runs lessons — the wind end of the lake.',
+      duration: 'half', effort: 'moderate', transport: ['car','busboat'], themes: ['water','adrenaline'],
+      scenic: 2, novelty: 2, group: 'some', groupNote: 'Best for those keen to learn or already sail.',
+      booking: 'recommended', bookingUrl: 'https://www.cvsevrier.fr/',
+      weather: { rain: 'ok', wind: 'breeze-pm', best: 'afternoon', note: 'Wants the afternoon thermal breeze; light mornings suit total beginners.' },
+      status: 'operator-active', availability: 'Club season ~April–October; confirm rental slots.', verifyBeforeGo: true, src: 'cv-sevrier',
+      travel: { lake: { min: 20, mode: 'car' } }
+    },
+
+    /* ===== ROAD & GRAVEL CYCLING (lake base) ===== */
+    {
+      id: 'lake-loop-road', title: 'The lake loop (road, ~40 km)', base: 'lake', cat: 'road', subtype: 'Road loop',
+      areaId: 'annecy', coords: [45.8992, 6.1294],
+      summary: 'The signed circuit of the lake — but ride it clockwise, and know the two shores are not the same.',
+      why: 'The classic. Half of it is a genuine traffic-free greenway; the other half is a real road you share with cars.',
+      duration: 'half', effort: 'moderate', transport: ['bike'], themes: ['bikes','views','water'],
+      distanceKm: 40, ascentM: 300, difficulty: 'Medium road loop; one main climb early if clockwise.',
+      scenic: 3, novelty: 1, group: 'some', groupNote: 'The east-shore road section suits confident road riders; nervous riders can turn back on the west greenway.',
+      safety: 'Clockwise the east shore is road riding on the RD909a. The ~3 km between Menthon and Talloires needs real care — a steep, narrow, twisting descent into Talloires. The west shore (Sévrier→Annecy) is the traffic-free Voie Verte.',
+      access: 'From Veyrier you join mid-loop on the east shore; ride south first, return on the greenway.',
+      facilities: 'Water/toilets at old Brédannaz station, fountains after the greenway tunnel, and at Saint-Jorioz.',
+      gpx: 'https://en.lac-annecy.com/cycle-tourism-route/cycling-route-around-lake-annecy-annecy/',
+      weather: { rain: 'ok', heat: 'exposed', best: 'clear', note: 'Long and open — start early on hot days.' },
+      pairWith: ['home-swim'], easierAlt: 'voie-verte-recovery',
+      status: 'open', availability: 'Year-round, free.', src: 'lake-loop',
+      travel: { lake: { min: 2, mode: 'from the door' } }, featured: true, media: { photo: 'assets/wiki/voie-verte.jpg' }
+    },
+    {
+      id: 'voie-verte-recovery', title: 'West-shore greenway spin', base: 'lake', cat: 'easybike', subtype: 'Traffic-free path',
+      areaId: 'sevrier', coords: [45.8700, 6.1390],
+      summary: 'Flat, separated, lake the whole way — the fully family-friendly half of the loop. Perfect recovery or no-car ride.',
+      duration: 'half', effort: 'recovery', transport: ['bike','busboat'], themes: ['bikes','water','recovery'],
+      difficulty: 'Easy, flat, traffic-free (old railway).',
+      scenic: 3, novelty: 1, group: 'all',
+      safety: 'The genuinely traffic-free section — the developed Voie Verte on the old Annecy–Albertville railway.',
+      access: 'From Veyrier: shore path into Annecy, then pick up the greenway south. Or take a bike on the Navibus one way.',
+      facilities: 'Swim stops all along; fountains and cafés at Sévrier and Saint-Jorioz. Railway relics en route: the cyclists-only Duingt tunnel, Sévrier’s Belle-Époque footbridge and the old locomotive at Brédannaz.',
+      weather: { rain: 'ok', heat: 'exposed', best: 'any' },
+      pairWith: ['st-jorioz-beach','navibus-hop'],
+      status: 'open', src: 'lake-loop', travel: { lake: { min: 12, mode: 'bike to Annecy' } }, media: { photo: 'assets/wiki/voie-verte.jpg' }
+    },
+    {
+      id: 'east-shore-ride', title: 'Home ride: shore path to Annecy', base: 'lake', cat: 'easybike', subtype: 'Bike-to-swim',
+      areaId: 'veyrier', coords: [45.8830, 6.1717],
+      summary: 'Roll from the house along the tree-shaded lake wall at Chavoire into the old town — coffee, a swim, home.',
+      duration: '2h', effort: 'easy', transport: ['bike'], themes: ['bikes','water'],
+      difficulty: 'Easy, mostly separated path; ~10 min each way.',
+      scenic: 2, novelty: 1, group: 'all',
+      weather: { rain: 'ok', best: 'any' }, pairWith: ['annecy-market','home-swim'],
+      status: 'open', src: 'lac-annecy', travel: { lake: { min: 2, mode: 'from the door' } }
+    },
+    {
+      id: 'forclaz-climb-lake', title: 'Col de la Forclaz — lake side', base: 'lake', cat: 'road', subtype: 'Road climb',
+      areaId: 'menthon', coords: [45.8624, 6.1978],
+      summary: 'The short, steep classic straight up from the shore to the paragliding balcony over the lake.',
+      duration: 'half', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      distanceKm: 10.2, ascentM: 660, difficulty: 'Hard: avg ~6.5%, hardest last 3 km with pitches to ~12%. Summit ~1150 m.',
+      scenic: 3, novelty: 2, group: 'some', groupNote: 'A proper climb — one rider can do this while others swim below.',
+      safety: 'Popular col road; watch for cars and paraglider-shuttle vans near the top.',
+      weather: { rain: 'ok', heat: 'exposed', storm: 'avoid-pm', best: 'clear', note: 'Start from Menthon (do not blend with the Montmin/south stats).' },
+      pairWith: ['forclaz-lunch','paragliding-forclaz'], easierAlt: 'east-shore-ride',
+      status: 'seasonal', availability: 'Paved col, snow-free ~Apr–Oct.', src: 'forclaz-thones',
+      travel: { lake: { min: 10, mode: 'ride to the foot' } }
+    },
+    {
+      id: 'forclaz-climb-south', title: 'Col de la Forclaz — Montmin (south) side', base: 'lake', cat: 'road', subtype: 'Road climb',
+      areaId: 'doussard', coords: [45.7826, 6.2197],
+      summary: 'The shorter, steeper south approach from Vésonne through Montmin — a different climb to the same col.',
+      duration: 'half', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      distanceKm: 8.2, ascentM: 655, difficulty: 'Very hard: avg ~8%, max ~13%, with a dip near Montmin that hides the steepest ramps. Summit ~1150 m.',
+      scenic: 3, novelty: 2, group: 'some',
+      weather: { rain: 'ok', heat: 'exposed', storm: 'avoid-pm', best: 'clear', note: 'Named start = Vésonne. Kept separate from the lake-side numbers on purpose.' },
+      status: 'seasonal', availability: 'Paved col, snow-free ~Apr–Oct.', src: 'forclaz-thones',
+      travel: { lake: { min: 25, mode: 'drive/ride to Vésonne' } }
+    },
+    {
+      id: 'semnoz-climb', title: 'Col du Semnoz by bike (from Annecy)', base: 'lake', cat: 'road', subtype: 'Road climb',
+      areaId: 'semnoz', coords: [45.8992, 6.1294],
+      summary: 'The big local benchmark: a long, steady forested climb from the lake to the Crêt de Châtillon at 1660 m.',
+      duration: 'full', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      distanceKm: 17.4, ascentM: 1212, difficulty: 'Hard: avg ~7%, upper 9 km ~8.6%, max ~10%. Summit 1660 m.',
+      scenic: 3, novelty: 2, group: 'some', groupNote: 'One rider’s big day out; others can drive up for the picnic view.',
+      safety: 'Cooler and exposed near the summit — take a layer for the descent.',
+      weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear', note: 'From Annecy, direct north side. The gentler cyclo loop goes via Col de Leschaux instead.' },
+      pairWith: ['semnoz-picnic'], easierAlt: 'tour-semnoz',
+      status: 'seasonal', availability: 'Summit road open in summer, snow-free.', src: 'semnoz-climb',
+      travel: { lake: { min: 12, mode: 'ride to Annecy first' } }
+    },
+    {
+      id: 'tour-semnoz', title: 'Tour du Semnoz (cyclo loop, 52 km)', base: 'lake', cat: 'road', subtype: 'Road loop',
+      areaId: 'annecy', coords: [45.8992, 6.1294],
+      summary: 'The official signed cyclo loop up the gentler Col de Leschaux side and around — a big day without the 1660 m summit wall.',
+      duration: 'full', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      distanceKm: 52, ascentM: 1100, difficulty: 'Difficile but graded gentler than the direct climb; Leschaux ~4% avg. ~3h30.',
+      scenic: 3, novelty: 1, group: 'some',
+      gpx: 'https://hautesavoiemontblanc-tourisme.com/offres/tour-du-semnoz-itineraire-cyclo-annecy-fr-5835541/',
+      weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear' },
+      status: 'open', src: 'tour-semnoz', travel: { lake: { min: 12, mode: 'ride to Annecy first' } }
+    },
+    {
+      id: 'glieres-gravel', title: 'Traversée des Glières (gravel epic)', base: 'lake', cat: 'gravel', subtype: 'Gravel loop',
+      areaId: 'glieres', coords: [45.8992, 6.1294],
+      summary: 'The signed gravel classic from Annecy over the Glières plateau — long, high and genuinely hard.',
+      why: 'The standout gravel route: pasture tracks to 1440 m across the Resistance plateau, GPX published.',
+      duration: 'full', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      distanceKm: 81, ascentM: 1750, difficulty: 'Very hard · ~4h15 riding · max alt 1440 m · gravel + paved sections.',
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'A serious solo/duo objective — pair it with a rest day for the others.',
+      safety: 'The paved road serving the plateau carries heavy traffic daily — take care where the gravel shares it. Check snow/weather even in August.',
+      gpx: 'https://en.lac-annecy.com/cache/gpx/28958809.gpx',
+      weather: { rain: 'poor', storm: 'avoid-pm', ground: 'dries slow', best: 'clear', wetUnsafe: false, note: 'High and long — a settled clear day only.' },
+      status: 'seasonal', availability: 'Route open ~1 May–31 Oct, snow/weather permitting.', src: 'glieres-gravel',
+      travel: { lake: { min: 12, mode: 'ride to Annecy first' } }, featured: true
+    },
+
+    /* ===== MTB & BIKE PARKS ===== */
+    {
+      id: 'semnoz-bikepark', title: 'Semnoz bike park', base: 'lake', cat: 'mtb', subtype: 'Lift-served DH',
+      areaId: 'semnoz', coords: [45.7970, 6.1040],
+      summary: 'The closest lift-served descents to the lake — 4 downhill trails off the Télémix, only ~20 min above Annecy.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['bikes','adrenaline'],
+      difficulty: '4 dedicated downhill trails (grading not stated by the resort).',
+      scenic: 2, novelty: 2, group: 'some',
+      booking: 'no', price: 'Lift pass at the caisse centrale: €17.50/day adult, €14.50/4h; rental via l’Appartelier du Cycle.',
+      access: 'Drive up, or the summer Sibra summit shuttle (MTB on the Semnoz line +€6). Trailhead parking fills early on fine days.',
+      facilities: 'Whole Semnoz summer station alongside: luge, tubing, scooters, buvettes.',
+      safety: 'The much-shared “20 km descent to Annecy” is NOT an official trail — semnoz.fr lists only the four park runs. Ride it as a guided tour with a local operator, or skip it.',
+      weather: { rain: 'poor', ground: 'greasy when wet', storm: 'avoid-pm', best: 'clear' },
+      status: 'seasonal', availability: 'Bike park daily 10:00–18:00, 4 Jul–30 Aug 2026 — covers the whole lake stay.', src: 'semnoz-bikepark',
+      travel: { lake: { min: 30, mode: 'car' } }, featured: true
+    },
+    {
+      id: 'laclusaz-bikepark', title: 'La Clusaz bike park', base: 'lake', cat: 'mtb', subtype: 'Lift-served DH & enduro',
+      areaId: 'aravis', coords: [45.9040, 6.4230],
+      summary: '12 graded gravity trails across three lifts — real DH plus a strong enduro/beginner offer, ~45 min from Veyrier.',
+      duration: 'full', effort: 'big', transport: ['car'], themes: ['bikes','adrenaline'],
+      difficulty: '6 DH (2 green / 2 blue / 1 red / 1 black) + 6 enduro (1 blue / 4 red / 1 black), plus Wall Ride & North Shore zones.',
+      scenic: 2, novelty: 2, group: 'some', groupNote: 'Beginner-friendly greens through to black — the whole group can ride at its level.',
+      booking: 'no', price: '2026 day pass €23.50 adult (3h €20; 2-day €46); junior 5–14 €16.',
+      weather: { rain: 'poor', ground: 'greasy when wet', best: 'clear' },
+      status: 'seasonal', availability: 'Bike lifts daily 1 Jul–30 Aug 2026.', src: 'laclusaz-bikepark',
+      travel: { lake: { min: 45, mode: 'car' } }, media: { photo: 'assets/wiki/aravis-village.jpg' }
+    },
+    {
+      id: 'grandbornand-mtb', title: 'Le Grand-Bornand — enduro & e-enduro', base: 'lake', cat: 'mtb', subtype: 'Enduro / VTTAE',
+      areaId: 'aravis', coords: [45.9420, 6.4270],
+      summary: '178 km of marked trails and a guided E-Enduro day that pairs La Clusaz’s bike park with Grand-Bornand’s natural trails.',
+      duration: 'full', effort: 'big', transport: ['car'], themes: ['bikes','adrenaline'],
+      difficulty: 'Enduro/XC rather than a full DH park; 16 itineraries, 2 summer bike lifts; Lormay natural pump track.',
+      scenic: 2, novelty: 2, group: 'some',
+      booking: 'recommended', price: 'Summer lift pass = 10 rides; guided E-Enduro day via reservation.',
+      weather: { rain: 'poor', best: 'clear' },
+      status: 'seasonal', availability: 'Bike lifts daily 4 Jul–30 Aug 2026.', verifyBeforeGo: true, src: 'gb-mtb',
+      travel: { lake: { min: 50, mode: 'car' } }
+    },
+    {
+      id: 'pumptrack-duingt', title: 'Pump track at Duingt', base: 'lake', cat: 'mtb', subtype: 'Skills / pump track',
+      areaId: 'duingt', coords: [45.8268, 6.1956],
+      summary: 'The nearest lakeside pump track — two courses, free, year-round, on the west shore by the greenway.',
+      duration: '2h', effort: 'easy', transport: ['car','bike','busboat'], themes: ['bikes'],
+      difficulty: 'Two loops incl. one for young children; MTB / BMX / scooter.',
+      scenic: 1, novelty: 2, group: 'all',
+      booking: 'no', price: 'Free.', gear: 'Helmet + protection compulsory.',
+      access: 'On-site car park; ~20–25 min drive from Veyrier around the south end. (No pump track in Veyrier itself; Argonay is the other close one, ~15 min N.)',
+      weather: { rain: 'poor', best: 'any' },
+      status: 'open', availability: 'Free, year-round.', src: 'pumptrack-duingt',
+      travel: { lake: { min: 22, mode: 'car' } }
+    },
+
+    /* ===== HIKING & NATURE (lake base) ===== */
+    {
+      id: 'mont-veyrier-baron', title: 'Mont Veyrier & Mont Baron loop', base: 'lake', cat: 'hike', subtype: 'Mountain hike',
+      areaId: 'veyrier', coords: [45.9010, 6.1910],
+      summary: 'The ridge straight above the house — the whole lake from the top, but a real climb, not a stroll.',
+      duration: 'full', effort: 'big', transport: ['car','bike'], themes: ['views','adrenaline'],
+      distanceKm: 13.75, ascentM: 1120, difficulty: 'Très difficile · ~4h30 · max 1290 m. Engaged, technical ridge with exposure.',
+      scenic: 3, novelty: 2, group: 'some', groupNote: 'For sure-footed hikers with a head for heights — not for nervous walkers or a casual afternoon.',
+      skill: 'Sure footing and comfort with exposed/scramble passages required.',
+      safety: 'Rockfall and slippery rock in the wet; exposed passages to the summit. The official loop starts from Annecy-le-Vieux (Avenue de Chavoires), not Veyrier village.',
+      weather: { rain: 'poor', storm: 'avoid-pm', wetUnsafe: true, best: 'clear', note: 'Avoid in rain, fog or after heavy rain — the ridge gets dangerous.' },
+      easierAlt: 'roc-walk',
+      status: 'seasonal', availability: 'In season ~30 Apr–10 Nov.', verifyBeforeGo: true, src: 'mont-veyrier',
+      travel: { lake: { min: 10, mode: 'car to Annecy-le-Vieux' } }
+    },
+    {
+      id: 'roc-walk', title: 'Roc de Chère reserve walk', base: 'lake', cat: 'walk', subtype: 'Forest & viewpoint',
+      areaId: 'roc-de-chere', coords: [45.8533, 6.2050],
+      summary: 'An easy waymarked forest circuit in a protected reserve, with lake viewpoints — the low-effort nature option.',
+      duration: '2h', effort: 'easy', transport: ['car','bike','busboat'], themes: ['views','recovery'],
+      difficulty: 'Easy, low-altitude forest circuit; no technical difficulty.',
+      scenic: 2, novelty: 1, group: 'all',
+      safety: 'A national nature reserve — stay on marked paths. No camping, fires, picking plants or leaving the trails near the cliffs. It is protected woodland, not a swim spot.',
+      weather: { rain: 'ok', shade: 'shaded', best: 'any', note: 'Good in light rain or heat — mostly under trees.' },
+      pairWith: ['menthon-pontoons','angon-apero'],
+      status: 'open', availability: 'Open year-round on marked paths.', src: 'roc-de-chere',
+      travel: { lake: { min: 15, mode: 'car' } }, media: { photo: 'assets/wiki/roc-de-chere.jpg' }
+    },
+    {
+      id: 'cascade-angon', title: 'Cascade d’Angon walk', base: 'lake', cat: 'walk', subtype: 'Waterfall walk',
+      areaId: 'angon', coords: [45.8250, 6.2210],
+      summary: 'A short, shaded climb to a waterfall gorge — the cool corner on a hot afternoon.',
+      duration: '2h', effort: 'easy', transport: ['car','bike'], themes: ['views','recovery'],
+      difficulty: 'Short walk-up with some steps; damp rock near the falls.',
+      scenic: 2, novelty: 1, group: 'all',
+      weather: { rain: 'ok', shade: 'shaded', heat: 'cool', best: 'any' }, pairWith: ['angon-apero'],
+      status: 'open', src: 'lac-annecy', travel: { lake: { min: 15, mode: 'car' } }
+    },
+    {
+      id: 'semnoz-trois-lacs', title: 'Semnoz: Circuit des Trois Lacs', base: 'lake', cat: 'walk', subtype: 'Family ridge walk',
+      areaId: 'semnoz', coords: [45.7970, 6.1040],
+      summary: 'A very easy 5.4 km ridge stroll with a 360° panorama — Mont-Blanc, the Tournette, the Aravis, the Bauges.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['views','recovery'],
+      distanceKm: 5.4, ascentM: 140, difficulty: 'Très facile · ~1h40 · max 1644 m. Low exposure, good for everyone.',
+      scenic: 3, novelty: 1, group: 'all',
+      weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear', note: 'High ground — check the mountain bulletin for afternoon storms.' },
+      pairWith: ['semnoz-picnic'],
+      status: 'open', availability: 'Snow-free summer; fully open in August.', src: 'trois-lacs',
+      travel: { lake: { min: 30, mode: 'car' } }
+    },
+    {
+      id: 'glieres-walk', title: 'Plateau des Glières: monument & museum', base: 'lake', cat: 'walk', subtype: 'History & easy walk',
+      areaId: 'glieres', coords: [45.9630, 6.3260],
+      summary: 'An easy plateau walk to the Resistance monument, plus the Morette museum and necropolis on the way home.',
+      why: 'Where the maquis made their 1944 stand — free open ground and 50 km of marked trails at ~1450 m.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['views','culture','recovery'],
+      distanceKm: 4, ascentM: 100, difficulty: 'Très facile · ~2h30 discovery loop; longer trails available.',
+      scenic: 3, novelty: 2, group: 'all',
+      booking: 'no', price: 'Plateau & monument free. Morette museum €3 — Tue–Sun 10:00–12:30 & 14:00–18:00, closed Mondays (17 & 24 Aug).',
+      weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear' },
+      status: 'open', availability: 'Open; museum season to 1 Nov 2026.', src: 'glieres-sites',
+      travel: { lake: { min: 45, mode: 'car' } }, media: { photo: 'assets/wiki/glieres.jpg' }
+    },
+    {
+      id: 'parmelan', title: 'Plateau du Parmelan', base: 'lake', cat: 'hike', subtype: 'Karst plateau hike',
+      areaId: 'annecy', coords: [45.9710, 6.2240],
+      summary: 'A moderate hike onto a dramatic limestone karst plateau with a big horizon — but tricky footing and a damaged access road.',
+      why: 'The Grande Glacière cave up top still holds ice in August, and the 1880s refuge does lunch.',
+      duration: 'full', effort: 'moderate', transport: ['car'], themes: ['views'],
+      distanceKm: 9, ascentM: 400, difficulty: 'Moderate · ~3h15 · max 1820 m, from Chalet de l’Anglettaz. Crosses lapiaz (fissured limestone).',
+      scenic: 3, novelty: 2, group: 'some', groupNote: 'Not for young children or in wet/foggy weather; the karst is easy to turn an ankle on.',
+      safety: 'The 4 km access road to the Anglettaz parking is badly damaged — unsuitable for low cars; an alternative start from Villaz lengthens the hike.',
+      weather: { rain: 'poor', storm: 'avoid-pm', wetUnsafe: true, best: 'clear', note: 'Officially discouraged in wet or foggy weather.' },
+      status: 'seasonal', availability: 'Snow-free summer.', verifyBeforeGo: true, src: 'parmelan',
+      travel: { lake: { min: 40, mode: 'car' } }
+    },
+
+    /* ===== ADRENALINE: via ferrata / canyoning / paragliding ===== */
+    {
+      id: 'jallouvre-viaferrata', title: 'Via Ferrata de la Tour du Jallouvre', base: 'lake', cat: 'viaferrata', subtype: 'Via ferrata (AD–D+)',
+      areaId: 'aravis', coords: [45.9700, 6.4600],
+      summary: 'Serious mountain via ferrata above Le Grand-Bornand — graded AD to D+, free to climb with your own kit.',
+      why: 'The area’s flagship via ferrata — serious, spectacular and confirmed open all season 2026. (The shorter Thônes crag route turned out to be open too — see the map.)',
+      duration: 'full', effort: 'big', transport: ['car'], themes: ['adrenaline','views'],
+      ascentM: 590, difficulty: 'AD up to D+ by variant · 20–30 min approach · 5–6 h round trip. Serious mountain terrain.',
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'Experienced parties can self-guide; a guide is recommended for a first via ferrata.',
+      skill: 'Head for heights and via-ferrata experience for the harder sections.',
+      gear: 'Via-ferrata lanyard set + helmet required (hire from the Bureau des Guides).',
+      booking: 'no', bookingUrl: 'https://en.legrandbornand.com/what-to-do/via-ferrata-la-tour-du-jallouvre-le-grand-bornand-en-5595979/', price: 'Free access; guided sessions bookable.',
+      safety: 'The exit passes a pasture guarded by patou dogs — be vigilant. Early-season snow can make the descent tricky.',
+      weather: { rain: 'poor', storm: 'avoid-pm', wetUnsafe: true, best: 'clear', note: 'Never in a storm or on wet rock — exposed metalwork on a mountain.' },
+      status: 'open', availability: 'Season 4 Jun–1 Nov 2026 — open during the trip.', src: 'jallouvre-vf',
+      travel: { lake: { min: 55, mode: 'car' } }, featured: true
+    },
+    {
+      id: 'canyoning-angon', title: 'Angon canyoning (discovery)', base: 'lake', cat: 'canyoning', subtype: 'Guided canyon · beginner',
+      areaId: 'angon', coords: [45.8250, 6.2210],
+      summary: 'A guided beginner canyon by the lake: rappels, pool swims, optional jumps — ~15 min from home.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['adrenaline','water'],
+      difficulty: '~2h30–3h incl. approach; mandatory abseils up to ~20 m; optional jumps to ~5 m; small groups. The advanced “Grande Cascade” version rappels 60 m beside the waterfall — ask the guides.',
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'From age 8; min 4 to run a session. Everyone must be able to swim and put their head underwater.',
+      skill: 'Must swim; rappels are compulsory so some comfort at height helps; jumps are optional.',
+      gear: 'Wetsuit/helmet/harness provided by the guide.',
+      booking: 'required', bookingUrl: 'https://en.lac-annecy.com/activite-reservable/canyoning-angon-discovery/', price: 'From €55–60 pp',
+      weather: { rain: 'poor', wetUnsafe: true, best: 'clear', note: 'Guides cancel in heavy rain / high flow. Morning gives the clearest water.' },
+      status: 'seasonal', availability: 'Runs May–September, conditions permitting.', verifyBeforeGo: true, src: 'canyon-angon',
+      travel: { lake: { min: 15, mode: 'car' } }, featured: true
+    },
+    {
+      id: 'canyoning-montmin', title: 'Montmin canyoning (sporty)', base: 'lake', cat: 'canyoning', subtype: 'Guided canyon · intermediate',
+      areaId: 'talloires', coords: [45.8200, 6.2200],
+      summary: 'The sportier neighbour to Angon — 12 obligatory jumps of 2–7 m plus slides and rappels. Not for beginners.',
+      duration: 'half', effort: 'big', transport: ['car'], themes: ['adrenaline','water'],
+      difficulty: '~3h half-day; canyon ~1.2 km; “confirmé”. 12 compulsory jumps (2–7 m).',
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'From age 12; you must be willing to jump — not advised with vertigo or no canyoning experience.',
+      skill: 'Swim, sure footing and comfort with compulsory jumps.',
+      booking: 'required', bookingUrl: 'https://www.annecyguidesmontagne.com/aventures/canyon-montmin-sportif', price: 'From €70 pp',
+      weather: { rain: 'poor', wetUnsafe: true, best: 'clear', note: 'Cancelled in high water; June–September only.' },
+      status: 'seasonal', availability: 'Runs ~June–September, conditions permitting.', verifyBeforeGo: true, src: 'canyon-montmin',
+      travel: { lake: { min: 15, mode: 'car' } }
+    },
+    {
+      id: 'paragliding-forclaz', title: 'Tandem paragliding from the Forclaz', base: 'lake', cat: 'paragliding', subtype: 'Tandem flight',
+      areaId: 'forclaz', coords: [45.8070, 6.2440],
+      summary: 'A tandem flight off the Col de la Forclaz launch, floating down to the Doussard field with the whole lake below.',
+      duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline','views'],
+      difficulty: '~12 min airtime (longer flights available); no fitness needed.',
+      scenic: 3, novelty: 3, group: 'all', groupNote: 'From age 5; weight limits apply — mention over ~100 kg when booking.',
+      booking: 'recommended', bookingUrl: 'https://annecy.takamaka.fr/fr/p/parapente-annecy',
+      price: 'Classic ~€100; child from €85; performance flights €135–160; +€30 photos. Shuttle up ~€15.',
+      weather: { rain: 'poor', wind: 'light-only', storm: 'avoid-pm', wetUnsafe: false, best: 'clear', note: 'Flies only in fair weather with light wind. Mornings are calmest/best for nervous flyers; afternoons are bumpier with bigger thermals.' },
+      status: 'operator-active', availability: 'Operators fly Apr–Oct; each flight is day-by-day weather-dependent.', verifyBeforeGo: true, src: 'parapente',
+      travel: { lake: { min: 25, mode: 'car' } }, featured: true, media: { photo: 'assets/wiki/forclaz.jpg' }
+    },
+    {
+      id: 'accrobranche-talloires', title: 'Treetop adventure park (Talloires)', base: 'lake', cat: 'family', subtype: 'Accrobranche',
+      areaId: 'talloires', coords: [45.8400, 6.2100],
+      summary: 'Harnessed tree-top courses and zip-lines above Talloires — the low-stakes adrenaline option, ~15 min away.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['adrenaline'],
+      difficulty: 'Courses by height 1.00–1.40 m+; 11 ziplines including one out over the lake; new 2026 “Swing Jump”; harness-free net course too.',
+      scenic: 2, novelty: 2, group: 'all',
+      booking: 'recommended', price: '€17–27 (courses), €5–10 (activities).',
+      weather: { rain: 'ok', shade: 'shaded', best: 'any' },
+      status: 'seasonal', availability: 'Open 28 Mar–15 Nov 2026.', src: 'accro-talloires',
+      travel: { lake: { min: 15, mode: 'car' } }
+    },
+
+    /* ===== FOOD, MARKETS, CULTURE (lake base) ===== */
+    {
+      id: 'annecy-market', title: 'Annecy old-town market & picnic', base: 'lake', cat: 'food', subtype: 'Market',
+      areaId: 'annecy', coords: [45.8990, 6.1260],
+      summary: 'The Tue/Fri/Sun morning market along rue Sainte-Claire — the best picnic-supply run of the trip.',
+      duration: '2h', effort: 'easy', transport: ['bike','busboat','car'], themes: ['food'],
+      scenic: 2, novelty: 1, group: 'all',
+      access: 'Tuesday is food-only; Friday & Sunday are bigger. Arrive before ~8:30 to beat the crowds. In the window: Fri 14/21/28, Sun 16/23, Tue 18/25.',
+      weather: { rain: 'ok', best: 'any' }, pairWith: ['east-shore-ride','pierre-gay','halles-haras'],
+      status: 'open', src: 'annecy-market', travel: { lake: { min: 12, mode: 'bike/bus' } }, featured: true, media: { photo: 'assets/wiki/annecy-market.jpg' }
+    },
+    {
+      id: 'halles-haras', title: 'Les Halles du Haras (food hall)', base: 'lake', cat: 'food', subtype: 'Covered food hall',
+      areaId: 'annecy', coords: [45.9010, 6.1250],
+      summary: 'A brand-new 2026 covered food hall at Le Haras — 24 producers, Savoyard cheese and charcuterie, bars and food-court seating.',
+      duration: '2h', effort: 'easy', transport: ['bike','busboat','car'], themes: ['food','rainy','recovery'],
+      scenic: 1, novelty: 3, group: 'all',
+      booking: 'no', price: 'Walk-in.',
+      access: '13 rue de la Paix, Annecy. Tue–Thu 8:00–21:00, Fri–Sat 8:00–23:00, Sun 8:00–16:00, closed Mondays.',
+      weather: { rain: 'good', best: 'any', note: 'Indoor — a strong rainy-day or recovery lunch.' },
+      pairWith: ['musee-cinema','annecy-market'],
+      status: 'open', availability: 'Opened June 2026.', src: 'halles-haras', travel: { lake: { min: 12, mode: 'bike/bus' } }, featured: true
+    },
+    {
+      id: 'musee-cinema', title: 'Musée du cinéma d’animation', base: 'lake', cat: 'culture', subtype: 'Museum',
+      areaId: 'annecy', coords: [45.9010, 6.1250],
+      summary: 'France’s first animation-film museum, newly opened at Le Haras — a genuinely good rainy-day or rest-day plan.',
+      duration: 'half', effort: 'recovery', transport: ['bike','busboat','car'], themes: ['culture','rainy','recovery'],
+      scenic: 1, novelty: 3, group: 'all',
+      booking: 'recommended', price: 'Adult €9, youth €5.50, under 3 free; +€5 guided tour.',
+      access: 'Le Haras, next to the Halles. Tue–Sun 10:00–18:00, closed Mondays (17 & 24 Aug), last entry 45 min before.',
+      weather: { rain: 'good', best: 'any' }, pairWith: ['halles-haras'],
+      status: 'open', availability: 'Open all year exc. 1 Jan / 1 May / 25 Dec; temporary show to 31 Jan 2027.', src: 'musee-anim',
+      travel: { lake: { min: 12, mode: 'bike/bus' } }
+    },
+    {
+      id: 'chateau-palais', title: 'Château d’Annecy & Palais de l’Île', base: 'lake', cat: 'culture', subtype: 'Museums',
+      areaId: 'annecy', coords: [45.8985, 6.1270],
+      summary: 'The hilltop castle-museum and the ship-shaped island monument on the Thiou — the old town’s two set-pieces.',
+      duration: 'half', effort: 'easy', transport: ['bike','busboat','car'], themes: ['culture','rainy'],
+      scenic: 2, novelty: 1, group: 'all',
+      booking: 'no', price: 'Summer 10:30–18:00. Château €7 (red. €4); Palais €5; combined ticket €9. Under 12 free.',
+      access: 'Uphill walk to the château. Tuesday closure is disputed across sources — safest to avoid Tue 18 & 25 Aug.',
+      weather: { rain: 'ok', best: 'any' }, pairWith: ['annecy-market','pierre-gay'],
+      status: 'open', availability: 'Summer season 1 Jun–30 Sep.', verifyBeforeGo: true, src: 'musees-annecy',
+      travel: { lake: { min: 12, mode: 'bike/bus' } }
+    },
+    {
+      id: 'gorges-fier', title: 'Gorges du Fier', base: 'lake', cat: 'culture', subtype: 'Slot-canyon walkway',
+      areaId: 'annecy', coords: [45.8970, 6.0450],
+      summary: 'A walkway bolted into a narrow river canyon west of Annecy — cool, shaded and dramatic, good even when it’s grey.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['culture','rainy','views'],
+      scenic: 3, novelty: 2, group: 'all',
+      booking: 'no', price: 'Adult €6, child 7–15 €3, under 7 free.',
+      access: 'Daily to 15 Oct 2026; August 9:30–19:15 (last entry 18:15). Pair with the château next door.',
+      facilities: 'No strollers; baby carriers for non-walking children.',
+      weather: { rain: 'good', shade: 'shaded', heat: 'cool', best: 'any', note: 'A great hot-day or light-rain option.' },
+      status: 'open', availability: 'Season 15 Mar–15 Oct 2026.', src: 'gorges-fier',
+      travel: { lake: { min: 25, mode: 'car' } }, media: { photo: 'assets/wiki/gorges-fier.jpg' }
+    },
+    {
+      id: 'pierre-gay', title: 'Cheese run: Fromagerie Pierre Gay', base: 'lake', cat: 'food', subtype: 'Cheese shop',
+      areaId: 'annecy', coords: [45.8990, 6.1270],
+      summary: 'The old-town affineur with ~100 cheeses and aging caves under a glass floor — the spontaneous picnic-cheese stop.',
+      duration: '2h', effort: 'easy', transport: ['bike','busboat','car'], themes: ['food'],
+      scenic: 1, novelty: 1, group: 'all',
+      booking: 'no', access: 'Mon 10–12 & 14–18, Tue–Sat 8–19, closed Sunday — pair with the Tue/Fri market, not the Sunday one.',
+      weather: { rain: 'good', best: 'any' }, pairWith: ['annecy-market'],
+      status: 'open', verifyBeforeGo: true, src: 'pierre-gay', travel: { lake: { min: 12, mode: 'bike/bus' } }
+    },
+    {
+      id: 'cave-tasting', title: 'Cheese-cave visit & tasting', base: 'lake', cat: 'food', subtype: 'Guided tasting · book ahead',
+      areaId: 'annecy', coords: [45.8985, 6.1270],
+      summary: 'A guided hour in the limestone aging cellars under the château, ending with cave-aged cheeses and Savoie wines.',
+      duration: '2h', effort: 'easy', transport: ['bike','busboat','car'], themes: ['food','culture'],
+      scenic: 1, novelty: 3, group: 'all', groupNote: 'Includes wine — adult-oriented. Min 2 people.',
+      booking: 'required', bookingUrl: 'https://www.lac-annecy.com/alti_alliance_post/visite-de-cave-et-atelier-degustation/', price: '€45/adult, €10/child',
+      weather: { rain: 'good', best: 'any' },
+      status: 'operator-active', availability: 'Bookable via the tourism office; confirm August slots.', verifyBeforeGo: true, src: 'cave-michel',
+      travel: { lake: { min: 12, mode: 'bike/bus' } }
+    },
+    {
+      id: 'veyrier-market', title: 'Veyrier village market & food trucks', base: 'lake', cat: 'food', subtype: 'Local market',
+      areaId: 'veyrier', coords: [45.8830, 6.1717],
+      summary: 'The home-village Friday-morning market plus summer 2026 food trucks — spontaneous supplies minutes from the house.',
+      duration: '2h', effort: 'easy', transport: ['walk','bike'], themes: ['food','recovery'],
+      scenic: 1, novelty: 1, group: 'all',
+      access: 'Friday mornings (Fri 21 & 28 Aug); food trucks at Place de la Poste and, in summer 2026, by the mairie and on the Chavoires peninsula.',
+      weather: { rain: 'ok', best: 'any' }, pairWith: ['home-swim'],
+      status: 'open', src: 'veyrier-market', travel: { lake: { min: 3, mode: 'walk' } }
+    },
+    {
+      id: 'savoyard-night', title: 'One Savoyard cheese night', base: 'lake', cat: 'food', subtype: 'Evening',
+      areaId: 'veyrier', coords: [45.8830, 6.1717],
+      summary: 'Tartiflette, raclette or fondue — once, on a cooler evening, ideally after a big day out.',
+      duration: 'evening', effort: 'recovery', transport: ['walk','car'], themes: ['food','recovery'],
+      scenic: 1, novelty: 1, group: 'all',
+      weather: { rain: 'good', best: 'any', note: 'Save it for a grey or post-ride evening — heavy in the heat.' },
+      status: 'open', src: 'lac-annecy', travel: { lake: { min: 0, mode: 'at home / in the village' } }
+    },
+    {
+      id: 'pool-bbq', title: 'Pool + BBQ at Casa Elisa', base: 'lake', cat: 'recovery', subtype: 'Rest day · week 3 only',
+      areaId: 'veyrier', coords: [45.87580, 6.18525], stayOnly: 'stay-casa-elisa',
+      summary: 'The private pool, terrace and barbecue at the second house — a proper rest day with lake views and zero logistics.',
+      duration: 'full', effort: 'recovery', transport: ['walk'], themes: ['recovery','food'],
+      scenic: 2, novelty: 1, group: 'all',
+      weather: { rain: 'ok', best: 'clear' },
+      status: 'open', availability: 'Only during the 22–29 Aug stay (Casa Elisa).', src: 'lac-annecy',
+      travel: { lake: { min: 0, mode: 'at the house' } }
+    },
+    {
+      id: 'semnoz-picnic', title: 'Semnoz ridge picnic', base: 'lake', cat: 'walk', subtype: 'Drive-up viewpoint',
+      areaId: 'semnoz', coords: [45.7970, 6.1040],
+      summary: 'Drive up to the ridge for the whole lake and Mont-Blanc, spread a market picnic, wander the easy paths.',
+      duration: 'half', effort: 'easy', transport: ['car','busboat'], themes: ['views','food'],
+      scenic: 3, novelty: 1, group: 'all',
+      access: 'Drive up or take the summer summit shuttle (daily 1 Jul–31 Aug). Family bike park, luge and tubing up top.',
+      weather: { rain: 'poor', storm: 'avoid-pm', best: 'clear', note: 'Pointless in cloud — save it for a blue day.' },
+      pairWith: ['annecy-market','semnoz-trois-lacs'],
+      status: 'seasonal', availability: 'Station daily 4 Jul–30 Aug 2026.', src: 'semnoz-station',
+      travel: { lake: { min: 30, mode: 'car' } }, media: { photo: 'assets/wiki/semnoz.jpg' }
+    },
+    {
+      id: 'forclaz-lunch', title: 'Lunch above the lake (Forclaz)', base: 'lake', cat: 'food', subtype: 'View lunch',
+      areaId: 'forclaz', coords: [45.8070, 6.2440],
+      summary: 'A lawn lunch at Col de la Forclaz with the best seat on the lake and paragliders dropping in.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['food','views'],
+      scenic: 3, novelty: 1, group: 'all',
+      weather: { rain: 'poor', best: 'clear' }, pairWith: ['paragliding-forclaz','menthon-pontoons'],
+      status: 'open', src: 'lac-annecy', travel: { lake: { min: 25, mode: 'car' } }, media: { photo: 'assets/wiki/forclaz.jpg' }
+    },
+    {
+      id: 'aravis-cheese', title: 'Aravis & Reblochon drive', base: 'lake', cat: 'village', subtype: 'Day trip · food',
+      areaId: 'aravis', coords: [45.9040, 6.4230],
+      summary: 'Mountain villages, a cheese cellar or farm and the green Aravis valleys — closer and cheaper than Chamonix.',
+      duration: 'full', effort: 'easy', transport: ['car'], themes: ['food','views'],
+      scenic: 3, novelty: 2, group: 'all',
+      access: 'Loop La Clusaz / Le Grand-Bornand / Thônes. Note: Le Grand-Bornand is very busy 23–27 Aug (children’s festival).',
+      weather: { rain: 'ok', best: 'any', note: 'Good even on a so-so day.' },
+      status: 'open', verifyBeforeGo: true, src: 'lac-annecy', travel: { lake: { min: 40, mode: 'car' } }, media: { photo: 'assets/wiki/aravis-village.jpg' }
+    },
+    {
+      id: 'chamonix-day', title: 'Chamonix (clear-day trip)', base: 'lake', cat: 'village', subtype: 'Big day trip',
+      areaId: 'chamonix', coords: [45.9237, 6.8694],
+      summary: 'Glaciers, the Aiguilles and a serious alpine town — go only when the summits are out.',
+      duration: 'full', effort: 'moderate', transport: ['car'], themes: ['views'],
+      scenic: 3, novelty: 2, group: 'all',
+      access: '~1h20 each way by car (A41/A40, tolls). Check lift/Montenvers info before committing.',
+      weather: { rain: 'poor', best: 'clear', note: 'Only worth it on a clear day — the whole point is the peaks.' },
+      status: 'open', verifyBeforeGo: true, src: 'lac-annecy', travel: { lake: { min: 80, mode: 'car' } }, media: { photo: 'assets/wiki/chamonix.jpg' }
+    },
+
+    {
+      id: 'blue-secret-packraft', title: 'Packraft: hike + paddle the Roc de Chère', base: 'lake', cat: 'paddle', subtype: 'Guided packraft · book ahead',
+      areaId: 'menthon', coords: [45.8610, 6.1990],
+      summary: 'Hike over the Roc de Chère headland with a packraft on your back, then paddle home beneath its cliffs and coves — the shoreline you can’t see from land.',
+      why: 'The legal, brilliant way to get the “secret coves” — on the water, not off the reserve’s cliffs.',
+      duration: 'half', effort: 'moderate', transport: ['car','bike'], themes: ['water','adrenaline'],
+      scenic: 3, novelty: 3, group: 'all',
+      booking: 'required', bookingUrl: 'https://blue-secret.com/en/annecy-english-new/', price: 'Half-day €50–70; full day €130; max 8, certified guide',
+      safety: 'Roc de Chère is a protected reserve: marked paths on land and no cliff jumping — there have been fatalities. The coves are for floating and swimming.',
+      weather: { rain: 'poor', wind: 'calm-am', best: 'clear' },
+      status: 'operator-active', availability: 'Runs through summer — book a slot.', src: 'blue-secret',
+      travel: { lake: { min: 12, mode: 'car' } }, featured: true
+    },
+    {
+      id: 'skiwake74', title: 'Wakeboard & waterski (Skiwake 74)', base: 'lake', cat: 'paddle', subtype: 'Wake sports · Doussard',
+      areaId: 'doussard', coords: [45.7761, 6.2200],
+      summary: 'Coached wakeboard, wakesurf and waterski runs off the Doussard shore — plus SUP and kayak rental and a snack bar.',
+      duration: '2h', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      scenic: 2, novelty: 3, group: 'all',
+      booking: 'recommended', bookingUrl: 'https://www.skiwake74.com/en/', price: 'Wakeboard €34–49 · wakesurf €58 · waterski €34–47',
+      weather: { rain: 'poor', wind: 'calm-am', best: 'morning', note: 'Calm water is the morning — same rule as SUP.' },
+      status: 'operator-active', availability: 'Season Apr–Oct, open 7/7 in summer, 7:00–21:00.', src: 'skiwake74',
+      travel: { lake: { min: 25, mode: 'car' } }
+    },
+    {
+      id: 'fonds-blancs-sup', title: 'SUP to the “Fonds Blancs” sandbanks', base: 'lake', cat: 'paddle', subtype: 'Paddle mission',
+      areaId: 'st-jorioz', coords: [45.8270, 6.1730],
+      summary: 'Paddle out past Saint-Jorioz to white-sand shallows with absurd turquoise water — invisible from shore, so almost nobody’s there.',
+      duration: 'half', effort: 'moderate', transport: ['car','busboat'], themes: ['water'],
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'A real paddle — rent at NCY SUP (Sévrier port) or Le Deck, and go on a calm morning.',
+      weather: { rain: 'poor', wind: 'calm-am', best: 'morning' },
+      status: 'open', availability: 'The exact spot is local knowledge — ask the SUP base to point you at it.', verifyBeforeGo: true, src: 'ncy-sup',
+      travel: { lake: { min: 22, mode: 'car to Sévrier' } }
+    },
+    {
+      id: 'les-houches-bikepark', title: 'Les Houches bike park (Prarion)', base: 'lake', cat: 'mtb', subtype: 'Lift-served DH · Chamonix valley',
+      areaId: 'chamonix', coords: [45.8946, 6.7816],
+      summary: 'The Chamonix-valley gravity option: three DH runs and four enduro itineraries off the Prarion gondola — pair it with a Chamonix day.',
+      duration: 'full', effort: 'big', transport: ['car'], themes: ['bikes','adrenaline'],
+      difficulty: 'Blue “Alpages”, red “Bouquetins”, black “Chamois” + 4 enduro itineraries.',
+      scenic: 3, novelty: 2, group: 'some',
+      booking: 'no', price: 'MTB pass €23.50–29.40 (2026).',
+      weather: { rain: 'poor', best: 'clear', note: 'Many Chamonix-valley singletracks close to bikes in July–August for hiker priority — stick to the marked park.' },
+      status: 'seasonal', availability: 'Prarion gondola daily 9:15–17:00, 20 Jun–30 Aug 2026.', src: 'leshouches',
+      travel: { lake: { min: 80, mode: 'car' } }
+    },
+
+    /* ===== LES GETS (leg 1, Aug 12–15) ===== */
+    {
+      id: 'lesgets-bikepark', title: 'Les Gets Bike Park', base: 'lesgets', cat: 'mtb', subtype: 'Lift-served · all levels',
+      areaId: 'les-gets', coords: [46.1558, 6.6697],
+      summary: 'A 128 km bike park across two mountains from the front door — flow and progression on Chavannes, roots and tech on Mont Chéry.',
+      why: 'The whole reason to start here: every lift open across the stay, beginner to expert, plus a strong e-MTB and enduro offer.',
+      duration: 'full', effort: 'big', transport: ['walk','car'], themes: ['bikes','adrenaline'],
+      difficulty: '18 DH trails, 6 enduro itineraries, 5 e-MTB trails (50+ km), 3 bike lifts. Chavannes = flow/progression; Mont Chéry = technical/advanced.',
+      scenic: 2, novelty: 2, group: 'some', groupNote: 'Green flow to expert tech — riders split by level and regroup at the lift.',
+      booking: 'recommended', price: 'Web 2026: Les Gets VTT day €35; Portes du Soleil multi-resort day €39; 6 rental/repair shops in resort.',
+      access: 'Lifts from the village (walk from the apartment). High season Chavannes 09:00–17:30.',
+      facilities: 'e-MTB charging points; bike hire incl. DH rigs and pads at 360 Outdoor, LoisiBike, Intersport — book ahead.',
+      weather: { rain: 'poor', ground: 'greasy when wet', best: 'clear' },
+      pairWith: ['lesgets-village'], easierAlt: 'lesgets-lift-walk',
+      status: 'open', availability: 'Full bike-park season 19 Jun–13 Sep 2026 (Mont Chéry to 30 Aug) — every lift open 12–15 Aug.', src: 'lesgets-bikepark',
+      travel: { lesgets: { min: 5, mode: 'walk to the lift' } }, featured: true, media: { photo: 'assets/wiki/les-gets-mtb.jpg' }
+    },
+    {
+      id: 'lesgets-lift-walk', title: 'Lift up, walk the ridge (Mont Chéry)', base: 'lesgets', cat: 'walk', subtype: 'Non-bike option',
+      areaId: 'les-gets', coords: [46.1500, 6.6600],
+      summary: 'For anyone not riding downhill: ride the Mont Chéry cable car for the panorama and walk the quieter side.',
+      duration: 'half', effort: 'easy', transport: ['walk','car'], themes: ['views','recovery'],
+      scenic: 3, novelty: 1, group: 'all',
+      booking: 'no', price: 'Pedestrian single lift ~€10.',
+      weather: { rain: 'poor', storm: 'avoid-pm', best: 'clear' },
+      status: 'open', availability: 'Mont Chéry runs daily to 30 Aug 2026.', src: 'lesgets-bikepark',
+      travel: { lesgets: { min: 5, mode: 'walk to the lift' } }
+    },
+    {
+      id: 'lesgets-village', title: 'Les Gets village evening', base: 'lesgets', cat: 'village', subtype: 'Village & food',
+      areaId: 'les-gets', coords: [46.1558, 6.6697],
+      summary: 'A small wooden alpine town with terraces, shops and mountain views — the low-key evening with no drive.',
+      duration: 'evening', effort: 'recovery', transport: ['walk'], themes: ['food','recovery'],
+      scenic: 2, novelty: 1, group: 'all',
+      weather: { rain: 'ok', best: 'any' },
+      status: 'open', src: 'lesgets-tarifs', travel: { lesgets: { min: 3, mode: 'walk' } }, media: { photo: 'assets/wiki/les-gets-village.jpg' }
+    },
+    {
+      id: 'lesgets-grocery', title: 'Stock up before the lake', base: 'lesgets', cat: 'food', subtype: 'Practical',
+      areaId: 'les-gets', coords: [46.1558, 6.6697],
+      summary: 'Do the big grocery run in Les Gets before the Saturday drive down — arrival day is a Saturday in August.',
+      duration: '2h', effort: 'recovery', transport: ['walk','car'], themes: ['food'],
+      scenic: 1, novelty: 1, group: 'all',
+      status: 'open', src: 'lesgets-tarifs', travel: { lesgets: { min: 3, mode: 'walk' } }
+    },
+    {
+      id: 'lesgets-road-ride', title: 'Road ride from Les Gets', base: 'lesgets', cat: 'road', subtype: 'Road · verify route',
+      areaId: 'les-gets', coords: [46.1558, 6.6697],
+      summary: 'Portes-du-Soleil road country — Col de l’Encrenaz and the Joux Plane are close for a big morning on the road bike.',
+      duration: 'half', effort: 'big', transport: ['bike'], themes: ['bikes','views'],
+      difficulty: 'Serious cols nearby; exact stats not verified here — plan the route before riding.',
+      scenic: 3, novelty: 2, group: 'some',
+      weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear' },
+      status: 'open', availability: 'Roads open in summer; confirm the specific col/route yourself.', verifyBeforeGo: true, src: 'lesgets-tarifs',
+      travel: { lesgets: { min: 2, mode: 'from the door' } }
+    }
+  ];
+  const ACT_BY_ID = Object.fromEntries(ACTIVITIES.map(a => [a.id, a]));
+  // Back-compat alias so any older #/plan/:id deep links still resolve.
+  const PLAN_BY_ID = ACT_BY_ID;
+
+  /* ---------- EVENTS (date-aware layer) ------------------------------
+     Each event carries exact dates, why-you'd-care, booking, transport
+     impact, a source and a verifiedOn. Conflicts with changeover days
+     (15 & 22 Aug) are flagged honestly. */
+  const EVENTS = [
+    {
+      id: 'morillon-enduro', name: 'UCI Enduro World Cup Final — Morillon', kind: 'race',
+      start: '2026-08-14', end: '2026-08-16', datesLabel: 'Fri 14 – Sun 16 Aug',
+      base: 'lesgets', where: 'Morillon Enduro Bike Park (Giffre valley) · ~35 min from Les Gets',
+      coords: [46.0850, 6.6900],
+      why: 'The enduro World Cup final decides the overall title — and it lands during your Les Gets stay. Free to watch.',
+      booking: 'no', price: 'Free spectator admission.',
+      impact: 'Race-village crowds; Sat 15 overlaps your Les Gets → lake changeover if you linger. Detailed race times not yet published.',
+      conflict: 'changeover-15', confidence: 'likely', verifyBeforeGo: true, src: 'morillon-uci',
+      travel: { lesgets: { min: 35, mode: 'car' }, lake: { min: 75, mode: 'car' } }
+    },
+    {
+      id: 'le-bouquetin', name: 'Le Bouquetin — timed climb of the Col de la Colombière', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug, 08:30 start',
+      base: 'lake', where: 'Le Grand-Bornand Village → Col de la Colombière',
+      coords: [45.9400, 6.4270],
+      why: '27th edition mass-start hill-climb: 12 km / 660 m up the Colombière. Race it (licence/medical + insurance) or just watch the field go up.',
+      booking: 'recommended', price: 'On-site registration 07:00–08:15; riders 15+.',
+      impact: 'The Colombière road and Grand-Bornand centre are busy that morning. It falls on your Aug 15 changeover day — awkward to combine with the house move.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'bouquetin',
+      travel: { lake: { min: 50, mode: 'car' } }
+    },
+    {
+      id: 'veyrier-createurs', name: 'Marché des créateurs — Veyrier-du-Lac', kind: 'market',
+      start: '2026-08-16', end: '2026-08-16', datesLabel: 'Sun 16 Aug, 10:00–19:00',
+      base: 'lake', where: 'Port de Veyrier-du-Lac (Quai Général Doyen) · in your home village',
+      coords: [45.8848, 6.1740],
+      why: 'A lakeside artisan market at your own port — ~30 makers, free — the day after you arrive. Walk down from the house.',
+      booking: 'no', price: 'Free.',
+      impact: 'None — it’s in the village.', confidence: 'confirmed', src: 'veyrier-crea',
+      travel: { lake: { min: 5, mode: 'walk' } }
+    },
+    {
+      id: 'imperial-festival', name: 'Impérial Annecy Festival', kind: 'festival',
+      start: '2026-08-18', end: '2026-08-28', datesLabel: '18–28 Aug',
+      base: 'lake', where: 'Imperial Palace, Annecy lakefront · ~5 km from Veyrier',
+      coords: [45.9050, 6.1440],
+      why: 'Jazz, classical and comedy on the lakefront — around twenty events, roughly half of them free (a free early-evening terrace concert, then a ticketed main show).',
+      booking: 'recommended', price: 'Some events free; main shows ticketed.',
+      impact: 'Busy lakefront and parking on show nights. The free/paid split and show times are from secondary sources — confirm the programme.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'imperial-fest',
+      travel: { lake: { min: 12, mode: 'car/bus' } }
+    },
+    {
+      id: 'lesgets-worldcup', name: 'UCI MTB World Cup — Les Gets', kind: 'race',
+      start: '2026-08-20', end: '2026-08-23', datesLabel: '20–23 Aug (XCC Fri 21 · DH Sat 22 · XCO Sun 23)',
+      base: 'lake', where: 'Les Gets · ~1h15 drive from Veyrier',
+      coords: [46.1558, 6.6697],
+      why: 'World Cup downhill and cross-country back at Les Gets — free to spectate. You’ve left Les Gets by now, so it’s a day-trip from the lake.',
+      booking: 'no', price: 'Free admission, 09:00–18:00.',
+      impact: 'Heavy traffic, parking pressure and crowds in Les Gets, worst on DH Saturday (22 Aug — your Veyrier changeover day) and XCO Sunday. If day-tripping to watch, expect a long, busy drive.',
+      conflict: 'changeover-22', confidence: 'confirmed', src: 'lesgets-uci',
+      travel: { lake: { min: 75, mode: 'car' } }
+    },
+    {
+      id: 'bonheur-momes', name: 'Au Bonheur des Mômes — Le Grand-Bornand', kind: 'festival',
+      start: '2026-08-23', end: '2026-08-27', datesLabel: '23–27 Aug',
+      base: 'lake', where: 'Le Grand-Bornand village · ~50 min from Veyrier',
+      coords: [45.9400, 6.4270],
+      why: 'Europe’s biggest young-audience performance festival. Not aimed at four adults — but it fills Le Grand-Bornand for five days.',
+      booking: 'yes', price: 'Individual shows ticketed and sell out.',
+      impact: 'Mainly a heads-up: busy roads and full parking in the Aravis 23–27 Aug — factor it into any La Clusaz / Grand-Bornand bike or cheese day.',
+      confidence: 'confirmed', src: 'momes', travel: { lake: { min: 50, mode: 'car' } }
+    },
+    {
+      id: 'cine-plein-air', name: 'Annecy open-air cinema', kind: 'cinema',
+      start: '2026-06-26', end: '2026-08-29', datesLabel: 'Free evenings through Aug 29',
+      base: 'lake', where: 'Rotating Annecy neighbourhood venues',
+      coords: [45.8990, 6.1290],
+      why: 'Free after-dark screenings around Annecy all summer — a lovely cheap evening. Bring a blanket.',
+      booking: 'no', price: 'Free; ~21:30 start, cancelled in bad weather.',
+      impact: 'The advertised “Shaun le mouton” screening is the closing night, Sat 29 Aug — your departure day, so you’ll miss that one. Other films screen on other August nights: check the schedule for one during the stay.',
+      confidence: 'likely', verifyBeforeGo: true, src: 'cine-plein-air',
+      travel: { lake: { min: 12, mode: 'car/bus' } }
+    }
   ];
 
-  /* ---------- BUILD-A-DAY options ------------------------------------ */
-  const BUILD = {
-    effort: [
-      { id: 'low', label: 'Low', emoji: '🛋️', hint: 'Barely any planning' },
-      { id: 'medium', label: 'Medium', emoji: '🚲', hint: 'A proper outing' },
-      { id: 'big', label: 'Big', emoji: '🚵', hint: 'A full, tiring day' }
+  /* ---------- TRANSPORT GUIDANCE (getting around, no-car mode) -------- */
+  const TRANSPORT_GUIDE = {
+    intro: 'Mobil’été runs 1 Jul–31 Aug 2026: free summer Sibra buses, park-and-ride, lake boats and Vélonecy e-bikes. In summer, driving into central Annecy is the slow option — the Courier tunnel is under works into 2027 and lakeside parking is now paid.',
+    modes: [
+      { id: 'bus', label: 'Free summer buses', summary: 'The whole Sibra network is free in July–August (on-demand excepted). Line 20 is the east-shore link — Annecy ↔ Veyrier (Barattes stop for La Brune) ↔ Menthon ↔ Talloires, daily, last departure from Annecy ~01:00. Line 15 (15A/15B) serves the west shore (Sévrier, Saint-Jorioz, Duingt).', src: 'mobilite' },
+      { id: 'boat', label: 'Navibus lake shuttle', summary: 'Calls at Veyrier and eight other ports. 3 departures daily every day 6 Jul–28 Aug 2026; from 29 Aug only Tue/Wed/Fri/Sun (so likely none on departure Saturday). A full loop is ~2h20 — an excursion, not a fast commute. Bikes reportedly +€1 (verify). Take a bike one way, ride the greenway back.', src: 'navibus' },
+      { id: 'veyrier-express', label: 'Veyrier Express fast boat', summary: 'A dedicated fast shuttle between Annecy and Veyrier — the quickest car-free hop. Reported ~4 round trips/day in late August, weather-dependent. Dates/fares unverified for 2026 — check with the operator or the mairie.', verifyBeforeGo: true, src: 'mobilite' },
+      { id: 'mountain', label: 'Summer mountain lines', summary: 'Seasonal buses from Annecy to the Semnoz, Col de la Forclaz and Planfait (hiking / paragliding launches). MTB carried on the Semnoz line for €6. Trailhead car parks fill early on fine days — the bus skips the scramble. Confirm timetables.', verifyBeforeGo: true, src: 'mobil-ete' },
+      { id: 'bike', label: 'Bike + greenway', summary: 'The ~40 km lakeside route rings the lake; the west/south shore is the traffic-free Voie Verte. Pair it with a one-way Navibus. Vélonecy has ~450 e-bikes across 79 stations at the Annecy end.', src: 'mobilite' }
     ],
-    car: [
-      { id: 'no-car', label: 'No car', emoji: '🚶', hint: 'Walk, bike or boat' },
-      { id: 'car', label: 'Car’s fine', emoji: '🚗', hint: 'Happy to drive' }
+    parking: 'Lakeside car parks are paid €1/hour 09:00–18:00, 1 Jul–31 Aug; central underground parks fill by ~11:00. Use a free seasonal park-and-ride and ride the free bus in. Expect heavy traffic on market mornings (Tue/Fri/Sun), summer weekends and the Aug 15 & 22 changeover Saturdays.',
+    noCar: 'A genuine no-car day from Veyrier works: bus line 20 or the fast boat into Annecy, the greenway or Navibus around the lake, and walk-down swimming at La Brune. Save the car for the mountains (cols, bike parks, Glières, Chamonix).',
+    src: 'mobil-ete'
+  };
+
+  /* ---------- WEATHER (links + suitability legend, no live data) ------ */
+  const WEATHER = {
+    note: 'This app never invents live conditions. On the trip, open these official forecasts each morning — the August risks here are afternoon thunderstorms in the mountains and a thermal breeze that builds on the lake after lunch.',
+    links: [
+      { label: 'Météo-France — Haute-Savoie (towns, hourly)', src: 'meteo' },
+      { label: 'Météo-France Montagne — Alpes du Nord (storm timing for cols & ridges)', src: 'meteo-montagne' },
+      { label: 'Vigilance Météo-France (storm & heat alerts)', src: 'vigilance' },
+      { label: 'Windfinder — Veyrier-du-Lac (lake wind for paddling & sailing)', src: 'windfinder' }
     ],
-    theme: [
-      { id: 'water', label: 'Water', emoji: '🏊', modes: ['lake', 'beach'] },
-      { id: 'bikes', label: 'Bikes', emoji: '🚴', modes: ['easy-bike', 'big-cycling', 'cols', 'mtb'] },
-      { id: 'food', label: 'Food', emoji: '🧀', modes: ['food', 'apero'] },
-      { id: 'views', label: 'Views', emoji: '🌄', modes: ['views'] },
-      { id: 'rainy', label: 'Rainy', emoji: '🌧️', modes: ['rainy'] }
+    questions: [
+      { q: 'Clear morning?', a: 'Cols, Semnoz, the Glières gravel, Mont Veyrier, a paddle before the breeze.' },
+      { q: 'Storms after 2 pm?', a: 'Stay low: lake swims, the greenway, Annecy market, or be down off any ridge before lunch.' },
+      { q: 'Raining?', a: 'Gorges du Fier, the animation museum, Les Halles du Haras, the Roc de Chère woods, a cheese-cave tasting.' },
+      { q: 'Heat wave?', a: 'Shaded and cool: the gorge walkway, Cascade d’Angon, early-morning rides, late swims and apéro.' },
+      { q: 'Needs calm water / clear air?', a: 'SUP and sailing want a calm morning; paragliding and the big view days want a settled, clear sky.' }
     ]
   };
 
-  /* ---------- PHOTO CREDITS (Wikimedia Commons) ----------------------
-     Filled by the photo-integration pass; rendered on Discover. */
+  /* ---------- DISCOVER content (kept, superlative corrected) ---------- */
+  const STORY = [
+    { emoji: '🧊', title: 'Carved by ice', text: 'The lake sits in a trough that Ice-Age glaciers scooped out, then filled as they melted. The walls of peaks around it are what the ice left behind.' },
+    { emoji: '💧', title: 'One of the purest lakes in Europe', text: 'By the 1960s it was badly polluted. The towns around the shore built one of Europe’s first lake-wide sewer systems and brought it back — the tourism office calls it “l’un des plus purs d’Europe”, and it’s fiercely protected.' },
+    { emoji: '🛶', title: 'The Venice of the Alps', text: 'Annecy’s old town is laced with canals off the river Thiou. The Palais de l’Île — the little ship-shaped building midstream — has been a house, a court and a prison since the 12th century.' },
+    { emoji: '🏰', title: 'A castle on every shoulder', text: 'Château d’Annecy watches the old town, Château de Menthon perches on its hill, and Duingt’s tower guards the narrows. Half the skyline is medieval.' },
+    { emoji: '🧀', title: 'Cheese with a backstory', text: 'The story goes that Reblochon was born from a sneaky second milking — farmers under-declared their cows to the landlord, then milked again once he’d gone. The Aravis farms still make it.' }
+  ];
+  const HISTORY = [
+    { emoji: '🏔️', title: 'Mountains made for resistance', text: 'After France fell in 1940, these valleys became maquis country. High pastures, deep forests and passes the occupier couldn’t control — and farms that fed and hid the fighters.' },
+    { emoji: '✊', title: 'Glières, winter 1944', text: 'On a snowbound plateau just north-east of the lake, around 450 maquisards gathered to receive Allied weapons drops under the motto « Vivre libre ou mourir ». Attacked at the end of March 1944, well over a hundred were killed or deported — and the stand became a rallying cry for the whole Resistance.' },
+    { emoji: '🪂', title: 'The answer from the sky', text: 'On 1 August 1944 the plateau got its reply: a huge daylight parachute drop of arms. Weeks later, on 19 August, Haute-Savoie did something almost unique — it freed itself, the German garrison surrendering to the Resistance in Annecy before any Allied army arrived.' },
+    { emoji: '🕊️', title: 'You can stand there', text: 'The plateau is an easy drive: the national monument, open walking country, and the Resistance museum and necropolis at Morette on the Thônes road — the same road you’ll take toward the Aravis and the cheese.' }
+  ];
+  const DISCOVERIES = [
+    { emoji: '🚵', title: 'You’re sleeping in a world-class bike park', text: 'Leg one puts you at the foot of the Les Gets slopes — 128 km of lift-served trails from the front door, before the lake even starts.', route: '#/plan/lesgets-bikepark' },
+    { emoji: '🌄', title: 'The nearest bike park is 20 minutes away', text: 'The Semnoz above Annecy runs a summer bike park and luge daily through 30 August — the closest lift-served descents to the lake.', route: '#/plan/semnoz-bikepark' },
+    { emoji: '🪂', title: 'You can fly off the Forclaz', text: 'Tandem paragliders launch off Col de la Forclaz and float down to Doussard with the whole lake below. Book a calm morning.', route: '#/plan/paragliding-forclaz' },
+    { emoji: '🏞️', title: 'There’s a canyon 15 minutes from the house', text: 'Guided canyoning in the Angon gorge — rappels and pool swims for beginners, a jumpier sporty version at Montmin next door.', route: '#/plan/canyoning-angon' },
+    { emoji: '🚴', title: 'A World Cup lands mid-trip', text: 'The UCI MTB World Cup returns to Les Gets 20–23 Aug — free to watch, a day-trip from the lake (mind the Aug 22 crowds).', route: '#/event/lesgets-worldcup' },
+    { emoji: '🕊️', title: 'The Resistance made its stand next door', text: 'In 1944 the Maquis des Glières held a plateau just north-east of the lake. You can walk it — and visit the museum on the Thônes road.', route: '#/plan/glieres-walk' }
+  ];
+  const ZONES = [
+    { region: 'top', emoji: '🏛️', label: 'Annecy', text: 'Old town, market, canals, the Haras' },
+    { region: 'west', emoji: '🚲', label: 'West shore', text: 'Sévrier · Saint-Jorioz · Duingt — the greenway & beaches' },
+    { region: 'east', emoji: '🏠', label: 'East shore · home', text: 'Veyrier (home) · Menthon · Talloires — swims, pontoons, the Forclaz' },
+    { region: 'south', emoji: '🌾', label: 'South end', text: 'Doussard / Bout-du-Lac — calm water, SUP, paragliding landing' },
+    { region: 'heights', emoji: '🌄', label: 'Above the lake', text: 'Semnoz & Forclaz — climbs, bike park, big views' },
+    { region: 'beyond', emoji: '🏔️', label: 'Beyond', text: 'Aravis · Glières · Les Gets · Chamonix' }
+  ];
+
+  const CATEGORIES = [
+    { id: 'cycling', title: 'Cycling', emoji: '🚴', tint: 'pine', media: { photo: 'assets/wiki/col-aravis.jpg' },
+      vibe: 'Road, gravel, MTB and bike parks — this trip’s beating heart.',
+      looksLike: 'A col before breakfast heat, a gravel epic over the Glières, a lift-served bike-park afternoon, or a flat greenway spin between swims.',
+      themes: ['bikes'] },
+    { id: 'water', title: 'Water & swimming', emoji: '🏊', tint: 'aqua', media: { photo: 'assets/wiki/lake-swim.jpg' },
+      vibe: 'Clean, cold, turquoise water you can walk into — plus paddle, sail and dive.',
+      looksLike: 'Walk-down swims at La Brune, a SUP off the home beach before the breeze, pontoon jumps at Menthon, a first dive off the town shore.',
+      themes: ['water'] },
+    { id: 'adrenaline', title: 'Adrenaline', emoji: '🪂', tint: 'purple', media: { photo: 'assets/wiki/forclaz.jpg' },
+      vibe: 'Fly, drop and scramble — guided and serious.',
+      looksLike: 'A tandem flight off the Forclaz, canyoning the Angon gorge, the Jallouvre via ferrata, or a bike-park day.',
+      themes: ['adrenaline'] },
+    { id: 'mountains', title: 'Hikes & big views', emoji: '🏔️', tint: 'alpine', media: { photo: 'assets/wiki/semnoz.jpg' },
+      vibe: 'Up high on a clear day for the view that makes everyone stop talking.',
+      looksLike: 'The Semnoz ridge picnic, the airy Mont Veyrier loop, the easy Trois Lacs stroll, the Glières plateau.',
+      themes: ['views'] },
+    { id: 'food', title: 'Markets & food', emoji: '🧀', tint: 'sun', media: { photo: 'assets/wiki/annecy-market.jpg' },
+      vibe: 'Cheap, joyful eating — markets, cheese caves and lake-fish lunches beat fancy dinners here.',
+      looksLike: 'The old-town market, a cheese run at Pierre Gay, the new Halles du Haras food hall, one Savoyard night.',
+      themes: ['food'] },
+    { id: 'rainy', title: 'Rainy & rest days', emoji: '🌧️', tint: 'alpine-deep', media: { photo: 'assets/wiki/gorges-fier.jpg' },
+      vibe: 'Grey skies and tired legs have good plans too.',
+      looksLike: 'The Gorges du Fier walkway, the animation museum, the Roc de Chère woods, the pool at Casa Elisa, a long market lunch.',
+      themes: ['rainy','recovery'] }
+  ];
+  const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+  /* ---------- BUILD-A-DAY (five primary questions) ------------------- */
+  const BUILD = {
+    time:   [
+      { id: '2h', label: '2 hours', emoji: '⏱️' },
+      { id: 'half', label: 'Half day', emoji: '🌤️' },
+      { id: 'full', label: 'Full day', emoji: '☀️' },
+      { id: 'evening', label: 'Evening', emoji: '🌅' }
+    ],
+    effort: [
+      { id: 'recovery', label: 'Recovery', emoji: '🛋️' },
+      { id: 'easy', label: 'Easy', emoji: '🚶' },
+      { id: 'moderate', label: 'Moderate', emoji: '🚲' },
+      { id: 'big', label: 'Big', emoji: '🚵' }
+    ],
+    transport: [
+      { id: 'walk', label: 'On foot', emoji: '🚶' },
+      { id: 'bike', label: 'By bike', emoji: '🚴' },
+      { id: 'busboat', label: 'Bus / boat', emoji: '⛴️' },
+      { id: 'car', label: 'Car’s fine', emoji: '🚗' }
+    ],
+    theme:  [
+      { id: 'any', label: 'Anything', emoji: '✨' },
+      { id: 'water', label: 'Water', emoji: '🏊' },
+      { id: 'bikes', label: 'Bikes', emoji: '🚴' },
+      { id: 'views', label: 'Views', emoji: '🌄' },
+      { id: 'food', label: 'Food', emoji: '🧀' },
+      { id: 'adrenaline', label: 'Adrenaline', emoji: '🪂' },
+      { id: 'rainy', label: 'Rainy', emoji: '🌧️' }
+    ],
+    // progressive optional filters
+    weather: [
+      { id: 'any', label: 'Any weather' },
+      { id: 'clear', label: 'Clear & settled' },
+      { id: 'rain', label: 'Wet' },
+      { id: 'heat', label: 'Heat wave' },
+      { id: 'storm-pm', label: 'Storms later' }
+    ],
+    booking: [
+      { id: 'any', label: 'Either' },
+      { id: 'spontaneous', label: 'Spontaneous now' },
+      { id: 'ok-to-book', label: 'Happy to book' }
+    ]
+  };
+
+  /* ---------- FEATURED + shortlists --------------------------------- */
+  const FEATURED = ['lake-loop-road', 'canyoning-angon', 'semnoz-bikepark', 'paragliding-forclaz'];
+  const LESGETS_TOP3 = ['lesgets-bikepark', 'morillon-enduro', 'lesgets-lift-walk'];
+  const LAKE_EXCURSIONS = ['glieres-gravel', 'jallouvre-viaferrata', 'laclusaz-bikepark', 'chamonix-day', 'glieres-walk'];
+
+  /* ---------- MAP POIs -----------------------------------------------
+     Pins that don't need a full activity page: cyclist cafés, wild
+     beaches, gyms, restaurants, viewpoints, oddities. From the group's
+     starter list, geocoded via OSM/Nominatim (2026-07-26); items whose
+     details weren't confirmed on an official page carry verify:true and
+     show a "Verify before going" badge on the map. */
+  const MAP_POIS = [
+    // Cyclist cafés & bike spots
+    { id: 'bon-wagon', cat: 'food', em: '🚲', name: 'Le Bon Wagon (cyclist café)', coords: [45.82652, 6.20113], blurb: 'Converted railway station on the Voie Verte at Duingt — café, workshop, rentals, lake view.', verify: true },
+    { id: 'abri-cyclette', cat: 'food', em: '🚲', name: 'L’Abri Cyclette (cyclist café)', coords: [45.83335, 6.16430], blurb: 'Cycle-themed café at Saint-Jorioz — sofas, deckchairs, green fields.', note: 'Pin approximate (village centre).', verify: true },
+    { id: 'matchy', cat: 'food', em: '🚲', name: 'Matchy Cycling Clubhouse', coords: [45.90578, 6.12117], blurb: 'Cycling café-clubhouse in Annecy — group rides and race screenings.', verify: true },
+    { id: 'lormay-ludopark', cat: 'cycling', em: '🚵', name: 'Ludopark de Lormay', coords: [45.94523, 6.50575], blurb: 'Free MTB skills area in the Vallée du Bouchet: three graded loops plus a 150 m natural pumpline.', note: 'Open ~May–Nov, free; helmet strongly advised; under-10s supervised.', href: 'https://en.legrandbornand.com/ludopark-of-lormay.html' },
+    { id: 'carroz-pump', cat: 'cycling', em: '🚵', name: 'Pumptrack Les Carroz', coords: [46.02801, 6.63398], blurb: '230 m asphalt pump track with three circuits — worth a stop if you’re in the Grand Massif anyway.', verify: true },
+    { id: 'marlens-plan-eau', cat: 'water', em: '🚲', name: 'Plan d’eau de Marlens', coords: [45.76081, 6.34372], blurb: 'Swimming lake and free bike-wash on the greenway extension south of the lake.', verify: true },
+    // Water & wild beaches
+    { id: 'plage-chateau-duingt', cat: 'water', em: '🏖️', name: 'Plage du Château (Duingt)', coords: [45.83002, 6.20566], blurb: 'Grassy free beach with ladder entry under the Duingt château — unsupervised, quietly lovely.' },
+    { id: 'clos-bertet', cat: 'water', em: '🏖️', name: 'Plage du Clos Berthet (Sévrier)', coords: [45.85649, 6.14710], blurb: 'Small wild grassy beach 500 m south of Sévrier port — deep water fast, few people.' },
+    { id: 'ncy-sup', cat: 'water', em: '🛶', name: 'NCY SUP (Sévrier port)', coords: [45.85979, 6.14566], blurb: 'SUP & foil base — rentals from the port, plus the Wednesday “Paddle Burger” sunset tour.', note: 'Pin at the port; check in at the base.', href: 'https://ncy-sup.com/', verify: true },
+    // Climbing & indoor
+    { id: 'criqbloc', cat: 'adrenaline', em: '🧗', name: 'Criq’Bloc (Saint-Jorioz)', coords: [45.83335, 6.16430], blurb: 'Indoor bouldering right by the beach — ~€12 adult, shoes €3. Climb, then swim.', note: 'Pin approximate (La Crique leisure base).', href: 'https://annecy-lacrique.com/en/rates-and-reservation', verify: true },
+    { id: 'spacebloc', cat: 'adrenaline', em: '🧗', name: 'Space Bloc (Sillingy)', coords: [45.94497, 6.04583], blurb: 'The area’s big bouldering gym, with a bar — a proper rainy-day session.', verify: true },
+    // Food & treats
+    { id: 'poisson-rouge', cat: 'food', em: '🐟', name: 'Le Poisson Rouge (Sévrier)', coords: [45.86766, 6.14353], blurb: 'Feet-in-the-water lakefront classic — fried perch and féra. Book ahead in August.', verify: true },
+    { id: 'charbonniere', cat: 'food', em: '🧀', name: 'Ferme de la Charbonnière (Menthon)', coords: [45.86991, 6.20702], blurb: 'Ferme-auberge above the cow stable — cheese made on site, Reblochonnade, raclette. The real Savoie, five minutes from home.', verify: true },
+    { id: 'le-freti', cat: 'food', em: '🫕', name: 'Le Fréti (old town)', coords: [45.89855, 6.12493], blurb: 'Fondue institution since 1974, cheese aged in its own caves. No summer reservations — go early.', verify: true },
+    { id: 'chez-ma-cousine', cat: 'food', em: '🍽️', name: 'Chez ma Cousine (Doussard)', coords: [45.79520, 6.21333], blurb: 'Refined guinguette on the south shore with its own pontoon — arrive by boat if you can. Reserve.', verify: true },
+    { id: 'le-denti', cat: 'food', em: '🐟', name: 'Le Denti (Annecy)', coords: [45.89642, 6.12066], blurb: 'Fifteen seats, superb fish, zero fuss — the locals’ secret. Reservations essential.', verify: true },
+    { id: 'glacier-des-alpes', cat: 'food', em: '🍦', name: 'Glacier des Alpes', coords: [45.89803, 6.12740], blurb: 'Thirty-year family gelato on rue Perrière — lavender-honey, violet, salted caramel.', verify: true },
+    { id: 'nazca-lines', cat: 'food', em: '🍸', name: 'Nazca Lines (cocktail bar)', coords: [45.89923, 6.12888], blurb: 'Hidden-gem cocktail bar in the old town for the one dressed-up evening.', note: 'Pin approximate.', verify: true },
+    { id: 'anglettaz', cat: 'food', em: '🧀', name: 'Chalet de l’Anglettaz', coords: [45.96377, 6.24328], blurb: 'Stone alpage chalet at 1,500 m under the Parmelan — wood-fire farm dinners, menus ~€23–28. Go for sunset.', verify: true },
+    { id: 'coop-reblochon', cat: 'food', em: '🧀', name: 'Coopérative du Reblochon (Thônes)', coords: [45.88781, 6.31420], blurb: 'Reblochon fermier cellars, tastings and shop. Saturday 9:30 cellar tours (€2, book via the Thônes tourist office) — though our Saturdays are all moving days.', href: 'https://hautesavoiemontblanc-tourisme.com/en/offers/visite-de-la-cooperative-du-reblochon-fermier-thones-en-5867525/' },
+    // Flagged & rediscovered (researched 26 Jul 2026)
+    { id: 'tournette-closed', cat: 'hike', em: '🥾', closed: true, name: 'La Tournette (2,351 m)', coords: [45.82709, 6.28615],
+      blurb: 'The queen hike of the lake — officially flagged CLOSED right now: lingering snowfields above 1,700 m, after two fatal slips in 2025. Likely to reopen once the snow melts.',
+      note: 'Check lac-annecy.com and the Talloires-Montmin mairie when we’re in France — mid-August could well be fine. If it opens: park at Prés Ronds; the Col de l’Aulp track isn’t public.',
+      href: 'https://www.lac-annecy.com/itineraire-de-randonnee-pedestre/la-tournette-depuis-montmin-talloires-montmin/' },
+    { id: 'thones-vf', cat: 'adrenaline', em: '🧗', name: 'Via Ferrata de Thônes (Roche à l’Agathe)', coords: [45.8854, 6.3215],
+      blurb: 'Short, steep crag route right above Thônes town (~600 m, 235 m gain, D–ED). Widely listed “closed” — that’s a stale 2023 banner: the office’s own 2026 listing and June-2026 climber reports say it’s open.',
+      note: 'Call the Thônes tourist office (+33 4 50 02 00 26) to confirm before driving over — one official page still shows the old closure line.',
+      href: 'https://www.thonescoeurdesvallees.com/en/equipement/via-ferrata-de-la-roche-a-lagathe/', verify: true },
+    { id: 'cascade-mysterieuse', cat: 'hike', em: '💧', name: 'Cascade Mystérieuse (Le Chinaillon)', coords: [45.96443, 6.44065],
+      blurb: 'A real 30 m waterfall in a slot gorge at Le Grand-Bornand — a 20-minute walk from L’Arbelay. The cyclist guide sold it as a secret lake swim spot; it’s actually in the Aravis, and it’s a look, not a dip.',
+      href: 'https://www.haute-savoie-tourisme.org/nature/itineraires-randonnees/6168701-la-cascade-mysterieuse' },
+    // Culture, viewpoints & oddities
+    { id: 'paccard', cat: 'culture', em: '🔔', name: 'Musée Paccard (bells)', coords: [45.84424, 6.15076], blurb: 'The Sévrier foundry that cast France’s biggest bell and 57 Liberty Bell replicas — quirky and genuinely interesting.', verify: true },
+    { id: 'grotte-sevrier', cat: 'culture', em: '⛪', name: 'Grotte de Sévrier', coords: [45.86429, 6.13807], blurb: 'A tiny Lourdes-style grotto above the lake — silent, serene, known mostly to locals.' },
+    { id: 'ermitage', cat: 'hike', em: '🌄', name: 'Ermitage de Saint-Germain', coords: [45.84208, 6.22305], blurb: 'The balcony over the Baie de Talloires — an old oratory, candles still lit, postcard view.' },
+    { id: 'pont-abime', cat: 'hike', em: '🌉', name: 'Pont de l’Abîme', coords: [45.76451, 6.05693], blurb: '96 m suspension bridge over the Chéran gorge — pair with Alby-sur-Chéran’s arcaded old town.', note: 'Swimming in the Chéran is officially banned (low flow, cyanobacteria) — look, don’t dip.', href: 'https://mairie-alby-sur-cheran.fr/cheran-baignade-interdite/' },
+    { id: 'alby', cat: 'culture', em: '🏘️', name: 'Alby-sur-Chéran', coords: [45.8154, 6.0181], blurb: 'Arcaded medieval shoemaking village 20 min away — plus a time-capsule candle workshop (€2 tours).', note: 'Pin approximate.', verify: true },
+    // Chamonix satellites
+    { id: 'aiguille-midi', cat: 'hike', em: '🚡', name: 'Aiguille du Midi (valley station)', coords: [45.91821, 6.87018], blurb: 'The 3,842 m cable car. Book online and take the ~8 am first bin — queues get silly. ~€81 return.', note: 'Clear days only.', verify: true },
+    { id: 'montenvers', cat: 'hike', em: '🚂', name: 'Montenvers — Mer de Glace', coords: [45.92262, 6.87532], blurb: 'The red cog railway to France’s biggest glacier and its carved ice grotto (~€41 return).', verify: true },
+    // Farther afield
+    { id: 'yvoire', cat: 'culture', em: '🏰', name: 'Yvoire (Lac Léman)', coords: [46.3710, 6.3270], blurb: '“Most beautiful villages” medieval port on Lake Geneva, ~50 min. Go on a weekday in August.' },
+    { id: 'perouges', cat: 'culture', em: '🏰', name: 'Pérouges', coords: [45.9036, 5.1764], blurb: 'Walled hilltop film-set village about an hour away — go early, eat the galette.', verify: true },
+    { id: 'geneva', cat: 'culture', em: '🌆', name: 'Geneva', coords: [46.2040, 6.1430], blurb: 'Jet d’Eau, old town and chocolate ~45 min north — pairs with Yvoire.' },
+    { id: 'aiguebelette', cat: 'water', em: '🚣', name: 'Lac d’Aiguebelette', coords: [45.5500, 5.8010], blurb: 'Motor-boat-free “blue pearl” ~40 min away — warm, calm, the great crowd escape.', verify: true }
+  ];
+
+  /* ---------- THE CUT LIST (#/archive) ------------------------------
+     Things we researched and deliberately did NOT put on the map —
+     kept here with reasons so nobody rediscovers them mid-trip and
+     wonders. Groups: closed | no | cut | unverified | season.        */
+  const ARCHIVE = [
+    { group: 'no', em: '⛔', name: 'Cliff jumping & deep-water soloing (Roc de Chère)',
+      reason: 'Illegal — the Roc de Chère is a protected national nature reserve, and people have died jumping there. Not on this trip, in any form. The legal way to see those coves is the packraft tour: hike over the top, paddle back under the cliffs.' },
+    { group: 'no', em: '🧗', name: 'Le Biclop crag (Veyrier-du-Lac)',
+      reason: 'The historic ~200-route crag directly above the lake road at the entrance to our own village — but climbing there is banned by municipal decree over rockfall risk. Locals reportedly still sneak on; we don’t do banned crags. Criq’Bloc and Space Bloc scratch the itch legally.',
+      href: 'https://www.escalade-74.com/le-biclop/' },
+    { group: 'cut', em: '⭐', name: 'Le Clos des Sens (3★) & L’Esquisse (1★)',
+      reason: 'The guide PDF’s fine-dining picks. Cut by request — this trip runs on markets, guinguettes and fondue, not tasting menus.' },
+    { group: 'season', em: '🚴', name: 'La Résistance (gravel race, Talloires)',
+      reason: 'A brilliant event — in June. It will be long over by the time we arrive in August, so it’s not on the map.' },
+  ];
+
+  /* ---------- PHOTO CREDITS (Wikimedia Commons) --------------------- */
   const CREDITS = [
+    { subject: 'Lake panorama (hero)', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Col_de_la_Forclaz_@_Hike_to_Pointe_de_la_Rochette_@_Annecy_(35828637062).jpg' },
     { subject: 'Old Annecy (Palais de l’Île)', author: 'Tournasol7', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Palais_de_l%27Isle_in_Annecy_04.jpg' },
-    { subject: 'Annecy canal-side market', author: 'Frédérique Voisin-Demery', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Les_chalands_le_long_des_canaux_(Annecy).jpg' },
+    { subject: 'Annecy market', author: 'Frédérique Voisin-Demery', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Les_chalands_le_long_des_canaux_(Annecy).jpg' },
     { subject: 'Lake from the Semnoz', author: 'Florian Pépellin', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Sud_du_Lac_d%27Annecy_vu_du_Semnoz_en_fin_d%27%C3%A9t%C3%A9_(2020).JPG' },
-    { subject: 'Col de la Forclaz view', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Espace_spectateur_@_Aire_de_d%C3%A9collage_@_Col_de_la_Forclaz_(51221254562).jpg' },
-    { subject: 'Gorges du Fier walkway', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Gorges_du_Fier_(8900949669).jpg' },
+    { subject: 'Col de la Forclaz', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Espace_spectateur_@_Aire_de_d%C3%A9collage_@_Col_de_la_Forclaz_(51221254562).jpg' },
+    { subject: 'Gorges du Fier', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Gorges_du_Fier_(8900949669).jpg' },
     { subject: 'Chamonix valley', author: 'Ximonic (Simo Räsänen)', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Chamonix_valley_from_la_Fl%C3%A9g%C3%A8re,2010_07.JPG' },
     { subject: 'La Clusaz village', author: 'Rundvald', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:La-Clusaz-Eglise-Sainte-Foy-Place-de-l-Eglise-byRundvald.jpg' },
     { subject: 'Col des Aravis', author: 'chisloup', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:Vue_depuis_le_col_des_aravis_-_panoramio.jpg' },
@@ -1090,9 +1185,7 @@ window.DATA = (function () {
     { subject: 'Veyrier-du-Lac promenade', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Veyrier-du-Lac_(15151949388).jpg' },
     { subject: 'Château de Menthon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Menthon_01_v2.jpg' },
     { subject: 'Baie de Talloires', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Baie_de_Talloires_@_Lac_d%27Annecy_@_Ermitage_de_Saint-Germain_(51166211883).jpg' },
-    { subject: 'Plage d’Albigny', author: 'Benoît Prieur', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Vue_du_lac_d%27Annecy_en_ao%C3%BBt_2022_(3).JPG' },
     { subject: 'Glières monument', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Monument_national_%C3%A0_la_R%C3%A9sistance_@_Plateau_des_Gli%C3%A8res_(51175637332).jpg' },
-    { subject: 'Lake panorama (hero)', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Col_de_la_Forclaz_@_Hike_to_Pointe_de_la_Rochette_@_Annecy_(35828637062).jpg' },
     { subject: 'Sévrier', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Plage_de_Sevrier_@_Lac_d%27Annecy_@_Point_de_vue_@_Second_sommet_@_Mont_Baret_(51341230869).jpg' },
     { subject: 'Saint-Jorioz bay', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Saint-Jorioz_@_Lac_d%27Annecy_@_Taillefer_@_Duingt_(51243283172).jpg' },
     { subject: 'Château de Duingt', author: 'Rémih', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Ch%C3%A2teauvieux_@_Plage_de_Duingt.jpg' },
@@ -1105,14 +1198,13 @@ window.DATA = (function () {
   ];
 
   return {
-    MODES, MODE_BY_ID,
+    VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT,
     AREAS, AREA_BY_ID,
-    PLANS, PLAN_BY_ID,
-    BIKE, LAKE, FOOD, TRIPS,
-    MAP_CATEGORIES, MAP_SPOTS,
-    STORY, HISTORY, INSPIRE, SEASON,
-    ZONES, CATEGORIES, CATEGORY_BY_ID, DISCOVERIES,
-    TRIP, STAYS, LESGETS, TRANSPORT, CREDITS,
-    BUILD, FEATURED, QUICK
+    ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
+    EVENTS, TRANSPORT_GUIDE, WEATHER,
+    STORY, HISTORY, DISCOVERIES, ZONES,
+    CATEGORIES, CATEGORY_BY_ID,
+    MAP_POIS, ARCHIVE, BUILD, FEATURED, LESGETS_TOP3, LAKE_EXCURSIONS, CREDITS
   };
 })();
+
