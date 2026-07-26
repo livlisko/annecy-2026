@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v11';
+const VERSION = 'a26-v13';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -67,7 +67,7 @@ self.addEventListener('fetch', (e) => {
   // Same-origin app code/data/images: cache-first, then network (and cache).
   if (sameOrigin) {
     e.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+      caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req).then((res) => {
         const copy = res.clone();
         caches.open(RUNTIME).then((c) => c.put(req, copy)).catch(() => {});
         return res;
