@@ -1042,3 +1042,84 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .arch-body strong { display: block; font-size: .9rem; }
 .arch-body p { margin: .15rem 0 .2rem; font-size: .8rem; color: var(--ink-2); }
 .arch-foot { margin-top: 1.2rem; font-size: .8rem; color: var(--muted); font-style: italic; }
+
+/* =====================================================================
+   v13 — guidebook restructure: Activities pin-grid, Ideas boards,
+   Trip jump-row, quieter update toast, focus polish
+   ===================================================================== */
+[tabindex="-1"]:focus { outline: none; } /* programmatic heading focus shouldn't draw a ring */
+
+/* pinterest-ish activity grid */
+.pin-grid { columns: 2; column-gap: .65rem; margin: .2rem 0 1rem; }
+.pin-card {
+  display: inline-block; width: 100%; break-inside: avoid;
+  background: var(--card, #fff); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin: 0 0 .65rem;
+  box-shadow: 0 1px 4px rgba(11,31,51,.06);
+}
+.pin-hit { display: block; text-decoration: none; color: inherit; }
+.pin-img { position: relative; }
+.pin-img .cover-img, .pin-img .cover-ph { width: 100%; height: 110px; object-fit: cover; display: flex; }
+.pin-img .cover-ph { align-items: center; justify-content: center; }
+.pin-leg {
+  position: absolute; top: .45rem; left: .45rem;
+  font-size: .6rem; font-weight: 700; letter-spacing: .03em;
+  background: rgba(17,75,115,.92); color: #fff; border-radius: 99px; padding: .12rem .5rem;
+}
+.pin-card h3 { font-size: .88rem; margin: .5rem .6rem .15rem; line-height: 1.25; }
+.pin-card .pin-hit p { font-size: .74rem; color: var(--muted); margin: 0 .6rem .45rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pin-foot { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: 0 .45rem .45rem .6rem; }
+.pin-tags { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
+.pin-tags .pc-tag { font-size: .6rem; }
+@media (min-width: 700px) { .pin-grid { columns: 3; } }
+@media (min-width: 1100px) { .pin-grid { columns: 4; } }
+
+/* worlds strip as filter buttons */
+.worlds-strip { padding-bottom: .4rem; }
+.worlds-strip .world-card { width: 190px; flex: 0 0 auto; }
+button.wc-btn { text-align: left; padding: 0; border: 1px solid var(--border); background: var(--card, #fff); font: inherit; color: inherit; cursor: pointer; }
+button.wc-btn[aria-pressed="true"] { outline: 3px solid var(--alpine); outline-offset: 1px; }
+
+/* facet + person chips */
+.facet-row { margin: .55rem 0 .1rem; }
+.person-row { margin: .4rem 0 .9rem; }
+.chip.person.me, .chip.person[aria-pressed="true"] { background: var(--alpine); color: #fff; border-color: var(--alpine); }
+.chip.person .mc-count { background: rgba(255,255,255,.25); color: inherit; }
+
+/* bike banner on Activities */
+.bike-banner {
+  display: flex; align-items: center; gap: .7rem;
+  background: linear-gradient(135deg, #2f6b4f, #1f4a36); color: #fff;
+  border-radius: 14px; padding: .8rem .95rem; margin: .7rem 0 .5rem;
+  text-decoration: none; font-size: .9rem;
+}
+.bike-banner .bb-em { font-size: 1.5rem; }
+.bike-banner .bb-go { margin-left: auto; font-size: 1.1rem; }
+
+/* today hero actions always visible */
+.hero-actions { margin-top: .65rem; }
+.note-box.pre { border-left: 4px solid var(--alpine); }
+
+/* trip jump row + placeholder flight */
+.jump-row { margin: .2rem 0 .6rem; }
+.flight-card.placeholder { border-style: dashed; opacity: .85; }
+.local-note { margin-top: 1rem; }
+
+/* quieter update toast: sits above the nav, never over it */
+.sw-toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--nav-h, 62px) + env(safe-area-inset-bottom, 0px) + 12px);
+  max-width: min(92vw, 420px);
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem .7rem; border-radius: 12px;
+  font-size: .8rem; z-index: 60;
+}
+.sw-toast #sw-dismiss {
+  background: transparent; border: 0; color: inherit; opacity: .8;
+  font-size: .9rem; padding: .2rem .35rem; cursor: pointer;
+}
+
+/* v13.1 — review fixes */
+[hidden] { display: none !important; } /* the hidden attribute always wins (fixes always-visible update toast) */
+.world-body .wc-t { display: block; font-weight: 700; font-size: .95rem; margin: 0 0 .15rem; font-family: var(--font-display, inherit); }
+.world-body .wc-p { display: block; font-size: .75rem; color: var(--muted); }

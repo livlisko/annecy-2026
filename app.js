@@ -64,18 +64,25 @@
   }
   function dayNumber(dt) { const diff = Math.round((Date.UTC(...dt.split('-').map((x, i) => i === 1 ? x - 1 : +x)) - Date.UTC(...D.TRIP.window.start.split('-').map((x, i) => i === 1 ? x - 1 : +x))) / 86400000); return diff + 1; }
 
-  /* ---------- saved / status / notes (localStorage) ----------------- */
+  /* ---------- ideas boards / notes (this-phone-only localStorage) ---- */
   function jget(k, def) { try { return JSON.parse(localStorage.getItem(k)) || def; } catch (e) { return def; } }
   function jset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  const Saved = {
-    all() { return jget('a26.saved', {}); },
-    status(id) { return this.all()[id] || null; },
-    set(id, st) { const m = this.all(); if (st) m[id] = st; else delete m[id]; jset('a26.saved', m); },
+  const PEOPLE = D.PEOPLE || ['Olivia', 'Andrew', 'Christian', 'Ian'];
+  function activePerson() { const p = localStorage.getItem('a26.person'); return PEOPLE.includes(p) ? p : PEOPLE[0]; }
+  function setPerson(p) { if (PEOPLE.includes(p)) localStorage.setItem('a26.person', p); }
+  const Ideas = {
+    boards() {
+      // one-time migration from the old single shortlist → first person's board
+      const old = jget('a26.saved', null);
+      if (old && !localStorage.getItem('a26.ideas')) { jset('a26.ideas', { [PEOPLE[0]]: old }); localStorage.removeItem('a26.saved'); localStorage.removeItem('a26.compare'); }
+      return jget('a26.ideas', {});
+    },
+    board(p) { return this.boards()[p || activePerson()] || {}; },
+    status(id, p) { return this.board(p)[id] || null; },
+    set(id, st, p) { const all = this.boards(); const k = p || activePerson(); const m = all[k] || {}; if (st) m[id] = st; else delete m[id]; all[k] = m; jset('a26.ideas', all); },
     toggle(id) { const cur = this.status(id); this.set(id, cur ? null : 'maybe'); return this.status(id); },
-    ids() { return Object.keys(this.all()); },
-    note(id, v) { const m = jget('a26.notes', {}); if (v != null) { if (v) m[id] = v; else delete m[id]; jset('a26.notes', m); } return m[id] || ''; },
-    compare() { return jget('a26.compare', []); },
-    toggleCompare(id) { let c = this.compare(); if (c.includes(id)) c = c.filter((x) => x !== id); else if (c.length < 3) c.push(id); jset('a26.compare', c); return c; }
+    ids(p) { return Object.keys(this.board(p)); },
+    note(id, v) { const m = jget('a26.notes', {}); if (v != null) { if (v) m[id] = v; else delete m[id]; jset('a26.notes', m); } return m[id] || ''; }
   };
   const STATUS_LABEL = { maybe: 'Maybe', booked: 'Booked', done: 'Done' };
 
@@ -105,9 +112,9 @@
   function upcomingEvents(dt, baseId) { return D.EVENTS.filter((e) => e.end >= dt && (e.base === baseId || e.base === 'both')).sort((a, b) => a.start.localeCompare(b.start)); }
 
   /* =========================== chrome =============================== */
-  const PRIMARY = ['today', 'discover', 'plan', 'map', 'bike'];
-  const NAV_FOR = { today: 'today', trip: 'today', areas: 'today', discover: 'discover', category: 'discover', plan: 'plan', build: 'plan', timeline: 'plan', events: 'plan', event: 'plan', saved: 'plan', search: 'plan', browse: 'plan', bike: 'bike', map: 'map' };
-  const TITLES = { today: 'Today', discover: 'Discover', plan: 'Plan', build: 'Build a day', timeline: 'Timeline', events: 'Events', saved: 'Saved', search: 'Search', browse: 'All activities', bike: 'Cycling', map: 'Map', trip: 'Trip & logistics', areas: 'Areas', archive: 'The cut list' };
+  const PRIMARY = ['today', 'activities', 'ideas', 'trip', 'map'];
+  const NAV_FOR = { today: 'today', activities: 'activities', plan: 'activities', bike: 'activities', ideas: 'ideas', trip: 'trip', event: 'trip', map: 'map', areas: 'map', archive: 'map' };
+  const TITLES = { today: 'Today', activities: 'Activities', ideas: 'Ideas', bike: 'Cycling', map: 'Map', trip: 'Trip', areas: 'Areas', archive: 'The cut list' };
 
   function setChrome(route) {
     const isPrimary = PRIMARY.includes(route.name) && route.parts.length === 0;
@@ -116,11 +123,10 @@
     if (route.name === 'areas' && route.parts[0]) { const a = D.AREA_BY_ID[route.parts[0]]; title = a ? a.name : 'Area'; }
     if (route.name === 'plan' && route.parts[0]) { const a = D.ACT_BY_ID[route.parts[0]]; title = a ? a.title : 'Plan'; }
     if (route.name === 'event' && route.parts[0]) { const e = D.EVENTS.find((x) => x.id === route.parts[0]); title = e ? e.name : 'Event'; }
-    if (route.name === 'category' && route.parts[0]) { const c = D.CATEGORY_BY_ID[route.parts[0]]; title = c ? c.title : 'Discover'; }
     titleEl.textContent = title;
     const navFor = NAV_FOR[route.name] || '';
     navEl.querySelectorAll('a').forEach((a) => { if (a.dataset.nav === navFor) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    if (actionEl) actionEl.hidden = false;
+    if (actionEl) actionEl.hidden = true; // hearts on cards are the one way to save
   }
 
   /* ---------- cover / media ----------------------------------------- */
@@ -144,19 +150,22 @@
     return `<p class="source-line">${verify} Source: <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.type)} ↗</a> · checked ${esc(s.on || D.VERIFIED)}</p>`;
   }
 
-  /* ---------- save / status controls -------------------------------- */
+  /* ---------- save / status controls (♥ = idea for the active person) */
   function saveBtn(id, cls) {
-    const st = Saved.status(id);
-    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${st ? 'Saved (' + STATUS_LABEL[st] + ')' : 'Save to shortlist'}">${st ? '★' : '☆'}<span class="save-txt">${st ? STATUS_LABEL[st] : 'Save'}</span></button>`;
+    const st = Ideas.status(id); const p = activePerson();
+    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${st ? `On ${esc(p)}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${esc(p)}’s ideas`}">${st ? '♥' : '♡'}<span class="save-txt">${st ? STATUS_LABEL[st] : 'Idea'}</span></button>`;
   }
   // event delegation for save buttons (bound once)
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-save]'); if (!b) return;
     e.preventDefault();
-    const id = b.dataset.save; const st = Saved.toggle(id);
+    const id = b.dataset.save; const st = Ideas.toggle(id); const p = activePerson();
     b.classList.toggle('on', !!st); b.setAttribute('aria-pressed', String(!!st));
-    b.innerHTML = (st ? '★' : '☆') + `<span class="save-txt">${st ? STATUS_LABEL[st] : 'Save'}</span>`;
-    announce(st ? 'Saved to shortlist' : 'Removed from shortlist');
+    b.setAttribute('aria-label', st ? `On ${p}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${p}’s ideas`);
+    b.innerHTML = (st ? '♥' : '♡') + `<span class="save-txt">${st ? STATUS_LABEL[st] : 'Idea'}</span>`;
+    announce(st ? `Added to ${p}’s ideas` : `Removed from ${p}’s ideas`);
+    // screens that show saved state beyond the heart itself must repaint
+    if (screenEl.querySelector('.status-picker, .person-row')) render();
   });
 
   /* ---------- activity card ----------------------------------------- */
@@ -209,7 +218,7 @@
       if (cmd === 'today') setDate('');
       else if (cmd === 'prev') setDate(dt <= D.TRIP.window.start ? D.TRIP.window.start : addDays(dt, -1));
       else if (cmd === 'next') setDate(dt >= D.TRIP.window.end ? D.TRIP.window.end : addDays(dt, 1));
-      render(); announce('Viewing ' + prettyDay(activeDate()));
+      render(); const again = screenEl.querySelector(`[data-date="${cmd}"]`); if (again) again.focus({ preventScroll: true }); announce('Viewing ' + prettyDay(activeDate()));
     }));
   }
 
@@ -217,17 +226,27 @@
   const Views = {};
 
   /* ---------- TODAY (home dashboard) -------------------------------- */
+  function daysUntilTrip() { const t = parisToday(); return Math.max(0, Math.round((Date.UTC(...D.TRIP.window.start.split('-').map((x, i) => i === 1 ? x - 1 : +x)) - Date.UTC(...t.split('-').map((x, i) => i === 1 ? x - 1 : +x))) / 86400000)); }
   Views.today = function () {
     const dt = activeDate(); const stay = activeStay(); const base = stay.baseId; const co = changeoverOn(dt);
+    const T = D.TRANSPORT;
     const todays = eventsOn(dt).filter((e) => e.base === base || e.base === 'both');
     const upcoming = upcomingEvents(dt, base).filter((e) => e.start > dt).slice(0, 3);
-    const mustBook = D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && (a.booking === 'required' || a.booking === 'recommended')).slice(0, 4);
-    const savedIds = Saved.ids().map((id) => D.ACT_BY_ID[id]).filter(Boolean);
-    const savedBlock = savedIds.length
-      ? `<div class="section-head"><h2>Your shortlist</h2><a class="see-all" href="#/saved">See all (${savedIds.length})</a></div><div class="cards">${savedIds.slice(0, 4).map((a) => activityCard(a)).join('')}</div>`
-      : `<div class="section-head"><h2>Featured today</h2></div><div class="cards">${D.FEATURED.map((id) => D.ACT_BY_ID[id]).filter((a) => a && availableNow(a, base, dt)).slice(0, 4).map((a) => activityCard(a)).join('')}</div>`;
+    const p = activePerson();
+    const ideaActs = Ideas.ids().map((id) => D.ACT_BY_ID[id]).filter(Boolean);
+    const ideasBlock = ideaActs.length
+      ? `<div class="section-head"><h2>${esc(p)}’s ideas</h2><a class="see-all" href="#/ideas">All boards (${ideaActs.length})</a></div><div class="cards">${ideaActs.slice(0, 4).map((a) => activityCard(a)).join('')}</div>`
+      : `<div class="section-head"><h2>Featured</h2></div><div class="cards">${D.FEATURED.map((id) => D.ACT_BY_ID[id]).filter(Boolean).slice(0, 4).map((a) => activityCard(a)).join('')}</div>`;
 
-    const changeoverNote = co ? `<div class="note-box warn">🔁 <strong>Changeover day.</strong> Out of ${esc(co.out.name)} (${esc(co.out.checkout)}), into ${esc(co.inn.name)} (${esc(co.inn.checkin)}). ${dt === '2026-08-22' ? 'Also the Les Gets World-Cup Downhill day — expect crowds if you go near Les Gets.' : ''}</div>` : '';
+    // Gentle nudges, only on the days that genuinely need them.
+    const notes = [];
+    if (isPreTrip()) notes.push(`<div class="note-box pre">🗓️ <strong>Trip starts ${esc(prettyDay(D.TRIP.window.start))}</strong> — ${daysUntilTrip()} days away. You’re previewing Day 1; flip through days with ‹ › above, or <a href="#/trip">see the whole trip →</a></div>`);
+    if (dt === D.TRIP.window.start && !isPreTrip()) notes.push(`<div class="note-box">🛬 <strong>Arrival day.</strong> Van pickup: ${esc(T.car.pickup)}. ${esc(T.car.find)} <a href="#/trip">Trip details →</a></div>`);
+    if (co) notes.push(`<div class="note-box warn">🔁 <strong>Changeover day.</strong> Out of ${esc(co.out.name)} (${esc(co.out.checkout)}), into ${esc(co.inn.name)} (${esc(co.inn.checkin)}). ${dt === '2026-08-22' ? 'Also the Les Gets World-Cup Downhill day — expect crowds if you go near Les Gets.' : ''}</div>`);
+    const coTomorrow = changeoverOn(addDays(dt, 1));
+    if (coTomorrow && !co) notes.push(`<div class="note-box">🧳 <strong>Heads-up:</strong> tomorrow is changeover — out of ${esc(coTomorrow.out.name)} (${esc(coTomorrow.out.checkout)}). Worth packing tonight.</div>`);
+    if (dt === D.TRIP.window.end) notes.push(`<div class="note-box warn">⏰ ${esc(T.departure)} <a href="#/trip">Full plan →</a></div>`);
+    else if (addDays(dt, 1) === D.TRIP.window.end) notes.push(`<div class="note-box">⏰ <strong>Heads-up:</strong> tomorrow is the early departure (leave ~06:15). Sort packing + the Casa Elisa deposit today.</div>`);
 
     return `
       ${contextBar()}
@@ -239,34 +258,31 @@
           <p class="si-addr">${esc(stay.address)}</p>
           <p class="si-times"><strong>In:</strong> ${esc(stay.checkin)}<br><strong>Out:</strong> ${esc(stay.checkout)}</p>
           <div class="ac-tags">${stay.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
-          <div class="actions" style="margin-top:.6rem">
-            <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stay.address)}" target="_blank" rel="noopener">Directions ↗</a>
-            <a class="btn ghost" href="#/map?place=${esc(stay.id)}">On map</a>
-            <a class="btn ghost" href="#/trip">All logistics</a>
-          </div>
         </details>
+        <div class="actions hero-actions">
+          <a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stay.address)}" target="_blank" rel="noopener">🧭 Directions home ↗</a>
+          <a class="btn ghost" href="#/trip">Trip &amp; logistics</a>
+        </div>
       </section>
 
-      ${changeoverNote}
+      ${notes.join('')}
 
       <div class="action-row">
-        <a class="action-tile" href="#/build"><span class="at-em" aria-hidden="true">🧩</span><span>Build a day</span></a>
-        <a class="action-tile" href="#/map"><span class="at-em" aria-hidden="true">🗺️</span><span>Map</span></a>
-        <a class="action-tile" href="#/plan?must=1"><span class="at-em" aria-hidden="true">📌</span><span>Must book</span></a>
+        <a class="action-tile" href="#/activities"><span class="at-em" aria-hidden="true">🧭</span><span>Activities</span></a>
+        <a class="action-tile" href="#/bike"><span class="at-em" aria-hidden="true">🚴</span><span>Cycling</span></a>
+        <a class="action-tile" href="#/activities?f=book"><span class="at-em" aria-hidden="true">📌</span><span>Must book</span></a>
       </div>
 
       <div class="section-head"><h2>Today &amp; next up</h2></div>
       ${todays.length ? `<p class="intro">On today near you:</p>` + todays.map(eventRow).join('') : `<p class="intro">Nothing fixed today — a blank canvas. ${upcoming.length ? 'Coming up:' : ''}</p>`}
       ${upcoming.map(eventRow).join('')}
-      <a class="see-all block" href="#/timeline">See the whole timeline →</a>
+      <a class="see-all block" href="#/trip">See the whole trip, day by day →</a>
 
-      <div class="section-head"><h2>Weather-led</h2><a class="see-all" href="#/plan">More</a></div>
+      <div class="section-head"><h2>Weather-led</h2><a class="see-all" href="#/activities?f=rain">More</a></div>
       <div class="weather-quick">${D.WEATHER.questions.slice(0, 4).map((q) => `<div class="wq"><strong>${esc(q.q)}</strong><span>${esc(q.a)}</span></div>`).join('')}</div>
       <p class="intro"><a href="${esc(D.SOURCES[D.WEATHER.links[0].src].url)}" target="_blank" rel="noopener">Open the forecast ↗</a> — this app never fakes live weather.</p>
 
-      ${mustBook.length ? `<div class="section-head"><h2>Worth booking ahead</h2></div><div class="cards">${mustBook.map((a) => activityCard(a)).join('')}</div>` : ''}
-
-      ${savedBlock}
+      ${ideasBlock}
     `;
   };
 
@@ -280,164 +296,115 @@
     </a>`;
   }
 
-  /* ---------- BUILD A DAY (ranked) ---------------------------------- */
-  const defaultBuild = () => ({ time: 'half', effort: 'moderate', transport: 'car', theme: 'any', weather: 'any', booking: 'any' });
-  let buildState = defaultBuild();
-
-  function readBuildQuery(route) {
-    const q = route.query; const s = defaultBuild();
-    if (q.t) s.time = q.t; if (q.e) s.effort = q.e; if (q.x) s.transport = q.x; if (q.th) s.theme = q.th; if (q.w) s.weather = q.w; if (q.b) s.booking = q.b;
-    return s;
+  /* ---------- ACTIVITIES (the guidebook: browse everything) ---------
+     One screen replaces Discover / Browse / Search / Build-a-day.
+     Everything is always visible — no day/leg gating; filters are
+     light moods, not machinery. -------------------------------------- */
+  const FACETS = [
+    { id: 'chill', label: '🛋️ Chill', test: (a) => ['recovery', 'easy'].includes(a.effort) },
+    { id: 'big', label: '🔥 Big day out', test: (a) => a.effort === 'big' || a.duration === 'full' },
+    { id: 'book', label: '📌 Must book', test: (a) => a.booking === 'required' || a.booking === 'recommended' },
+    { id: 'rain', label: '🌧️ Rain-proof', test: (a) => (a.weather && (a.weather.rain === 'good' || a.weather.rain === 'ok')) || (a.themes || []).includes('rainy') },
+    { id: 'group', label: '🎉 Easy group win', test: (a) => a.group === 'all' }
+  ];
+  let actState = { cat: 'all', f: null, q: '' };
+  function readActQuery(route) {
+    actState = {
+      cat: route.query.cat && D.CATEGORY_BY_ID[route.query.cat] ? route.query.cat : 'all',
+      f: FACETS.some((x) => x.id === route.query.f) ? route.query.f : null,
+      q: route.query.q || ''
+    };
   }
-  function buildUrl(s) { return `#/build?t=${s.time}&e=${s.effort}&x=${s.transport}&th=${s.theme}&w=${s.weather}&b=${s.booking}`; }
-
-  const DUR_RANK = { '2h': 1, half: 2, full: 3, evening: 1 };
-  function durationFits(actDur, win) { if (win === 'evening') return actDur === 'evening' || actDur === '2h'; return DUR_RANK[actDur] <= DUR_RANK[win]; }
-
-  function hardOk(a, s, base, dt, relax) {
-    if (!availableNow(a, base, dt)) return false;
-    if (!relax.transport && !(a.transport || []).includes(s.transport)) return false;
-    if (!relax.duration && !durationFits(a.duration, s.time)) return false;
-    // never surface an unsafe option for the chosen weather
-    if ((s.weather === 'rain' || s.weather === 'storm-pm') && a.weather && a.weather.wetUnsafe) return false;
+  function buildActQS() { const p = []; if (actState.cat !== 'all') p.push('cat=' + actState.cat); if (actState.f) p.push('f=' + actState.f); if (actState.q) p.push('q=' + encodeURIComponent(actState.q)); return p.length ? '?' + p.join('&') : ''; }
+  function actMatches(a) {
+    if (a.status === 'closed') return false;
+    if (actState.cat !== 'all') { const c = D.CATEGORY_BY_ID[actState.cat]; if (!c || !(a.themes || []).some((t) => c.themes.includes(t))) return false; }
+    if (actState.f) { const f = FACETS.find((x) => x.id === actState.f); if (f && !f.test(a)) return false; }
+    if (actState.q) { const q = actState.q.trim().toLowerCase(); if (q) { const hay = [a.title, a.summary, a.subtype, a.cat, (a.themes || []).join(' '), (D.AREA_BY_ID[a.areaId] || {}).name].join(' ').toLowerCase(); if (!hay.includes(q)) return false; } }
     return true;
   }
-  function scoreAct(a, s) {
-    let score = 0; const relaxed = []; const reasons = [];
-    const eOrder = ['recovery', 'easy', 'moderate', 'big'];
-    const de = Math.abs(eOrder.indexOf(a.effort) - eOrder.indexOf(s.effort));
-    if (de === 0) { score += 4; reasons.push(`${EFFORT_LABEL[a.effort]} effort, as asked`); }
-    else if (de === 1) { score += 1; relaxed.push('effort'); }
-    else { score -= 1.5; relaxed.push('effort'); }
-    if (s.theme === 'any') { score += 1; }
-    else if ((a.themes || []).includes(s.theme)) { score += 5; reasons.push(`${THEME_LABEL[s.theme]} — your theme`); }
-    else { score -= 2; relaxed.push('theme'); }
-    if (s.weather === 'rain') { const r = a.weather && a.weather.rain; if (r === 'good') { score += 4; reasons.push('Good in the rain'); } else if (r === 'ok') score += 1; else { score -= 4; relaxed.push('weather'); } }
-    else if (s.weather === 'storm-pm') { if (a.weather && (a.weather.storm === 'avoid-pm' || a.weather.storm === 'avoid')) { score -= 3; relaxed.push('weather'); } else { score += 1; reasons.push('Fine with afternoon storms'); } }
-    else if (s.weather === 'heat') { if (a.weather && (a.weather.shade === 'shaded' || a.weather.heat === 'cool')) { score += 3; reasons.push('Shaded / cool in the heat'); } else if (a.weather && a.weather.heat === 'exposed') { score -= 2; relaxed.push('weather'); } }
-    else if (s.weather === 'clear') { if (a.weather && a.weather.best === 'clear') { score += 3; reasons.push('Made for a clear day'); } }
-    if (s.booking === 'spontaneous' && a.booking === 'required') { score -= 3; relaxed.push('booking'); }
-    if (s.booking === 'ok-to-book' && a.booking === 'required') { score += 0.5; }
-    if ((a.transport || []).includes(s.transport)) reasons.push(`Reachable ${s.transport === 'car' ? 'by car' : s.transport === 'bike' ? 'by bike' : s.transport === 'busboat' ? 'by bus/boat' : 'on foot'}`);
-    score += (a.scenic || 0) * 0.6 + (a.novelty || 0) * 0.4;
-    if (a.featured) score += 0.4;
-    return { score, relaxed: [...new Set(relaxed)], reasons: reasons.slice(0, 3) };
+  function pinTags(a) {
+    const t = [];
+    if (a.effort) t.push([EFFORT_LABEL[a.effort], '']);
+    if (a.duration) t.push([DUR_LABEL[a.duration], '']);
+    if (a.booking === 'required') t.push(['Book ahead', ' warn']);
+    else if (a.booking === 'recommended') t.push(['Booking advised', '']);
+    if (a.verifyBeforeGo) t.push(['Verify', ' verify']);
+    return t.map(([x, cls]) => `<span class="pc-tag${cls}">${esc(x)}</span>`).join('');
   }
-  function rankDay(s) {
-    const base = activeBase(), dt = activeDate();
-    let relax = { transport: false, duration: false };
-    let pool = D.ACTIVITIES.filter((a) => hardOk(a, s, base, dt, relax));
-    const relaxedGlobal = [];
-    if (pool.length < 3) { relax.transport = true; relaxedGlobal.push('transport (car allowed)'); pool = D.ACTIVITIES.filter((a) => hardOk(a, s, base, dt, relax)); }
-    if (pool.length < 3) { relax.duration = true; relaxedGlobal.push('time window'); pool = D.ACTIVITIES.filter((a) => hardOk(a, s, base, dt, relax)); }
-    const scored = pool.map((a) => ({ a, ...scoreAct(a, s) })).sort((x, y) => y.score - x.score);
-    const top = scored.slice(0, 3).map((r) => ({
-      a: r.a,
-      fit: r.relaxed.length === 0 ? 'Best fit' : 'Close fit',
-      relaxed: r.relaxed.map((x) => x === 'effort' ? 'effort' : x === 'theme' ? 'theme' : x === 'weather' ? 'weather' : x).join(', '),
-      reasons: r.reasons
-    }));
-    return { top, relaxedGlobal, base, count: scored.length };
+  function pinCard(a) {
+    const legTag = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets leg</span>` : '';
+    return `<article class="pin-card">
+      <a class="pin-hit" href="#/plan/${esc(a.id)}">
+        <div class="pin-img">${cover(actCover(a), { alt: '' })}${legTag}</div>
+        <h3>${esc(a.title)}</h3>
+        <p>${esc(a.summary)}</p>
+      </a>
+      <div class="pin-foot"><span class="pin-tags">${pinTags(a)}</span>${saveBtn(a.id)}</div>
+    </article>`;
   }
-  function renderBuildOut(s) {
-    const out = document.getElementById('build-out'); if (!out) return;
-    const { top, relaxedGlobal, base } = rankDay(s);
-    const stay = activeStay();
-    let html = `<p class="intro">From <strong>${esc(stay.village)}</strong> on ${esc(prettyDay(activeDate()))}.</p>`;
-    if (relaxedGlobal.length) html += `<div class="note-box">No exact match — widened by <strong>${esc(relaxedGlobal.join(' & '))}</strong> to show real options.</div>`;
-    if (!top.length) { out.innerHTML = html + `<div class="empty">Nothing fits even loosely. Try a different theme or “Car’s fine”.</div>`; announce('No results'); return; }
-    html += `<div class="cards">${top.map((r) => activityCard(r.a, { fit: r.fit, relaxed: r.relaxed, reasons: r.reasons })).join('')}</div>`;
-    // pairing suggestion from the best result
-    const best = top[0].a; if (best.pairWith && best.pairWith.length) { const p = D.ACT_BY_ID[best.pairWith[0]]; if (p) html += `<p class="pair-line">Pair the top pick with <a href="#/plan/${esc(p.id)}">${esc(p.title)}</a> nearby.</p>`; }
-    out.innerHTML = html;
-    announce(`${top.length} suggestion${top.length === 1 ? '' : 's'}: best fit ${top[0].a.title}`);
-  }
-  Views.build = function (route) {
-    buildState = readBuildQuery(route);
-    function seg(group, opts, label) {
-      return `<fieldset class="build-q"><legend class="build-label">${label}</legend><div class="seg" role="group" aria-label="${label}">${opts.map((o) => `<button type="button" class="seg-btn" data-group="${group}" data-val="${esc(o.id)}" aria-pressed="${buildState[group] === o.id}">${o.emoji ? `<span class="em" aria-hidden="true">${o.emoji}</span>` : ''}<span class="seg-lb">${esc(o.label)}</span></button>`).join('')}</div></fieldset>`;
-    }
+  Views.activities = function (route) {
+    readActQuery(route);
+    const worlds = D.CATEGORIES.map((c) => `<button type="button" class="world-card wc-btn" data-actcat="${esc(c.id)}" aria-pressed="${actState.cat === c.id}"><div class="world-cover">${cover(c.media, { tint: c.tint, emoji: c.emoji, label: c.title, alt: c.title })}</div><span class="world-body"><span class="wc-t">${esc(c.title)}</span><span class="wc-p">${esc(c.vibe)}</span></span></button>`).join('');
+    const facetChips = FACETS.map((f) => `<button class="chip facet" data-actfacet="${f.id}" aria-pressed="${actState.f === f.id}">${esc(f.label)}</button>`).join('');
+    const disc = D.DISCOVERIES.map((d) => `<a class="disc-card" href="${esc(d.route)}"><span class="disc-em" aria-hidden="true">${d.emoji}</span><strong>${esc(d.title)}</strong><span class="disc-text">${esc(d.text)}</span><span class="disc-go">Show me →</span></a>`).join('');
+    const story = (arr) => arr.map((s) => `<div class="story-item"><span class="story-em" aria-hidden="true">${s.emoji}</span><div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`).join('');
     return `
-      ${contextBar()}
-      <div class="section-head" style="margin-top:.4rem"><h2>Build a day</h2><p>Ranked for ${esc(activeStay().village)} on the active date. Answers stay in the link.</p></div>
-      ${seg('time', D.BUILD.time, 'How much time?')}
-      ${seg('effort', D.BUILD.effort, 'Effort')}
-      ${seg('transport', D.BUILD.transport, 'How are you getting there?')}
-      ${seg('theme', D.BUILD.theme, 'In the mood for')}
-      <details class="build-more"><summary>More filters (weather, booking)</summary>
-        ${seg('weather', D.BUILD.weather, 'Weather')}
-        ${seg('booking', D.BUILD.booking, 'Booking')}
-      </details>
-      <div class="section-head"><h2>Suggestions</h2></div>
-      <div id="build-out" aria-live="polite"></div>
+      <div class="detail-hero" style="min-height:150px">${cover({ photo: 'assets/wiki/lake-sunset.jpg' }, { alt: 'Sunset over the lake', eager: true, cls: 'cover-fill' })}<div class="dh-inner"><div class="dh-zone">The guidebook</div><h2 class="dh-h1">Everything we could do</h2></div></div>
+      <p class="detail-lede">All of it, all the time — nothing hidden by dates. Tap ♡ to pin anything to <strong>${esc(activePerson())}’s</strong> ideas board.</p>
+      <a class="bike-banner" href="#/bike"><span class="bb-em" aria-hidden="true">🚴</span><span><strong>Cycling HQ</strong> — cols, gravel, bike parks, rentals &amp; races</span><span class="bb-go" aria-hidden="true">→</span></a>
+      <input class="search-input" id="act-q" type="search" value="${esc(actState.q)}" placeholder="Filter: canyoning, market, Semnoz…" aria-label="Filter activities" autocomplete="off">
+      <div class="chips-row facet-row">${facetChips}</div>
+      <div class="section-head"><h2>Worlds</h2><button class="see-all link-btn" data-actcat="all" ${actState.cat === 'all' ? 'hidden' : ''}>✕ Clear world</button></div>
+      <div class="h-scroll worlds-strip">${worlds}</div>
+      <div class="section-head"><h2>All ideas</h2><span class="see-all" id="act-count"></span></div>
+      <div class="pin-grid" id="act-grid"></div>
+      <div class="section-head"><h2>Stories &amp; background</h2></div>
+      <button class="btn block" id="surprise" type="button">🎲 Surprise me — 3 ideas</button>
+      <div id="surprise-out"></div>
+      <div class="section-head"><h2>You might not know you can…</h2></div>
+      <div class="h-scroll">${disc}</div>
+      <div class="section-head"><h2>The short story of the lake</h2></div>
+      <div class="story">${story(D.STORY)}</div>
+      <div class="section-head"><h2>The war in these mountains</h2></div>
+      <div class="story">${story(D.HISTORY)}</div>
+      <div class="actions" style="margin-top:.8rem"><a class="btn" href="#/plan/glieres-walk">🕊️ Go stand where it happened</a><a class="btn ghost" href="#/areas">All the places, one by one →</a></div>
+      ${creditsBlock()}
     `;
   };
-  function wireBuild(route) {
-    wireContextBar();
-    renderBuildOut(buildState);
-    screenEl.querySelectorAll('.seg-btn').forEach((btn) => btn.addEventListener('click', () => {
-      const g = btn.dataset.group; buildState[g] = btn.dataset.val;
-      screenEl.querySelectorAll(`.seg-btn[data-group="${g}"]`).forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      history.replaceState(null, '', buildUrl(buildState));
-      renderBuildOut(buildState);
-    }));
-  }
-
-  /* ---------- PLAN HUB ---------------------------------------------- */
-  Views.plan = function (route) {
-    if (route.parts[0]) return Views.activity(route);
-    if (route.query.must) return browseList((a) => a.booking === 'required' || a.booking === 'recommended', 'Worth booking ahead', 'Guided and ticketed things that can sell out.');
-    const base = activeBase(); const dt = activeDate();
-    const top3 = base === 'lesgets' ? D.LESGETS_TOP3 : null;
-    const shortlist = base === 'lesgets'
-      ? `<div class="section-head"><h2>If you only do three things in Les Gets</h2></div>` + D.LESGETS_TOP3.map((id) => { const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id); return a && a.title ? (D.ACT_BY_ID[id] ? activityCardWrap(a) : eventRow(a)) : ''; }).join('')
-      : `<div class="section-head"><h2>Full-day excursions worth leaving the lake for</h2></div><div class="cards">${D.LAKE_EXCURSIONS.map((id) => D.ACT_BY_ID[id]).filter(Boolean).map((a) => activityCard(a)).join('')}</div>`;
-    return `
-      ${contextBar()}
-      <div class="hub-grid">
-        <a class="hub-tile" href="#/build"><span class="em">🧩</span><strong>Build a day</strong><span>Ranked for right now</span></a>
-        <a class="hub-tile" href="#/browse"><span class="em">📚</span><strong>All activities</strong><span>Browse &amp; filter</span></a>
-        <a class="hub-tile" href="#/timeline"><span class="em">🗓️</span><strong>Timeline</strong><span>Aug 12–29</span></a>
-        <a class="hub-tile" href="#/events"><span class="em">🎫</span><strong>Events</strong><span>Races &amp; festivals</span></a>
-        <a class="hub-tile" href="#/saved"><span class="em">★</span><strong>Saved</strong><span>${Saved.ids().length} shortlisted</span></a>
-        <a class="hub-tile" href="#/search"><span class="em">🔎</span><strong>Search</strong><span>Places, climbs, tags</span></a>
-      </div>
-      ${shortlist}
-    `;
-  };
-  function activityCardWrap(a) { return `<div class="cards">${activityCard(a)}</div>`; }
-
-  /* ---------- BROWSE (all activities, filterable) ------------------- */
-  function browseList(pred, title, sub) {
-    const base = activeBase(), dt = activeDate();
-    const list = D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && (!pred || pred(a)));
-    return `${contextBar()}<div class="section-head" style="margin-top:.4rem"><h2>${esc(title || 'All activities')}</h2><p>${esc(sub || (list.length + ' available now from ' + activeStay().village))}</p></div>
-      <div class="chips-row" id="browse-cats">${['all', 'cycling', 'water', 'adrenaline', 'mountains', 'food', 'rainy'].map((c) => `<button class="chip" data-cat="${c}" aria-pressed="${c === 'all'}">${c === 'all' ? 'All' : D.CATEGORY_BY_ID[c] ? D.CATEGORY_BY_ID[c].title : c}</button>`).join('')}</div>
-      <div class="cards" id="browse-out">${list.map((a) => activityCard(a)).join('')}</div>`;
-  }
-  Views.browse = function () { return browseList(null); };
-  const CAT_THEMES = { cycling: ['bikes'], water: ['water'], adrenaline: ['adrenaline'], mountains: ['views'], food: ['food'], rainy: ['rainy', 'recovery'] };
-  function wireBrowse() {
-    wireContextBar();
-    const row = document.getElementById('browse-cats'); const out = document.getElementById('browse-out'); if (!row || !out) return;
-    const base = activeBase(), dt = activeDate();
-    row.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-cat]'); if (!b) return;
-      row.querySelectorAll('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      const c = b.dataset.cat; const themes = CAT_THEMES[c];
-      const list = D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && (c === 'all' || (a.themes || []).some((t) => themes.includes(t))));
-      out.innerHTML = list.length ? list.map((a) => activityCard(a)).join('') : `<div class="empty">Nothing in that category from ${esc(activeStay().village)} right now.</div>`;
-      announce(list.length + ' activities');
-    });
+  function wireActivities() {
+    const grid = document.getElementById('act-grid'); if (!grid) return;
+    const redraw = () => {
+      const list = D.ACTIVITIES.filter(actMatches);
+      grid.innerHTML = list.length ? list.map(pinCard).join('') : `<div class="empty">Nothing matches those filters. <button class="link-btn" id="act-clear">Clear filters</button></div>`;
+      const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => { actState = { cat: 'all', f: null, q: '' }; const inp = document.getElementById('act-q'); if (inp) inp.value = ''; sync(); });
+      const cnt = document.getElementById('act-count'); if (cnt) cnt.textContent = list.length + ' of ' + D.ACTIVITIES.length;
+    };
+    const sync = () => {
+      history.replaceState(null, '', '#/activities' + buildActQS());
+      screenEl.querySelectorAll('[data-actcat]').forEach((b) => {
+        if (b.classList.contains('link-btn')) { b.hidden = actState.cat === 'all'; return; }
+        b.setAttribute('aria-pressed', String(b.dataset.actcat === actState.cat));
+      });
+      screenEl.querySelectorAll('[data-actfacet]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.actfacet === actState.f)));
+      redraw();
+      announce(D.ACTIVITIES.filter(actMatches).length + ' activities shown');
+    };
+    screenEl.querySelectorAll('[data-actcat]').forEach((b) => b.addEventListener('click', () => { const c = b.dataset.actcat; actState.cat = (c === 'all' || actState.cat === c) ? 'all' : c; sync(); }));
+    screenEl.querySelectorAll('[data-actfacet]').forEach((b) => b.addEventListener('click', () => { actState.f = actState.f === b.dataset.actfacet ? null : b.dataset.actfacet; sync(); }));
+    const inp = document.getElementById('act-q');
+    if (inp) inp.addEventListener('input', () => { actState.q = inp.value; history.replaceState(null, '', '#/activities' + buildActQS()); redraw(); });
+    wireSurprise();
+    redraw();
   }
 
   /* ---------- ACTIVITY DETAIL --------------------------------------- */
   Views.activity = function (route) {
-    const a = D.ACT_BY_ID[route.parts[0]]; if (!a) return `<div class="empty">Unknown plan. <a href="#/plan">Back to Plan</a></div>`;
+    const a = D.ACT_BY_ID[route.parts[0]]; if (!a) return `<div class="empty">Unknown activity. <a href="#/activities">Back to Activities</a></div>`;
     const base = activeBase(); const relevant = a.base === 'both' || a.base === base;
     const dd = travelFromBase(a, base); const ddOther = travelFromBase(a, base === 'lake' ? 'lesgets' : 'lake');
     const area = D.AREA_BY_ID[a.areaId];
-    const note = Saved.note(a.id);
+    const note = Ideas.note(a.id);
 
     const facts = [];
     if (a.subtype) facts.push(['Type', esc(a.subtype)]);
@@ -473,7 +440,7 @@
         <div class="dh-inner"><div class="dh-zone">${esc(CAT_LABEL[a.cat] || '')}${area ? ' · ' + esc(area.name) : ''}</div><h2 class="dh-h1">${esc(a.title)}</h2></div>
       </div>
 
-      ${!relevant ? `<div class="note-box warn">You’re based at <strong>${esc(D.BASES[base].label)}</strong> right now — this is a ${esc(D.BASES[a.base] ? D.BASES[a.base].label : 'different-base')} activity${ddOther ? ` (${ddOther.approx ? '≈' : ''}${ddOther.min} min from there)` : ''}.</div>` : ''}
+      ${!relevant && !isPreTrip() ? `<div class="note-box warn">You’re based at <strong>${esc(D.BASES[base].label)}</strong> right now — this is a ${esc(D.BASES[a.base] ? D.BASES[a.base].label : 'different-base')} activity${ddOther ? ` (${ddOther.approx ? '≈' : ''}${ddOther.min} min from there)` : ''}.</div>` : `${!relevant ? `<p class="intro">${a.base === 'lesgets' ? '🏔️ A Les Gets-leg option (12–15 Aug).' : '🌊 A lake-leg option (15–29 Aug).'}</p>` : ''}`}
       ${a.status === 'closed' ? `<div class="note-box warn">⚠️ Currently closed — not available for the trip.</div>` : ''}
 
       <p class="detail-lede">${esc(a.summary)}</p>
@@ -510,26 +477,29 @@
     return `<span class="ws-label">Conditions</span> ${bits.map((b) => `<span class="ws-chip">${esc(b)}</span>`).join('')}${w.note ? `<p class="ws-note">${esc(w.note)}</p>` : ''}`;
   }
   function statusPicker(id) {
-    const cur = Saved.status(id);
+    const cur = Ideas.status(id);
     return `<span class="status-picker" role="group" aria-label="Set status">${['maybe', 'booked', 'done'].map((s) => `<button type="button" class="sp-btn" data-status="${id}:${s}" aria-pressed="${cur === s}">${STATUS_LABEL[s]}</button>`).join('')}</span>`;
   }
   function wireActivity() {
     screenEl.querySelectorAll('[data-status]').forEach((b) => b.addEventListener('click', () => {
-      const [id, s] = b.dataset.status.split(':'); const cur = Saved.status(id);
-      Saved.set(id, cur === s ? null : s);
-      render(); announce(cur === s ? 'Status cleared' : 'Marked ' + STATUS_LABEL[s]);
+      const [id, s] = b.dataset.status.split(':'); const cur = Ideas.status(id);
+      Ideas.set(id, cur === s ? null : s);
+      render(); const again = screenEl.querySelector(`[data-status="${b.dataset.status}"]`); if (again) again.focus({ preventScroll: true }); announce(cur === s ? 'Status cleared' : 'Marked ' + STATUS_LABEL[s]);
     }));
     const ta = screenEl.querySelector('[data-note]');
-    if (ta) ta.addEventListener('change', () => { Saved.note(ta.dataset.note, ta.value); announce('Note saved'); });
+    if (ta) ta.addEventListener('change', () => { Ideas.note(ta.dataset.note, ta.value); announce('Note saved'); });
   }
 
-  /* ---------- TIMELINE ---------------------------------------------- */
-  Views.timeline = function () {
+  /* ---------- #/plan/:id detail links keep working ------------------ */
+  Views.plan = function (route) { return route.parts[0] ? Views.activity(route) : Views.activities(route); };
+
+  /* ---------- 18-days-at-a-glance strip (lives on Trip) ------------- */
+  function timelineRows() {
     const days = []; let d = D.TRIP.window.start;
     while (d <= D.TRIP.window.end) { days.push(d); d = addDays(d, 1); }
     const today = activeDate();
     const firstInWindow = (e) => (e.start < D.TRIP.window.start ? D.TRIP.window.start : e.start);
-    const rows = days.map((dt) => {
+    return days.map((dt) => {
       const stay = stayForDate(dt); const co = changeoverOn(dt);
       // show each event once, on its first day inside the trip window
       const evs = D.EVENTS.filter((e) => firstInWindow(e) === dt);
@@ -539,7 +509,7 @@
       if (dt === D.TRIP.window.start) flags.push(`<span class="tl-flag">Arrive · van pickup GVA</span>`);
       if (dt === D.TRIP.window.end) flags.push(`<span class="tl-flag">Depart · flights + van back</span>`);
       return `<div class="tl-row${isNow ? ' now' : ''}${co ? ' change' : ''}">
-        <button class="tl-date" data-goto="${dt}"><span class="tl-dow">${esc(prettyDay(dt).split(' ')[0])}</span><span class="tl-num">${dt.split('-')[2]}</span></button>
+        <button class="tl-date" data-goto="${dt}" aria-label="Preview ${esc(prettyDay(dt))} on Today"><span class="tl-dow">${esc(prettyDay(dt).split(' ')[0])}</span><span class="tl-num">${dt.split('-')[2]}</span></button>
         <div class="tl-body">
           <div class="tl-base">${esc(stay.village)} · <span class="tl-stay">${esc(stay.name)}</span></div>
           ${flags.join(' ')}
@@ -547,19 +517,9 @@
         </div>
       </div>`;
     }).join('');
-    return `<div class="section-head" style="margin-top:.4rem"><h2>Trip timeline</h2><p>${esc(D.TRIP.datesLabel)}. <span class="lg confirmed">Confirmed</span> events &amp; base changes; the rest is open. Tap a date to plan it.</p></div>
-      <div class="timeline">${rows}</div>
-      <p class="intro" style="margin-top:1rem">Your shortlist isn’t pinned to days — keep it flexible. <a href="#/saved">See saved plans →</a></p>`;
-  };
-  function wireTimeline() {
-    screenEl.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => { setDate(b.dataset.goto); location.hash = '#/build'; }));
   }
 
-  /* ---------- EVENTS ------------------------------------------------ */
-  Views.events = function () {
-    const rows = D.EVENTS.slice().sort((a, b) => a.start.localeCompare(b.start)).map(eventRow).join('');
-    return `<div class="section-head" style="margin-top:.4rem"><h2>Events during the trip</h2><p>Races, festivals and markets — dates and conflicts shown honestly.</p></div>${rows}`;
-  };
+  /* ---------- EVENT DETAIL ------------------------------------------ */
   Views.event = function (route) {
     const e = D.EVENTS.find((x) => x.id === route.parts[0]); if (!e) return `<div class="empty">Unknown event.</div>`;
     const base = activeBase(); const dd = travelFromBase(e, base);
@@ -580,77 +540,38 @@
     `;
   };
 
-  /* ---------- SAVED + COMPARE --------------------------------------- */
-  Views.saved = function () {
-    const ids = Saved.ids(); if (!ids.length) return `<div class="section-head" style="margin-top:.4rem"><h2>Saved</h2></div><div class="empty">Nothing saved yet. Tap ☆ on any activity to shortlist it, then set it to Maybe / Booked / Done.</div>`;
-    const groups = { maybe: [], booked: [], done: [] };
-    ids.forEach((id) => { const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id); if (a) (groups[Saved.status(id)] || groups.maybe).push({ id, a, isEvent: !D.ACT_BY_ID[id] }); });
-    const cmp = Saved.compare();
-    let out = `<div class="section-head" style="margin-top:.4rem"><h2>Saved</h2><p>${ids.length} shortlisted. Tick 2–3 to compare.</p></div>`;
-    if (cmp.length >= 2) out += `<a class="btn block" href="#/compare">Compare ${cmp.length} selected →</a>`;
-    ['maybe', 'booked', 'done'].forEach((st) => { if (groups[st].length) { out += `<div class="group-label">${STATUS_LABEL[st]}</div>`; out += groups[st].map(({ id, a, isEvent }) => savedRow(id, a, isEvent)).join(''); } });
-    return out;
+  /* ---------- IDEAS (per-person boards, this phone only) ------------ */
+  Views.ideas = function () {
+    const p = activePerson();
+    const chips = PEOPLE.map((name) => { const n = Ideas.ids(name).length; return `<button type="button" class="chip person${name === p ? ' me' : ''}" data-person="${esc(name)}" aria-pressed="${name === p}">${esc(name)}${n ? ` <span class="mc-count">${n}</span>` : ''}</button>`; }).join('');
+    const ids = Ideas.ids(p);
+    let board;
+    if (!ids.length) {
+      board = `<div class="empty">Nothing on ${esc(p)}’s board yet. Wander through <a href="#/activities">Activities</a> and tap ♡ on anything that looks fun.</div>`;
+    } else {
+      const groups = { maybe: [], booked: [], done: [] };
+      ids.forEach((id) => { const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id); if (a) (groups[Ideas.status(id, p)] || groups.maybe).push({ id, a, isEvent: !D.ACT_BY_ID[id] }); });
+      board = ['maybe', 'booked', 'done'].map((st) => groups[st].length
+        ? `<div class="group-label">${STATUS_LABEL[st]}</div><div class="pin-grid">${groups[st].map(({ id, a, isEvent }) => isEvent ? ideaEventCard(id, a) : pinCard(a)).join('')}</div>`
+        : '').join('');
+    }
+    return `
+      <div class="section-head" style="margin-top:.4rem"><h2>Ideas</h2><p>Everyone’s maybe-pile. Tap ♡ anywhere to add to the selected board.</p></div>
+      <div class="chips-row person-row" role="group" aria-label="Whose board">${chips}</div>
+      ${board}
+      <p class="intro local-note">💾 Boards are saved on <strong>this phone only</strong> — everyone keeps their own on their own phone.</p>
+    `;
   };
-  function savedRow(id, a, isEvent) {
-    const checked = Saved.compare().includes(id);
-    return `<div class="saved-row">
-      ${!isEvent ? `<label class="cmp-check"><input type="checkbox" data-cmp="${esc(id)}" ${checked ? 'checked' : ''} aria-label="Compare ${esc(a.title)}"></label>` : '<span class="cmp-check"></span>'}
-      <a class="sr-link" href="#/${isEvent ? 'event' : 'plan'}/${esc(id)}"><strong>${esc(a.title || a.name)}</strong><span>${esc(a.summary || a.where || '')}</span></a>
-      ${saveBtn(id)}
-    </div>`;
+  function ideaEventCard(id, e) {
+    return `<article class="pin-card"><a class="pin-hit" href="#/event/${esc(id)}"><h3>${esc(e.name)}</h3><p>${esc(e.where || '')} · ${esc(e.datesLabel || '')}</p></a><div class="pin-foot"><span class="pin-tags"><span class="pc-tag">Event</span></span>${saveBtn(id)}</div></article>`;
   }
-  function wireSaved() {
-    screenEl.querySelectorAll('[data-cmp]').forEach((c) => c.addEventListener('change', () => { Saved.toggleCompare(c.dataset.cmp); render(); }));
-  }
-  Views.compare = function () {
-    const ids = Saved.compare().map((id) => D.ACT_BY_ID[id]).filter(Boolean); if (ids.length < 2) return `<div class="empty">Pick 2–3 saved activities to compare. <a href="#/saved">Back to Saved</a></div>`;
-    const base = activeBase();
-    const rows = [
-      ['', ids.map((a) => `<strong>${esc(a.title)}</strong>`)],
-      ['Effort', ids.map((a) => EFFORT_LABEL[a.effort] || '—')],
-      ['Time', ids.map((a) => DUR_LABEL[a.duration] || '—')],
-      ['Door-to-door', ids.map((a) => { const d = travelFromBase(a, base); return d ? `${d.approx ? '≈' : ''}${d.min}′ ${esc(d.mode)}` : '—'; })],
-      ['Stats', ids.map((a) => a.distanceKm ? `${a.distanceKm} km / ${a.ascentM || '?'} m` : (a.difficulty ? esc(a.difficulty.split(';')[0]) : '—'))],
-      ['Booking', ids.map((a) => a.booking === 'required' ? 'Required' : a.booking === 'recommended' ? 'Advised' : 'Walk-up')],
-      ['Price', ids.map((a) => esc(a.price || 'Free / n/a'))],
-      ['Weather', ids.map((a) => a.weather && a.weather.best ? esc(a.weather.best) : '—')]
-    ];
-    return `<div class="section-head" style="margin-top:.4rem"><h2>Compare</h2><p>From ${esc(activeStay().village)}.</p></div>
-      <div class="cmp-wrap"><table class="cmp-table">${rows.map(([k, cells]) => `<tr><th scope="row">${esc(k)}</th>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>
-      <div class="actions">${ids.map((a) => `<a class="btn ghost" href="#/plan/${esc(a.id)}">${esc(a.title)} →</a>`).join('')}</div>`;
-  };
-
-  /* ---------- SEARCH ------------------------------------------------ */
-  Views.search = function (route) {
-    const q = route.query.q || '';
-    return `<div class="section-head" style="margin-top:.4rem"><h2>Search</h2></div>
-      <input class="search-input" id="search-input" type="search" value="${esc(q)}" placeholder="Climbs, towns, canyoning, market…" aria-label="Search activities, places and events" autocomplete="off">
-      <div id="search-out" aria-live="polite"></div>`;
-  };
-  function searchIndex() {
-    const items = [];
-    D.ACTIVITIES.forEach((a) => items.push({ t: a.title, s: a.summary, tags: [a.subtype, a.cat, (a.themes || []).join(' '), (D.AREA_BY_ID[a.areaId] || {}).name].join(' '), href: '#/plan/' + a.id, kind: 'Activity' }));
-    D.AREAS.forEach((a) => items.push({ t: a.name, s: a.zone, tags: a.region, href: '#/areas/' + a.id, kind: 'Area' }));
-    D.EVENTS.forEach((e) => items.push({ t: e.name, s: e.where, tags: e.kind, href: '#/event/' + e.id, kind: 'Event' }));
-    return items;
-  }
-  function runSearch(q) {
-    const out = document.getElementById('search-out'); if (!out) return;
-    q = q.trim().toLowerCase(); if (!q) { out.innerHTML = `<p class="intro">Type to search across activities, towns, climbs, events and tags.</p>`; return; }
-    const res = searchIndex().filter((i) => (i.t + ' ' + i.s + ' ' + i.tags).toLowerCase().includes(q)).slice(0, 25);
-    out.innerHTML = res.length ? res.map((r) => `<a class="list-item" href="${r.href}"><div class="li-top"><h3>${esc(r.t)}</h3><span class="li-tag">${r.kind}</span></div><p>${esc(r.s)}</p></a>`).join('') : `<div class="empty">No match for “${esc(q)}”.</div>`;
-    announce(res.length + ' results');
-  }
-  function wireSearch() {
-    const inp = document.getElementById('search-input'); if (!inp) return;
-    runSearch(inp.value);
-    inp.addEventListener('input', () => { history.replaceState(null, '', '#/search?q=' + encodeURIComponent(inp.value)); runSearch(inp.value); });
+  function wireIdeas() {
+    screenEl.querySelectorAll('[data-person]').forEach((b) => b.addEventListener('click', () => { const who = b.dataset.person; setPerson(who); render(); const again = screenEl.querySelector(`[data-person="${who}"]`); if (again) again.focus({ preventScroll: true }); announce('Showing ' + who + '’s ideas'); }));
   }
 
   /* ---------- BIKE (cycling hub) ------------------------------------ */
   Views.bike = function () {
-    const base = activeBase(), dt = activeDate();
-    const byCat = (cats) => D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && cats.includes(a.cat));
+    const byCat = (cats) => D.ACTIVITIES.filter((a) => a.status !== 'closed' && cats.includes(a.cat));
     const groups = [
       ['Road climbs & loops', byCat(['road'])],
       ['Gravel', byCat(['gravel'])],
@@ -658,8 +579,8 @@
       ['MTB & bike parks', byCat(['mtb'])]
     ];
     const races = D.EVENTS.filter((e) => e.kind === 'race');
-    return `${contextBar()}
-      <div class="section-head" style="margin-top:.4rem"><h2>Cycling</h2><p>Road, gravel, MTB and bike parks from ${esc(activeStay().village)}. Honest labels: strong riders vs casual.</p></div>
+    return `
+      <div class="section-head" style="margin-top:.4rem"><h2>Cycling</h2><p>Every ride on the trip — both legs, no filters. Honest labels: strong riders vs casual.</p></div>
       ${groups.filter((g) => g[1].length).map((g) => `<div class="group-label">${esc(g[0])}</div><div class="cards">${g[1].map((a) => activityCard(a)).join('')}</div>`).join('')}
       <div class="group-label">Race spectating</div>
       ${races.map(eventRow).join('')}
@@ -670,48 +591,13 @@
       <p class="source-line">Route stats tie to a named start point and are checked against official sources — see any climb’s detail page.</p>`;
   };
 
-  /* ---------- DISCOVER + category ----------------------------------- */
-  Views.discover = function () {
-    const worlds = D.CATEGORIES.map((c) => `<a class="world-card" href="#/category/${esc(c.id)}"><div class="world-cover">${cover(c.media, { tint: c.tint, emoji: c.emoji, label: c.title, alt: c.title })}</div><div class="world-body"><h3>${esc(c.title)}</h3><p>${esc(c.vibe)}</p></div></a>`).join('');
-    const disc = D.DISCOVERIES.map((d) => `<a class="disc-card" href="${esc(d.route)}"><span class="disc-em" aria-hidden="true">${d.emoji}</span><strong>${esc(d.title)}</strong><span class="disc-text">${esc(d.text)}</span><span class="disc-go">Show me →</span></a>`).join('');
-    const story = (arr) => arr.map((s) => `<div class="story-item"><span class="story-em" aria-hidden="true">${s.emoji}</span><div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`).join('');
-    return `
-      <div class="detail-hero" style="min-height:150px">${cover({ photo: 'assets/wiki/lake-sunset.jpg' }, { alt: 'Sunset over the lake', eager: true, cls: 'cover-fill' })}<div class="dh-inner"><div class="dh-zone">Get inspired</div><h2 class="dh-h1">What kind of trip is this?</h2></div></div>
-      <button class="btn block" id="surprise" type="button">🎲 Surprise me — 3 ideas</button>
-      <div id="surprise-out"></div>
-      <div class="section-head"><h2>The worlds nearby</h2></div>
-      <div class="world-grid">${worlds}</div>
-      <div class="section-head"><h2>You might not know you can…</h2></div>
-      <div class="h-scroll">${disc}</div>
-      <div class="section-head"><h2>The short story of the lake</h2></div>
-      <div class="story">${story(D.STORY)}</div>
-      <div class="section-head"><h2>The war in these mountains</h2></div>
-      <div class="story">${story(D.HISTORY)}</div>
-      <div class="actions" style="margin-top:.8rem"><a class="btn" href="#/plan/glieres-walk">🕊️ Go stand where it happened</a></div>
-      ${creditsBlock()}
-    `;
-  };
-  Views.category = function (route) {
-    const c = D.CATEGORY_BY_ID[route.parts[0]]; if (!c) return `<div class="empty">Unknown category.</div>`;
-    const base = activeBase(), dt = activeDate();
-    const list = D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && (a.themes || []).some((t) => c.themes.includes(t)));
-    const other = D.ACTIVITIES.filter((a) => !availableNow(a, base, dt) && (a.themes || []).some((t) => c.themes.includes(t)));
-    return `
-      <div class="detail-hero cat" data-tint="${esc(c.tint)}">${cover(c.media, { tint: c.tint, emoji: c.emoji, alt: c.title, cls: 'cover-fill', eager: true })}<div class="dh-inner"><div class="dh-zone">${c.emoji} A kind of day</div><h2 class="dh-h1">${esc(c.title)}</h2></div></div>
-      <p class="detail-lede">${esc(c.vibe)}</p>
-      <p class="intro">${esc(c.looksLike)}</p>
-      <div class="section-head"><h2>Available from ${esc(activeStay().village)} now</h2></div>
-      <div class="cards">${list.length ? list.map((a) => activityCard(a)).join('') : '<div class="empty">Nothing from this base right now — try the other leg.</div>'}</div>
-      ${other.length ? `<div class="section-head"><h2>Elsewhere on the trip</h2></div><div class="cards">${other.slice(0, 4).map((a) => activityCard(a)).join('')}</div>` : ''}
-    `;
-  };
+  /* ---------- credits + surprise (used by Activities) --------------- */
   function creditsBlock() { return `<details class="credits"><summary>Photo credits (Wikimedia Commons)</summary><p>${D.CREDITS.map((c) => `<a href="${esc(c.source)}" target="_blank" rel="noopener">${esc(c.subject)}</a> — ${esc(c.author)}, ${esc(c.license)}`).join(' · ')}</p></details>`; }
   function wireSurprise() {
     const btn = document.getElementById('surprise'), out = document.getElementById('surprise-out'); if (!btn || !out) return;
     btn.addEventListener('click', () => {
-      const base = activeBase(), dt = activeDate();
       const cats = sample(D.CATEGORIES, 3);
-      const picks = cats.map((c) => { const pool = D.ACTIVITIES.filter((a) => availableNow(a, base, dt) && (a.themes || []).some((t) => c.themes.includes(t))); return pool.length ? sample(pool, 1)[0] : null; }).filter(Boolean);
+      const picks = cats.map((c) => { const pool = D.ACTIVITIES.filter((a) => a.status !== 'closed' && (a.themes || []).some((t) => c.themes.includes(t))); return pool.length ? sample(pool, 1)[0] : null; }).filter(Boolean);
       out.innerHTML = `<div class="cards" style="margin-top:.7rem">${picks.map((a) => activityCard(a)).join('')}</div>`;
       announce('Three ideas: ' + picks.map((p) => p.title).join(', '));
     });
@@ -732,29 +618,39 @@
       ${here.length ? `<div class="section-head"><h2>Things to do here</h2></div><div class="cards">${here.map((x) => activityCard(x)).join('')}</div>` : ''}`;
   };
 
-  /* ---------- TRIP LOGISTICS ---------------------------------------- */
+  /* ---------- TRIP (logistics + the 18 days at a glance) ------------ */
   Views.trip = function () {
     const T = D.TRANSPORT;
     const stays = D.STAYS.map((s) => `<div class="stay-card"><div class="stay-top"><div><div class="ac-zone">${esc(s.legLabel)} · ${esc(s.village)}</div><h3>${esc(s.name)}</h3></div><span class="stay-dates">${esc(s.dates)}</span></div>
       <p class="stay-addr">📍 ${esc(s.address)}</p>
       <dl class="spec" style="margin:.5rem 0 .3rem"><dt>In</dt><dd>${esc(s.checkin)}</dd><dt>Out</dt><dd>${esc(s.checkout)}</dd></dl>
       <div class="ac-tags">${s.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
-      <div class="actions" style="margin:.7rem 0 0"><a class="btn ghost" href="#/map?place=${esc(s.id)}">On map</a><a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a></div></div>`).join('');
-    const flights = T.flights.map((f) => `<div class="flight-card"><div class="fc-top"><span class="fc-who">${f.dir === 'out' ? '🛬' : '🛫'} ${esc(f.who)}</span><span class="fc-date">${esc(f.date)}</span></div><div class="fc-route">${esc(f.legs)}</div><div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}</div>`).join('');
+      <div class="actions" style="margin:.7rem 0 0"><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a><a class="btn ghost" href="#/map?place=${esc(s.id)}">On map</a></div></div>`).join('');
+    const flights = T.flights.map((f) => `<div class="flight-card"><div class="fc-top"><span class="fc-who">${f.dir === 'out' ? '🛬' : '🛫'} ${esc(f.who)}</span><span class="fc-date">${esc(f.date)}</span></div><div class="fc-route">${esc(f.legs)}</div><div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}</div>`)
+      .join('') + (T.flightsNote ? `<div class="flight-card placeholder"><div class="fc-top"><span class="fc-who">✈️ Christian &amp; Ian</span><span class="fc-date">TBC</span></div><p class="fc-note">${esc(T.flightsNote)}</p></div>` : '');
     const modes = D.TRANSPORT_GUIDE.modes.map((m) => `<div class="info-card"><h3>${esc(m.label)}</h3><p>${esc(m.summary)}${m.verifyBeforeGo ? ' <span class="pc-tag verify">Verify</span>' : ''}</p></div>`).join('');
+    const jump = [['trip-days', '🗓️ Days'], ['trip-stays', '🏠 Stays'], ['trip-travel', '✈️ Flights & van'], ['trip-around', '🚌 Getting around']]
+      .map(([id, label]) => `<button type="button" class="chip" data-jump="${id}">${label}</button>`).join('');
     return `
-      <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2><p>${esc(D.TRIP.datesLabel)} — mountains first, then the lake.</p></div>
-      <div class="section-head"><h2>Where you’re sleeping</h2></div>
+      <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2><p>${esc(D.TRIP.datesLabel)} — mountains first, then the lake. Everything confirmed lives here.</p></div>
+      <div class="chips-row jump-row" role="group" aria-label="Jump to section">${jump}</div>
+      <div class="section-head" id="trip-days"><h2>The 18 days at a glance</h2><p>Base changes and fixed events only — the rest stays gloriously open. Tap a date to preview it on Today.</p></div>
+      <div class="timeline">${timelineRows()}</div>
+      <div class="section-head" id="trip-stays"><h2>Where we’re sleeping</h2></div>
       <div class="cards" style="grid-template-columns:1fr">${stays}</div>
-      <div class="note-box">⏰ ${esc(T.departure)}</div>
-      <div class="section-head"><h2>Getting there &amp; back</h2><p>${esc(T.privacyNote)}</p></div>
+      <div class="section-head" id="trip-travel"><h2>Getting there &amp; back</h2><p>${esc(T.privacyNote)}</p></div>
+      <div class="note-box warn">⏰ ${esc(T.departure)}</div>
       <div class="flights">${flights}</div>
       <div class="stay-card"><div class="stay-top"><div><div class="ac-zone">The van · ${esc(T.car.conf)}</div><h3>${esc(T.car.name)}</h3></div></div><dl class="spec" style="margin:.5rem 0 .3rem"><dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd><dt>Return</dt><dd>${esc(T.car.ret)}</dd><dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd><dt>Included</dt><dd>${esc(T.car.includes)}</dd></dl><p class="fc-note">📍 ${esc(T.car.find)}</p></div>
-      <div class="section-head"><h2>Getting around (no-car friendly)</h2><p>${esc(D.TRANSPORT_GUIDE.intro)}</p></div>
+      <div class="section-head" id="trip-around"><h2>Getting around (no-car friendly)</h2><p>${esc(D.TRANSPORT_GUIDE.intro)}</p></div>
       ${modes}
       <div class="info-card"><h3>Parking &amp; traffic</h3><p>${esc(D.TRANSPORT_GUIDE.parking)}</p></div>
       <p class="source-line">Transport: <a href="${esc(D.SOURCES['mobilite'].url)}" target="_blank" rel="noopener">Grand Annecy Mobilités ↗</a> · checked ${esc(D.VERIFIED)}. Timetables change — verify exact times before travel.</p>`;
   };
+  function wireTrip() {
+    screenEl.querySelectorAll('[data-jump]').forEach((b) => b.addEventListener('click', () => { const el = document.getElementById(b.dataset.jump); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    screenEl.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => { setDate(b.dataset.goto); location.hash = '#/today'; }));
+  }
 
   /* ---------- MAP (rebuilt) ----------------------------------------- */
   const MAP_CATS = [
@@ -816,6 +712,7 @@
     const chips = `<button class="map-chip" data-cat="all" aria-pressed="${active.size === MAP_CATS.length}"><span class="cdot"></span>All</button>` +
       MAP_CATS.map((c) => `<button class="map-chip" data-cat="${c.id}" aria-pressed="${active.has(c.id)}" style="--cat:${c.color}"><span class="chip-em" aria-hidden="true">${c.emoji}</span>${esc(c.label)} <span class="mc-count">${counts[c.id]}</span></button>`).join('');
     return `
+      <h2 class="sr-only">Map</h2>
       <div class="map-toolbar">
         <div class="map-filters" id="map-filters" role="group" aria-label="Filter map">${chips}</div>
         <div class="map-tools"><button class="mini-btn" id="map-reset" type="button">Reset</button><button class="mini-btn" id="map-base" type="button">Near ${esc(activeStay().village)}</button></div>
@@ -876,7 +773,7 @@
     el.querySelectorAll('[data-mid]').forEach((b) => b.addEventListener('click', () => focusMarker(b.dataset.mid)));
   }
   function focusMarker(id) {
-    const mk = mapMarkers[id]; if (!mk || !mapInstance) { const p = mapPlaces().find((x) => x.id === id); if (p) location.hash = p.route; return; }
+    const mk = mapMarkers[id]; if (!mk || !mapInstance) { const p = mapPlaces().find((x) => x.id === id); if (p && p.route) location.hash = p.route; else if (p && p.href) window.open(p.href, '_blank', 'noopener'); return; }
     mapInstance.setView(mk.marker.getLatLng(), 14); mk.marker.openPopup();
   }
   function applyMap(places) {
@@ -942,10 +839,13 @@
     if (qs) qs.split('&').forEach((kv) => { const [k, v] = kv.split('='); query[decodeURIComponent(k)] = decodeURIComponent(v || ''); });
     return { name: parts[0] || 'today', parts: parts.slice(1), query };
   }
-  const ALIAS = { home: 'today', day: 'browse' };
+  // Old routes keep working: every retired screen forwards to its new home.
+  const ALIAS = { home: 'today', day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip', events: 'trip' };
   function render() {
     let route = parse();
     if (ALIAS[route.name]) route.name = ALIAS[route.name];
+    if (route.name === 'category' && route.parts[0]) route = { name: 'activities', parts: [], query: { cat: route.parts[0] } };
+    if (route.name === 'plan' && !route.parts[0]) route = { name: 'activities', parts: [], query: route.query.must ? { f: 'book' } : route.query };
     teardownMap();
     const view = Views[route.name] || Views.today;
     screenEl.innerHTML = view(route);
@@ -954,17 +854,13 @@
     window.scrollTo(0, 0); screenEl.scrollTop = 0;
     // focus management for hash-route changes
     const h = screenEl.querySelector('h1, h2'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-    announce(TITLES[route.name] || 'Page');
+    announce(titleEl.textContent || 'Page');
     // wiring
-    if (route.name === 'today') { wireContextBar(); }
-    if (route.name === 'build') wireBuild(route);
-    if (route.name === 'browse' || (route.name === 'plan' && route.query.must)) wireBrowse();
+    if (route.name === 'today') wireContextBar();
+    if (route.name === 'activities') wireActivities();
     if (route.name === 'plan' && route.parts[0]) wireActivity();
-    if (route.name === 'timeline') wireTimeline();
-    if (route.name === 'saved') wireSaved();
-    if (route.name === 'search') wireSearch();
-    if (route.name === 'discover') wireSurprise();
-    if (route.name === 'bike') wireContextBar();
+    if (route.name === 'ideas') wireIdeas();
+    if (route.name === 'trip') wireTrip();
     if (route.name === 'map') initMapView(route);
   }
 
@@ -986,7 +882,12 @@
           const nw = reg.installing; if (!nw) return;
           nw.addEventListener('statechange', () => {
             if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              const toast = document.getElementById('sw-toast'); if (toast) { toast.hidden = false; const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { nw.postMessage('skip-waiting'); toast.hidden = true; }; }
+              const toast = document.getElementById('sw-toast'); if (toast) {
+                toast.hidden = false;
+                const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { nw.postMessage('skip-waiting'); toast.hidden = true; };
+                const x = document.getElementById('sw-dismiss'); if (x) x.onclick = () => { toast.hidden = true; };
+                setTimeout(() => { toast.hidden = true; }, 12000); // never nags for long
+              }
             }
           });
         });

@@ -75,7 +75,37 @@ window.DATA = (function () {
     'ncy-sup':         { url: 'https://ncy-sup.com/', type: 'Operator', on: '2026-07-26' },
     'leshouches':      { url: 'https://leshouches.montblancnaturalresort.com/en/', type: 'Resort operator', on: '2026-07-26' },
     'coop-thones':     { url: 'https://hautesavoiemontblanc-tourisme.com/en/offers/visite-de-la-cooperative-du-reblochon-fermier-thones-en-5867525/', type: 'Tourism office', on: '2026-07-26' },
-    'cheran-ban':      { url: 'https://mairie-alby-sur-cheran.fr/cheran-baignade-interdite/', type: 'Municipal', on: '2026-07-26' }
+    'cheran-ban':      { url: 'https://mairie-alby-sur-cheran.fr/cheran-baignade-interdite/', type: 'Municipal', on: '2026-07-26' },
+    // Activity-expansion sweep (all checked 2026-07-26)
+    'traversee-lac':   { url: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/traversee-du-lac-dannecy/', type: 'Operator', on: '2026-07-26' },
+    'esperance3':      { url: 'https://esperance3.org/6-sorties-grand-public/', type: 'Operator', on: '2026-07-26' },
+    'vboat':           { url: 'https://v-boat.fr/tarifs', type: 'Operator', on: '2026-07-26' },
+    'libellule':       { url: 'https://www.bateaux-annecy.com/restaurant-cruises/dinner-cruise/', type: 'Operator', on: '2026-07-26' },
+    'essaonia':        { url: 'https://www.essaonia.net/activites/kayak-de-mer-lac-annecy-demi-journee/', type: 'Operator', on: '2026-07-26' },
+    'wakearena':       { url: 'https://wakearena-annecy.com/', type: 'Operator', on: '2026-07-26' },
+    'nautichill':      { url: 'https://nautichill.com/', type: 'Operator', on: '2026-07-26' },
+    'semnoz-luge':     { url: 'https://www.semnoz.fr/luge-ete/', type: 'Operator', on: '2026-07-26' },
+    'fantasticable':   { url: 'https://www.chatel.com/en/activities/the-fantasticable-in-summer-chatel/', type: 'Tourism office', on: '2026-07-26' },
+    'pont-diable':     { url: 'https://www.lepontdudiable.com/informations-tarifs/', type: 'Operator', on: '2026-07-26' },
+    'ballon-cimes':    { url: 'https://www.ballondescimes.fr', type: 'Operator', on: '2026-07-26' },
+    'delta-evasion':   { url: 'https://www.deltaevasion.com/', type: 'Operator', on: '2026-07-26' },
+    'terreo-diau':     { url: 'https://www.terreo-canyoning.com/activite/speleologie-la-diau-decouverte-a-annecy/', type: 'Operator', on: '2026-07-26' },
+    'vf-pollet':       { url: 'https://www.laclusaz.com/en/details/yves-pollet-villard-via-ferrata/', type: 'Tourism office', on: '2026-07-26' },
+    'guides-annecy':   { url: 'https://www.annecyguidesmontagne.com/escalade', type: 'Operator', on: '2026-07-26' },
+    'guidon-mtb':      { url: 'https://www.guidonmtb.com/activite/sortie-vtt-electrique/', type: 'Operator', on: '2026-07-26' },
+    'vitam':           { url: 'https://ucpavitam.fr/fr/infos-pratiques/tarifs/aquatique', type: 'Operator', on: '2026-07-26' },
+    'karting-rumilly': { url: 'https://www.kartingrumilly.fr/tarifs-location-karting-rumilly/', type: 'Operator', on: '2026-07-26' },
+    'grande-evasion':  { url: 'https://www.la-grande-evasion.com/annecy/', type: 'Operator', on: '2026-07-26' },
+    'menthon-chateau': { url: 'https://www.chateau-de-menthon.com/evenements/visites-nocturnes-theatralisees/', type: 'Operator', on: '2026-07-26' },
+    'tamie':           { url: 'https://www.abbaye-tamie.com/informations-pratiques', type: 'Operator', on: '2026-07-26' },
+    'jardins-secrets': { url: 'https://www.jardins-secrets.com/informations-pratiques/', type: 'Operator', on: '2026-07-26' },
+    'montrottier':     { url: 'https://www.chateaudemontrottier.com/visite/', type: 'Operator', on: '2026-07-26' },
+    'mija':            { url: 'https://www.mija-food.fr/food-tour-annecy/', type: 'Operator', on: '2026-07-26' },
+    'lesgets-luge':    { url: 'https://pass.lesgets.com/en/4-seasons-sledge/', type: 'Operator', on: '2026-07-26' },
+    'avokart':         { url: 'https://www.skipass-avoriaz.com/infos/avokart', type: 'Operator', on: '2026-07-26' },
+    'aquariaz':        { url: 'https://www.avoriaz.com/en/fiche/aquariaz-tropical-paradise/', type: 'Tourism office', on: '2026-07-26' },
+    'an-rafting':      { url: 'https://an-rafting.com/prestation/rafting-haute-savoie/', type: 'Operator', on: '2026-07-26' },
+    'music-meca':      { url: 'https://musicmecalesgets.org/horaires-tarifs/', type: 'Operator', on: '2026-07-26' }
   };
 
   /* ---------- TRIP: legs, bases, stays (personal, kept in full) ------
@@ -148,8 +178,12 @@ window.DATA = (function () {
       find: 'Stay on the Swiss side of the airport → rental counter → shuttle to the P51 car park → finish at the kiosk. Desk open 6:30–23:30.'
     },
     privacyNote: 'Full confirmation codes are in your email — kept off this public page on purpose.',
+    flightsNote: 'Christian & Ian — travel details coming (they owe us their bookings 😄). Both are already named drivers on the van.',
     departure: 'Departure Saturday (29 Aug) is tight: Andrew flies 09:20 (at GVA by ~07:15), the van is due back 09:30, Liv flies 11:40 — one early run leaving Veyrier ~06:15. Arrange early checkout + deposit handback with Casa Elisa in advance (their normal window opens 08:30).'
   };
+
+  // The four of us — used for the per-person Ideas boards (saved on each phone).
+  const PEOPLE = ['Olivia', 'Andrew', 'Christian', 'Ian'];
 
   /* ---------- AREAS (the mental map of the lake and its edges) -------- */
   const AREAS = [
@@ -866,6 +900,296 @@ window.DATA = (function () {
       status: 'open', availability: 'Roads open in summer; confirm the specific col/route yourself.', verifyBeforeGo: true, src: 'lesgets-tarifs',
       travel: { lesgets: { min: 2, mode: 'from the door' } }
     }
+,
+
+    /* ===== EXPANSION SWEEP (researched + verified 2026-07-26) ===== */
+    {
+      id: 'esperance-barge', title: 'Sail the Espérance III (1911 barge rebuild)', base: 'lake', cat: 'boat', subtype: 'Historic lateen barge · 2 h',
+      areaId: 'annecy', coords: [45.8984, 6.1306],
+      summary: 'Two hours under huge lateen sails on a faithful rebuild of the barque that hauled wine from Veyrier’s own vineyards.',
+      why: 'Zero effort, maximum story — and the Thursday 20 Aug combo pairs the sail with a guided Bout-du-Lac reserve walk.',
+      duration: '2h', effort: 'recovery', transport: ['car','busboat','bike'], themes: ['water','views','recovery'],
+      booking: 'required', bookingUrl: 'https://esperance3.org/6-sorties-grand-public/', price: '€30 adult',
+      scenic: 3, novelty: 3, group: 'all',
+      weather: { rain: 'poor', wind: 'depends', best: 'clear', note: 'Sailings are weather-dependent — they confirm by email.' },
+      status: 'open', availability: 'Public sailings all summer from the Thiou canal; Doussard combo runs Thu 20 Aug 2026.', src: 'esperance3'
+    },
+    {
+      id: 'vboat-electric', title: 'Skipper your own electric boat (Petit Port)', base: 'lake', cat: 'boat', subtype: 'No-licence 6-seater',
+      areaId: 'annecy', coords: [45.9050, 6.1489],
+      summary: 'Drive yourselves: a silent 6-seater from Petit Port, 10 minutes from home — putter to Menthon or under the Roc de Chère with a cooler aboard.',
+      why: 'The classic group hit. Same base rents slide-pedalos, so the fleet can mix.',
+      duration: '2h', effort: 'recovery', transport: ['car','bike','busboat'], themes: ['water','views','recovery'],
+      booking: 'recommended', bookingUrl: 'https://v-boat.fr/tarifs', price: '€75/1 h · €150/2 h per boat; slide pedalo from €26/30 min',
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'poor', best: 'clear' },
+      status: 'open', availability: 'Open 7/7, 9:00–19:00, April–September 2026.', src: 'vboat'
+    },
+    {
+      id: 'libellule-dinner', title: 'Dinner cruise on the electric MS Libellule', base: 'lake', cat: 'boat', subtype: 'Evening cruise · 2 h',
+      areaId: 'annecy', coords: [45.8979, 6.1305],
+      summary: 'Two hours gliding the whole lake at dusk on a fully glazed electric catamaran, three-course menu included — you sail silently past your own beach.',
+      duration: 'evening', effort: 'recovery', transport: ['car','busboat'], themes: ['water','food','views'],
+      booking: 'required', bookingUrl: 'https://www.bateaux-annecy.com/restaurant-cruises/dinner-cruise/', price: 'From €69.90 pp (drinks extra)',
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'good', best: 'any', note: 'Fully glazed — a genuinely great rainy-evening move.' },
+      status: 'open', availability: 'Boards 19:30 at Quai de la Tournette; season 30 Mar – 1 Nov 2026.', src: 'libellule'
+    },
+    {
+      id: 'essaonia-kayak', title: 'Guided sea-kayak half-day', base: 'lake', cat: 'paddle', subtype: 'Guided · 10 km',
+      areaId: 'st-jorioz', coords: [45.8412, 6.1755],
+      summary: 'Proper sea kayaks and a guide threading the Roc de Chère shoreline, Château de Duingt and the reed marshes — all kit included.',
+      why: 'A different animal from renting a SUP — rest-day cardio with a local who knows every cove.',
+      duration: 'half', effort: 'moderate', transport: ['car','bike'], themes: ['water','views'],
+      booking: 'required', bookingUrl: 'https://www.essaonia.net/activites/kayak-de-mer-lac-annecy-demi-journee/', price: '€65 pp half-day',
+      scenic: 3, novelty: 2, group: 'all', skill: 'Must swim; no kayak experience needed.',
+      weather: { rain: 'ok', wind: 'depends', best: 'calm mornings' },
+      status: 'open', availability: 'Departures 9:00 & 14:00 from La Crique, Saint-Jorioz. 2026 dates not printed — confirm when booking.', verifyBeforeGo: true, src: 'essaonia'
+    },
+    {
+      id: 'wake-arena', title: 'Wakesurf & wakefoil at Petit Port', base: 'lake', cat: 'paddle', subtype: 'Wake boat sessions',
+      areaId: 'annecy', coords: [45.9050, 6.1489],
+      summary: 'Endless-wave wakesurfing or hydrofoil flying behind a dedicated wake boat, 10 minutes from home — privatise the boat and rotate riders.',
+      duration: '2h', effort: 'moderate', transport: ['car','bike'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://wakearena-annecy.com/', price: '€50/15-min session; private boat €200–740 (1–4 h)',
+      scenic: 2, novelty: 3, group: 'all', skill: 'They teach from zero.',
+      weather: { rain: 'poor', best: 'calm' },
+      status: 'open', availability: 'No explicit 2026 dates published — message them before counting on it (Skiwake 74 at Doussard is the fallback).', verifyBeforeGo: true, src: 'wakearena'
+    },
+    {
+      id: 'semnoz-luge', title: 'Luge d’été du Semnoz', base: 'lake', cat: 'family', subtype: 'Summer toboggan',
+      areaId: 'semnoz', coords: [45.8034, 6.0975],
+      summary: 'The mountain toboggan run on your local summit — €4 a run, no booking, 35 minutes up the hill. Pair with the Trois Lacs walk or a ridge picnic.',
+      duration: '2h', effort: 'easy', transport: ['car','busboat'], themes: ['adrenaline','views'],
+      booking: 'no', bookingUrl: 'https://www.semnoz.fr/luge-ete/', price: '€4/run · 5 runs €19 · 10 runs €32',
+      scenic: 2, novelty: 2, group: 'all',
+      weather: { rain: 'poor', best: 'dry' },
+      status: 'open', availability: 'Daily 10:00–18:00, 4 Jul – 30 Aug 2026 — covers the whole stay.', src: 'semnoz-luge'
+    },
+    {
+      id: 'ballon-cimes', title: 'Hot-air balloon over the lake', base: 'lake', cat: 'paragliding', subtype: 'Dawn balloon flight',
+      areaId: 'doussard', coords: [45.7831, 6.2242],
+      summary: 'Sunrise drift over the whole lake and the Tournette from a balloon out of Doussard — the one view even the paragliders don’t get.',
+      duration: 'half', effort: 'recovery', transport: ['car'], themes: ['views','adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.ballondescimes.fr', price: '€310 pp (discount from 3 passengers) — the trip’s big-ticket splurge, flagged honestly',
+      scenic: 3, novelty: 3, group: 'all',
+      weather: { rain: 'poor', wind: 'depends', best: 'calm clear dawn', note: 'Flies at dawn, weather permitting — book early in the stay so there’s a re-fly window.' },
+      status: 'open', availability: 'Year-round, every day, weather permitting.', src: 'ballon-cimes'
+    },
+    {
+      id: 'ulm-microlight', title: 'Microlight lap of the lake', base: 'lake', cat: 'paragliding', subtype: 'ULM flight · 30 min',
+      areaId: 'doussard', coords: [45.7765, 6.2114],
+      summary: 'A 30-minute powered lap of the lake from the Doussard airfield — the drone shot, but you’re in it. Cheaper and more scheduleable than the balloon.',
+      duration: '2h', effort: 'recovery', transport: ['car'], themes: ['views','adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.deltaevasion.com/', price: 'Tour du Lac ~€160 pp; shorter flights less',
+      scenic: 3, novelty: 3, group: 'some', groupNote: 'One passenger per machine — rotate.',
+      weather: { rain: 'poor', wind: 'depends', best: 'clear' },
+      status: 'open', availability: 'Daily 9:00–20:00, April–October.', src: 'delta-evasion'
+    },
+    {
+      id: 'vf-pollet-villard', title: 'Via Ferrata Yves Pollet-Villard (La Clusaz)', base: 'lake', cat: 'viaferrata', subtype: 'Via ferrata (AD–D)',
+      areaId: 'aravis', coords: [45.8828, 6.4569],
+      summary: 'The Aravis’ other big via ferrata, free to climb above the Combe de Borderan — confirmed open for 2026 after its safety inspection.',
+      duration: 'half', effort: 'big', transport: ['car'], themes: ['adrenaline','views'],
+      booking: 'no', bookingUrl: 'https://www.laclusaz.com/en/details/yves-pollet-villard-via-ferrata/', price: 'Free; kit hire in La Clusaz; guides via guides-des-aravis.com',
+      scenic: 3, novelty: 2, group: 'some', skill: 'Head for heights; lanyard set + helmet required.',
+      weather: { rain: 'poor', storm: 'avoid', wetUnsafe: true, best: 'dry' },
+      status: 'open', availability: 'Open 6 May – 14 Nov 2026 (laclusaz.com).', src: 'vf-pollet'
+    },
+    {
+      id: 'climbing-initiation', title: 'Learn to climb with the Bureau des Guides', base: 'lake', cat: 'viaferrata', subtype: 'Rock climbing · guided',
+      areaId: 'annecy', coords: [45.8852, 6.1302],
+      summary: 'A private guide on the crags above the lake — Grande Jeanne, Bluffy, Angon — all within 15 minutes of home. Real rock, zero faff.',
+      duration: 'half', effort: 'moderate', transport: ['car','bike'], themes: ['adrenaline','views'],
+      booking: 'required', bookingUrl: 'https://www.annecyguidesmontagne.com/escalade', price: 'Private guide from ~€200/half-day (~€50 a head for 4)',
+      scenic: 2, novelty: 3, group: 'all', skill: 'None needed — initiation is the point.',
+      weather: { rain: 'poor', wetUnsafe: true, best: 'dry' },
+      status: 'open', availability: '2026 programme published; book ahead in August.', src: 'guides-annecy'
+    },
+    {
+      id: 'caving-diau', title: 'Caving in the Grotte de la Diau', base: 'lake', cat: 'canyoning', subtype: 'Guided caving · half-day',
+      areaId: 'glieres', coords: [45.9580, 6.2831],
+      summary: 'Headtorches, underground rivers and proper cave passages under the Parmelan cliffs — the mountain you’ll have already walked on top of.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['adrenaline','rainy'],
+      booking: 'required', bookingUrl: 'https://www.terreo-canyoning.com/activite/speleologie-la-diau-decouverte-a-annecy/', price: '€55 pp (€50 each from 4 — you qualify)',
+      scenic: 2, novelty: 3, group: 'all', skill: 'Fitness to scramble; no experience needed.',
+      weather: { rain: 'good', note: 'Underground — rain-proof by definition, though heavy storms can close it (water levels).' },
+      status: 'open', availability: 'Online booking live for summer 2026 — pick a slot on their calendar.', verifyBeforeGo: true, src: 'terreo-diau'
+    },
+    {
+      id: 'emtb-guidon', title: 'Guided e-MTB singletrack on the Semnoz', base: 'lake', cat: 'mtb', subtype: 'Guided e-MTB · half-day',
+      areaId: 'semnoz', coords: [45.9157, 6.1060],
+      summary: 'A guide, an e-MTB and the Semnoz’s singletrack — the way to get the non-MTBers into the woods without destroying them.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['bikes','views'],
+      booking: 'required', bookingUrl: 'https://www.guidonmtb.com/activite/sortie-vtt-electrique/', price: '€90 pp incl. e-MTB, helmet, gloves',
+      scenic: 2, novelty: 2, group: 'all',
+      weather: { rain: 'ok', best: 'dry' },
+      status: 'open', availability: 'Summer tours offered; 2026 dates by phone — confirm when booking.', verifyBeforeGo: true, src: 'guidon-mtb'
+    },
+    {
+      id: 'vitam-aquapark', title: 'Vitam aqua zone (Neydens)', base: 'lake', cat: 'family', subtype: 'Indoor waterpark',
+      coords: [46.1228, 6.0968],
+      summary: 'The region’s big indoor waterpark — slides, wave pool, outdoor lagoon — 35 minutes north. The nuclear option for a truly wet day.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['water','rainy'],
+      booking: 'no', bookingUrl: 'https://ucpavitam.fr/fr/infos-pratiques/tarifs/aquatique', price: '€25/4 h · €29/day (high season)',
+      scenic: 1, novelty: 2, group: 'all',
+      weather: { rain: 'good', note: 'This is what it’s for.' },
+      status: 'open', availability: 'Open daily; 2026 tariffs live on ucpavitam.fr.', src: 'vitam'
+    },
+    {
+      id: 'karting-rumilly', title: 'Outdoor karting at Rumilly', base: 'lake', cat: 'family', subtype: '1,150 m outdoor circuit',
+      coords: [45.8467, 5.9686],
+      summary: 'A proper 1,150 m outdoor circuit 35 minutes west — 10-minute sessions, two kart classes, four riders, one championship.',
+      duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline'],
+      booking: 'recommended', bookingUrl: 'https://www.kartingrumilly.fr/tarifs-location-karting-rumilly/', price: '€27–30 per 10-min session',
+      scenic: 1, novelty: 2, group: 'all',
+      weather: { rain: 'poor', best: 'dry' },
+      status: 'open', availability: 'Open 7/7, 9:00–19:00.', src: 'karting-rumilly'
+    },
+    {
+      id: 'escape-grande-evasion', title: 'Escape rooms: La Grande Évasion', base: 'lake', cat: 'family', subtype: 'Escape game · 1 h',
+      areaId: 'annecy', coords: [45.8915, 6.1105],
+      summary: 'Annecy’s big escape-room house in Seynod — four brains, one locked room, rain outside irrelevant.',
+      duration: '2h', effort: 'recovery', transport: ['car'], themes: ['rainy'],
+      booking: 'required', bookingUrl: 'https://www.la-grande-evasion.com/annecy/', price: '€124 for 4 (€31 pp)',
+      scenic: 1, novelty: 2, group: 'all',
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Book ~a week ahead in August.', src: 'grande-evasion'
+    },
+    {
+      id: 'menthon-chateau', title: 'Château de Menthon — visit & theatrical nocturnes', base: 'lake', cat: 'culture', subtype: 'Castle · 10 min from home',
+      areaId: 'menthon', coords: [45.86397, 6.20360],
+      summary: 'The thousand-year fairytale castle on your own shore — still lived in by the Menthon family. Wednesday nights in August it opens after dark with costumed theatrical tours.',
+      why: 'You look at it from the pontoon every day; go inside once — ideally by candlelight.',
+      duration: '2h', effort: 'recovery', transport: ['car','bike','walk'], themes: ['rainy','views','food'],
+      booking: 'recommended', bookingUrl: 'https://www.chateau-de-menthon.com/evenements/visites-nocturnes-theatralisees/', price: 'Day €12; nocturne €18 (limited places — presale on Billetweb)',
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Daily 10:00–19:00 in Jul–Aug 2026; nocturnes Wednesdays.', src: 'menthon-chateau'
+    },
+    {
+      id: 'tamie-abbey', title: 'Abbaye de Tamié — Trappist cheese at the source', base: 'lake', cat: 'food', subtype: 'Working abbey + farm shop',
+      coords: [45.68722, 6.30363],
+      summary: 'Buy Tamié from the monks who made it, in the abbey where it’s been made since 1132 — free entry, a film on the cheese, and mountain silence.',
+      duration: 'half', effort: 'recovery', transport: ['car'], themes: ['food','views'],
+      booking: 'no', bookingUrl: 'https://www.abbaye-tamie.com/informations-pratiques', price: 'Free entry; cheese at farm-shop prices',
+      scenic: 2, novelty: 3, group: 'all',
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Shop Mon–Sat 9:30–12:30 & 13:30–18:30, Sun from 11:45. ~40 min via Faverges — pairs with the south-lake greenway.', src: 'tamie'
+    },
+    {
+      id: 'jardins-secrets', title: 'Jardins Secrets (Vaulx)', base: 'lake', cat: 'culture', subtype: 'Hand-built gardens',
+      coords: [45.91871, 5.98653],
+      summary: 'One family spent 40 years hand-building a labyrinth of Moorish courtyards, painted galleries and rose gardens in the middle of farmland. Genuinely odd, genuinely lovely.',
+      duration: '2h', effort: 'recovery', transport: ['car'], themes: ['rainy','recovery'],
+      booking: 'no', bookingUrl: 'https://www.jardins-secrets.com/informations-pratiques/', price: '€10 adult',
+      scenic: 2, novelty: 3, group: 'all',
+      weather: { rain: 'ok' },
+      status: 'open', availability: 'Daily 10:30–17:00 until 23 Aug 2026, then 13:30–18:00.', src: 'jardins-secrets'
+    },
+    {
+      id: 'montrottier', title: 'Château de Montrottier — the collector’s castle', base: 'lake', cat: 'culture', subtype: 'Castle of curiosities',
+      areaId: 'annecy', coords: [45.89836, 6.03866],
+      summary: 'A medieval keep stuffed with one obsessive collector’s armour, ivories and oddities — two minutes from the Gorges du Fier, so do both.',
+      duration: '2h', effort: 'recovery', transport: ['car'], themes: ['rainy'],
+      booking: 'no', bookingUrl: 'https://www.chateaudemontrottier.com/visite/', price: '€10 adult, short guided tours included',
+      scenic: 2, novelty: 2, group: 'all', pairWith: ['gorges-fier'],
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Daily in Jul–Aug 2026; season to 31 Oct.', src: 'montrottier'
+    },
+    {
+      id: 'mija-food-tour', title: 'Old-town food tour (Mija)', base: 'lake', cat: 'food', subtype: 'Guided eating walk',
+      areaId: 'annecy', coords: [45.8984, 6.1277],
+      summary: 'A guided graze through old Annecy — cheese, charcuterie, lake fish, pastries — with the stories behind the stalls. All tastings included.',
+      duration: 'half', effort: 'easy', transport: ['car','busboat','bike'], themes: ['food','rainy'],
+      booking: 'required', bookingUrl: 'https://www.mija-food.fr/food-tour-annecy/', price: '€59.50–70 pp, tastings included',
+      scenic: 2, novelty: 2, group: 'all',
+      weather: { rain: 'ok' },
+      status: 'open', availability: 'Live 2026 booking calendar — pick a slot.', src: 'mija'
+    },
+
+    /* ===== LES GETS LEG — expansion sweep ===== */
+    {
+      id: 'lesgets-luge', title: 'Luge 4 Saisons (alpine coaster)', base: 'lesgets', cat: 'family', subtype: 'Rail coaster',
+      areaId: 'les-gets', coords: [46.1526, 6.6619],
+      summary: 'The on-rails alpine coaster at Les Perrières — 15 minutes’ walk from the apartment. The mandatory silly hour between bike-park laps.',
+      duration: '2h', effort: 'recovery', transport: ['walk','car'], themes: ['adrenaline'],
+      booking: 'no', bookingUrl: 'https://pass.lesgets.com/en/4-seasons-sledge/', price: '€9/ride · 6 rides €45',
+      scenic: 2, novelty: 2, group: 'all',
+      weather: { rain: 'ok', note: 'Runs in light rain; closes in storms.' },
+      status: 'open', availability: 'Daily 12:00–18:00, 27 Jun – 30 Aug 2026.', src: 'lesgets-luge', travel: { lesgets: { min: 15, mode: 'walk' } }
+    },
+    {
+      id: 'fantasticable', title: 'Fantasticable — giant zipline (Châtel)', base: 'lesgets', cat: 'paragliding', subtype: 'Zipline · 100+ km/h',
+      coords: [46.2333, 6.7881],
+      summary: 'Superman-position zipline across the Plaine Dranse — over a kilometre of cable at motorway speed, ~35 minutes from Les Gets.',
+      duration: 'half', effort: 'recovery', transport: ['car'], themes: ['adrenaline','views'],
+      booking: 'recommended', bookingUrl: 'https://www.chatel.com/en/activities/the-fantasticable-in-summer-chatel/', price: '€45 solo · €90 duo',
+      scenic: 3, novelty: 3, group: 'all',
+      weather: { rain: 'poor', wind: 'depends', best: 'dry' },
+      status: 'open', availability: 'Daily 12 Jul – 23 Aug 2026, 09:30–16:45 — covers the Les Gets leg.', src: 'fantasticable', travel: { lesgets: { min: 35, mode: 'car' } }
+    },
+    {
+      id: 'avokart', title: 'Avokart — downhill karting (Avoriaz)', base: 'lesgets', cat: 'family', subtype: 'Gravity karts',
+      coords: [46.1925, 6.7703],
+      summary: 'Three-wheeled gravity karts down the Avoriaz slopes — cable car up, chaos down. First run includes the Prodains Express ascent.',
+      duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline'],
+      booking: 'recommended', bookingUrl: 'https://www.skipass-avoriaz.com/infos/avokart', price: '€27 first run, €12 per re-run',
+      scenic: 2, novelty: 3, group: 'all', skill: 'Min height 1.40 m.',
+      weather: { rain: 'poor', best: 'dry' },
+      status: 'open', availability: 'Daily 4 Jul – 30 Aug 2026, sessions hourly 10:00–12:00 & 14:00–16:00.', src: 'avokart', travel: { lesgets: { min: 30, mode: 'car' } }
+    },
+    {
+      id: 'aquariaz', title: 'Aquariaz — tropical waterpark (Avoriaz)', base: 'lesgets', cat: 'swim', subtype: 'Indoor tropical pools',
+      coords: [46.1912, 6.7741],
+      summary: '29 °C water, real tropical plants and a halfpipe slide inside a glass hall at 1,800 m — the Les Gets-leg answer to a washout day.',
+      duration: '2h', effort: 'recovery', transport: ['car'], themes: ['water','rainy','recovery'],
+      booking: 'no', bookingUrl: 'https://www.avoriaz.com/en/fiche/aquariaz-tropical-paradise/', price: '€12 adult',
+      scenic: 2, novelty: 2, group: 'all',
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Sessions daily 26 Jun – 28 Aug 2026.', src: 'aquariaz', travel: { lesgets: { min: 25, mode: 'car' } }
+    },
+    {
+      id: 'rafting-dranse', title: 'Raft the Dranse gorges', base: 'lesgets', cat: 'canyoning', subtype: 'Rafting · ~1 h on water',
+      coords: [46.3244, 6.5879],
+      summary: 'The Haute-Savoie’s rafting river — a classic gorge descent ~35 minutes from Les Gets, all kit provided, departures four times a day.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://an-rafting.com/prestation/rafting-haute-savoie/', price: '€52 adult',
+      scenic: 3, novelty: 3, group: 'all', skill: 'Must swim.',
+      weather: { rain: 'ok', storm: 'avoid', best: 'any dry day' },
+      status: 'open', availability: 'Season May–September; departures 9:00/11:00/13:00/15:00.', src: 'an-rafting', travel: { lesgets: { min: 35, mode: 'car' } }
+    },
+    {
+      id: 'nautichill-montriond', title: 'Lac de Montriond — beach, SUP & canoe', base: 'lesgets', cat: 'paddle', subtype: 'Mountain lake · 1,060 m',
+      coords: [46.2090, 6.7291],
+      summary: 'The emerald cliff-ringed lake 20 minutes from Les Gets, with a little SUP/canoe base right off the beach and a snack terrace.',
+      why: 'The best water day of the mountain leg — bring the swim stuff.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['water','views','recovery'],
+      booking: 'no', bookingUrl: 'https://nautichill.com/', price: 'Lake free; SUP €24/h · canoe €21/h',
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'poor', best: 'warm' },
+      status: 'open', availability: 'Rentals daily 13 Jun – 6 Sep 2026, 10:00–19:00.', src: 'nautichill', travel: { lesgets: { min: 20, mode: 'car' } }
+    },
+    {
+      id: 'pont-du-diable', title: 'Gorges du Pont du Diable', base: 'lesgets', cat: 'culture', subtype: 'Show gorge · walkways',
+      coords: [46.3068, 6.6158],
+      summary: 'Walkways bolted through a marble gorge the Dranse carved 60 m deep — the classic wet-morning wonder between Morzine and Thonon.',
+      duration: '2h', effort: 'easy', transport: ['car'], themes: ['views','rainy'],
+      booking: 'no', bookingUrl: 'https://www.lepontdudiable.com/informations-tarifs/', price: '€19 adult',
+      scenic: 3, novelty: 2, group: 'all',
+      weather: { rain: 'ok', note: 'Under the forest canopy — works in drizzle; check after big storms.' },
+      status: 'open', availability: 'Open daily 4 Apr – 30 Sep 2026, 09:00 in summer.', src: 'pont-diable', travel: { lesgets: { min: 30, mode: 'car' } }
+    },
+    {
+      id: 'music-mecanique', title: 'Musée de la Musique Mécanique', base: 'lesgets', cat: 'culture', subtype: 'Village museum',
+      areaId: 'les-gets', coords: [46.1609, 6.6728],
+      summary: 'Les Gets’ own oddity: France’s best collection of self-playing organs, orchestrions and musical automata, demonstrated live on the guided tour.',
+      duration: '2h', effort: 'recovery', transport: ['walk'], themes: ['rainy'],
+      booking: 'no', bookingUrl: 'https://musicmecalesgets.org/horaires-tarifs/', price: '€10 guided tour',
+      scenic: 1, novelty: 3, group: 'all',
+      weather: { rain: 'good' },
+      status: 'open', availability: 'Daily 14:00–19:00 through summer 2026.', src: 'music-meca', travel: { lesgets: { min: 8, mode: 'walk' } }
+    }
   ];
   const ACT_BY_ID = Object.fromEntries(ACTIVITIES.map(a => [a.id, a]));
   // Back-compat alias so any older #/plan/:id deep links still resolve.
@@ -876,6 +1200,16 @@ window.DATA = (function () {
      impact, a source and a verifiedOn. Conflicts with changeover days
      (15 & 22 Aug) are flagged honestly. */
   const EVENTS = [
+    {
+      id: 'traversee-lac', name: 'Traversée du Lac swim race — starts on our beach', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug',
+      base: 'lake', where: '5 km start: Plage de la Brune, Veyrier-du-Lac (9:30) · 1 km at l’Impérial · 2.4/10 km from old Annecy',
+      coords: [45.8788, 6.1752],
+      why: 'The lake’s legendary open-water race, 94th edition — and the 5 km start line is literally the beach below the house, the morning we arrive at the lake.',
+      booking: 'yes', price: '1 km €25 → 10 km €50 (+€15 day licence); entries close 8 Aug, +30% after 5 Aug',
+      impact: 'It’s changeover morning: out of Les Gets by 10:00, Andrew lands at GVA, check-in 16:00. Racing it would take heroic logistics — watching the swimmers come into La Brune with coffee is the realistic (and great) plan.',
+      conflict: true, confidence: 'confirmed', src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }
+    },
     {
       id: 'morillon-enduro', name: 'UCI Enduro World Cup Final — Morillon', kind: 'race',
       start: '2026-08-14', end: '2026-08-16', datesLabel: 'Fri 14 – Sun 16 Aug',
@@ -1125,6 +1459,21 @@ window.DATA = (function () {
     { id: 'nazca-lines', cat: 'food', em: '🍸', name: 'Nazca Lines (cocktail bar)', coords: [45.89923, 6.12888], blurb: 'Hidden-gem cocktail bar in the old town for the one dressed-up evening.', note: 'Pin approximate.', verify: true },
     { id: 'anglettaz', cat: 'food', em: '🧀', name: 'Chalet de l’Anglettaz', coords: [45.96377, 6.24328], blurb: 'Stone alpage chalet at 1,500 m under the Parmelan — wood-fire farm dinners, menus ~€23–28. Go for sunset.', verify: true },
     { id: 'coop-reblochon', cat: 'food', em: '🧀', name: 'Coopérative du Reblochon (Thônes)', coords: [45.88781, 6.31420], blurb: 'Reblochon fermier cellars, tastings and shop. Saturday 9:30 cellar tours (€2, book via the Thônes tourist office) — though our Saturdays are all moving days.', href: 'https://hautesavoiemontblanc-tourisme.com/en/offers/visite-de-la-cooperative-du-reblochon-fermier-thones-en-5867525/' },
+    // Expansion sweep quick pins (verified 2026-07-26)
+    { id: 'laser-maxx', cat: 'adrenaline', em: '🔫', name: 'LaserMaxx 74 + Quiz Boxing (Épagny)', coords: [45.9427, 6.0731], blurb: 'Laser tag plus a TV-style quiz-boxing arena — a ready-made tournament night for four.', href: 'https://www.lasermaxx74.fr/horaire-et-tarif' },
+    { id: 'ereel-vr', cat: 'adrenaline', em: '🎮', name: 'E.reel VR arena (Épagny)', coords: [45.9433, 6.0738], blurb: 'Free-roam VR arena next door to the laser tag — book a slot, pick games on arrival.', href: 'https://ereel.fr/espace-vr/annecy/' },
+    { id: 'hachez-vous', cat: 'adrenaline', em: '🪓', name: 'L’Hachez-Vous axe-throwing bar (Seynod)', coords: [45.8620, 6.0675], blurb: 'Axe-throwing lanes with a bar. Beer after the axes, not before.', href: 'https://www.lancerdehache-annecy.fr/', verify: true },
+    { id: 'minigolf-imperial', cat: 'culture', em: '⛳', name: 'Mini-golf de l’Impérial (by night)', coords: [45.9046, 6.1449], blurb: 'Old-school lakeside mini-golf open to 22:00 in August — evening grudge match, then gelato.', href: 'https://www.velo-golf-annecy.com/', verify: true },
+    { id: 'cristal-spa', cat: 'water', em: '🧖', name: 'Cristal Spa (Impérial Palace)', coords: [45.9048, 6.1439], blurb: 'The grand hotel’s spa — a €130+ treatment buys pool/sauna access. The recovery-day flex.', href: 'https://www.hotel-imperial-palace.com/en/spa-access-conditions-1205' },
+    { id: 'distillerie-aravis', cat: 'food', em: '🥃', name: 'Distillerie des Aravis (La Clusaz)', coords: [45.9046, 6.4223], blurb: 'Génépi distillery tour + tasting, €6, Thu–Sat slots — bolt onto any Aravis ride or the Reblochon run.', href: 'https://www.laclusaz.com/en/details/distillerie-des-aravis/' },
+    { id: 'brasserie-caquot', cat: 'food', em: '🍺', name: 'Brasserie Caquot (Entrelacs)', coords: [45.7854, 5.9526], blurb: 'Craft brewery tour with a 4-beer tasting and boards, ~35 min away — designated driver required.', href: 'https://brasseriecaquot.fr/degustation-brasserie/', verify: true },
+    { id: 'domaine-lupin', cat: 'food', em: '🍷', name: 'Domaine Lupin — Roussette cellar (Frangy)', coords: [46.01854, 5.92576], blurb: 'Savoie’s Roussette tasted at the family domaine, by phone appointment, bottles ~€10–16.', href: 'https://www.haute-savoie-tourisme.org/commerces/producteurs-locaux/115183-domaine-lupin', verify: true },
+    { id: 'talloires-abbaye', cat: 'food', em: '🍸', name: 'Abbaye de Talloires — apéro terrace', coords: [45.84144, 6.21205], blurb: 'Drinks under the plane trees of a 17th-century lakefront abbey, 10 min south — the classy sunset move.', href: 'https://www.abbaye-talloires.com/en' },
+    { id: 'lamas-salagine', cat: 'hike', em: '🦙', name: 'Les Lamas de Salagine (Bloye)', coords: [45.81714, 5.95730], blurb: 'Walk llamas to the Crosagny ponds. Yes, really. By appointment.', href: 'https://www.lamasafran.com/', verify: true },
+    { id: 'canyon-terneze', cat: 'adrenaline', em: '🌊', name: 'Canyon de Ternèze (Bauges)', coords: [45.5664, 6.0090], blurb: 'A third canyoning option ~1 h south in the Bauges (€50) — pairs with a Pont de l’Abîme loop.', href: 'https://bauges-canyoning.com/canyoning/canyon-terneze-curienne/', verify: true },
+    { id: 'husky-morgins', cat: 'hike', em: '🐕', name: 'Summer husky cani-rando (Morgins, CH)', coords: [46.2377, 6.8581], blurb: 'Hike harnessed to a husky in the Swiss Valais, ~45 min from Les Gets. CHF 80; booking mandatory.', href: 'https://www.regiondentsdumidi.ch/en/5494304-husky-hike-17101/', verify: true },
+    { id: 'devalkart-morgins', cat: 'adrenaline', em: '🛷', name: 'Déval’kart Morgins (CH)', coords: [46.2377, 6.8581], blurb: 'Private-hire mountain karts on the Morgins slopes — CHF 150 for 5 karts/30 min. Book 24 h ahead.', href: 'https://www.regiondentsdumidi.ch/en/824907-deval-kart-9648/', verify: true },
+    { id: 'mont-caly', cat: 'hike', em: '🏔️', name: 'Mont Caly alpage — Mont Blanc panorama', coords: [46.1528, 6.6310], blurb: 'Les Gets’ balcony over Mont Blanc, with the Les Chevrelles alpage table — steep warm-up climb or short drive.', href: 'https://www.lesgets.com/details/le-mont-caly-643054-Fr/', verify: true },
     // Flagged & rediscovered (researched 26 Jul 2026)
     { id: 'tournette-closed', cat: 'hike', em: '🥾', closed: true, name: 'La Tournette (2,351 m)', coords: [45.82709, 6.28615],
       blurb: 'The queen hike of the lake — officially flagged CLOSED right now: lingering snowfields above 1,700 m, after two fatal slips in 2025. Likely to reopen once the snow melts.',
@@ -1165,6 +1514,9 @@ window.DATA = (function () {
       href: 'https://www.escalade-74.com/le-biclop/' },
     { group: 'cut', em: '⭐', name: 'Le Clos des Sens (3★) & L’Esquisse (1★)',
       reason: 'The guide PDF’s fine-dining picks. Cut by request — this trip runs on markets, guinguettes and fondue, not tasting menus.' },
+    { group: 'cut', em: '🎣', name: 'Dawn fishing charter (Rando-Pêche)',
+      reason: 'Real and bookable (~€250 pp/day with a pro guide, pike and lake trout at first light) — left off the main list as a pricey niche. Say the word if someone secretly fishes.',
+      href: 'https://www.rando-peche.com/guidages-tarifs/guidage-bateau/' },
     { group: 'season', em: '🚴', name: 'La Résistance (gravel race, Talloires)',
       reason: 'A brilliant event — in June. It will be long over by the time we arrive in August, so it’s not on the map.' },
   ];
@@ -1198,7 +1550,7 @@ window.DATA = (function () {
   ];
 
   return {
-    VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT,
+    VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT, PEOPLE,
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
     EVENTS, TRANSPORT_GUIDE, WEATHER,

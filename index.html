@@ -27,7 +27,7 @@
   <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin />
 
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=14" />
   <!-- Leaflet is loaded lazily only when the Map screen opens, so a slow or
        failed CDN can never block the rest of the app from booting. -->
 </head>
@@ -39,17 +39,17 @@
       <button class="ab-back" id="ab-back" type="button" aria-label="Go back">‹</button>
       <span class="ab-brand-dot" aria-hidden="true"></span>
       <h1 class="ab-title" id="ab-title">Annecy 2026</h1>
-      <a class="ab-action" id="ab-action" href="#/saved" aria-label="Saved plans" hidden>★</a>
+      <a class="ab-action" id="ab-action" href="#/ideas" aria-label="Saved plans" hidden>★</a>
     </header>
 
     <main class="screen" id="screen" tabindex="-1"><!-- rendered by app.js --></main>
 
     <nav class="bottomnav" id="bottomnav" aria-label="Primary">
-      <a href="#/today"    data-nav="today"><span class="ico" aria-hidden="true">📍</span>Today</a>
-      <a href="#/discover" data-nav="discover"><span class="ico" aria-hidden="true">💡</span>Discover</a>
-      <a href="#/plan"     data-nav="plan"><span class="ico" aria-hidden="true">🗓️</span>Plan</a>
-      <a href="#/map"      data-nav="map"><span class="ico" aria-hidden="true">🗺️</span>Map</a>
-      <a href="#/bike"     data-nav="bike"><span class="ico" aria-hidden="true">🚴</span>Bike</a>
+      <a href="#/today"      data-nav="today"><span class="ico" aria-hidden="true">📍</span>Today</a>
+      <a href="#/activities" data-nav="activities"><span class="ico" aria-hidden="true">🧭</span>Activities</a>
+      <a href="#/ideas"      data-nav="ideas"><span class="ico" aria-hidden="true">❤️</span>Ideas</a>
+      <a href="#/trip"       data-nav="trip"><span class="ico" aria-hidden="true">🧳</span>Trip</a>
+      <a href="#/map"        data-nav="map"><span class="ico" aria-hidden="true">🗺️</span>Map</a>
     </nav>
   </div>
 
@@ -58,10 +58,11 @@
   <div id="sw-toast" class="sw-toast" role="status" hidden>
     <span>New version available.</span>
     <button type="button" id="sw-reload">Refresh</button>
+    <button type="button" id="sw-dismiss" aria-label="Dismiss update notice">✕</button>
   </div>
   <div id="live" class="sr-only" aria-live="polite"></div>
 
-  <script src="data.js?v=12"></script>
-  <script src="app.js?v=12"></script>
+  <script src="data.js?v=14"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>
