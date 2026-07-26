@@ -1,4 +1,5 @@
 ---
+name: trip-site-product
 description: Use when changing the Annecy 2026 trip site product flow, navigation, activity discovery, saved-board behavior, logistics, or major trip-guide content.
 ---
 
@@ -38,8 +39,9 @@ Phase 1 should focus on the bones:
 - Simplify the information architecture.
 - Make Activities the main exploration surface.
 - Make Trip/logistics obvious but quiet.
-- Turn Saved into a Pinterest-style inspiration board.
-- Refocus Build a Day as a relaxed chooser, likely "What should we do today?"
+- Turn Saved/Ideas into a Pinterest-style inspiration board where each person can
+  save favorite activities.
+- Remove or absorb Build a Day. The site does not need a day-planning engine.
 - Preserve the current warm, personal voice.
 
 Major mobile polish, map bottom sheets/clustering, weather integrations, and a
@@ -60,8 +62,17 @@ wait for approval. Include what happens to:
 - Map
 - Bike
 - Logistics
+- Existing Build a Day surfaces
 
-The likely target bottom nav is:
+Possible target bottom nav options are:
+
+- Today
+- Activities
+- Ideas
+- Trip
+- Map
+
+or:
 
 - Today
 - Activities
@@ -94,8 +105,11 @@ Avoid robot-speak:
 Before finishing product work:
 
 - Confirm the change supports browsing/reference, not overplanning.
+- Confirm Build a Day was removed or absorbed rather than renamed into another
+  planning engine.
 - Confirm logistics are easier to find if they were touched.
-- Confirm Saved still feels like bookmarking/inspiration, not a spreadsheet.
+- Confirm Ideas/Saved still feels like bookmarking/inspiration, not a
+  spreadsheet.
 - Confirm phase 1 scope was respected.
 - Run the privacy-check skill if trip data, logistics, links, or content from
   confirmations were touched.

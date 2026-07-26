@@ -54,11 +54,11 @@ that may need to be merged or clarified, not blindly preserved as separate pages
 - Do not hide most activities behind rigid day/leg filters before the trip.
   Everything is close enough that grouping by category, mood, region/place,
   effort, must-book, rain/rest day, or easy group option is usually better.
-- Refocus Build a Day into a relaxed chooser, ideally named something like
-  "What should we do today?" It should suggest good loose options, not enforce an
-  itinerary.
-- Make Saved feel like a Pinterest-style inspiration board. Simple Maybe /
-  Booked / Done status is fine; avoid spreadsheet-like comparison or voting
+- Remove or absorb Build a Day. The site does not need a planning engine; useful
+  activity logic/data should move into Activities or Ideas where appropriate.
+- Make Saved/Ideas feel like a Pinterest-style inspiration board where each
+  person can save favorite activities. Simple Maybe / Booked / Done status is
+  fine only if it stays lightweight; avoid spreadsheet-like comparison or voting
   systems.
 - Keep regional character, cool history, food, lake, bike, mountain, and village
   context. Exploring and engaging with the place should feel fun.

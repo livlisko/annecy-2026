@@ -1,4 +1,5 @@
 ---
+name: privacy-check
 description: Use before finishing changes that touch trip logistics, data files, links, copied confirmations, private docs, or any content that may expose sensitive personal/travel information.
 ---
 
