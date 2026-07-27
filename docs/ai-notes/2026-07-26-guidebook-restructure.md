@@ -17,3 +17,11 @@
 
 ## Next phase (parked)
 Mobile map polish (clustering/bottom sheet), any visual redesign, weather integration — all explicitly out of scope this round.
+
+## Addendum — editorial redesign (same day, PR #8)
+- Root route = new `Views.home` (magazine cover / contents). Nav: Home · Activities · Ideas · Trip · Map (SVG line icons, no emoji). Today demoted to contextual page.
+- Palette B "cooler sage/pine": paper `#f2eee4`, accent `#2b4a4f`, sage `#7d8a6a`, muted `#6e675a` (AA-checked). v15 token-override layer at end of styles.css — beware: earlier high-specificity rules (e.g. `.action-tile:nth-child(n)`) can beat token overrides; v15.1 block patches those.
+- Emoji: removed from ALL UI chrome except the map pin system (deliberate, user-requested wayfinding).
+- Weather: fully removed (D.WEATHER gone) per owner — "that's on our phones by default". The rainy-day facet stays; safety-relevant `weather.note` folded into detail "Logistics & safety" as Conditions.
+- Christian → **Chip** everywhere (PEOPLE, boards + a26.person localStorage migrations; van contract line keeps legal name).
+- Known gap for next phase: 10 activities have no photo (calm sage placeholder currently) — vitam-aquapark, karting-rumilly, tamie-abbey, jardins-secrets, fantasticable, avokart, aquariaz, rafting-dranse, nautichill-montriond, pont-du-diable.

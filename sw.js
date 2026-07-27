@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v13';
+const VERSION = 'a26-v15';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -25,6 +25,13 @@ const CORE_ASSETS = [
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon.png',
   './assets/wiki/hero-lake.jpg',
+  './assets/wiki/forclaz.jpg',
+  './assets/wiki/lake-swim.jpg',
+  './assets/wiki/duingt.jpg',
+  './assets/wiki/lake-beach.jpg',
+  './assets/wiki/annecy-market.jpg',
+  './assets/wiki/glieres.jpg',
+  './assets/wiki/lake-sunset.jpg',
   './assets/wiki/les-gets-mtb.jpg',
   './assets/wiki/veyrier.jpg',
   './assets/orientation/orientation_relief_card.jpg'

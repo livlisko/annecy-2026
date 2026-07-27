@@ -173,17 +173,17 @@ window.DATA = (function () {
     car: {
       name: 'Full-size van — Renault Kangoo Grand or similar, automatic', conf: 'National #16948•••••',
       pickup: 'Wed 12 Aug, 09:30 · Geneva Airport (GVA)', ret: 'Sat 29 Aug, 09:30 · Geneva Airport (GVA)',
-      drivers: 'Liv · Christian · Andrew · Ian (all on the contract)',
+      drivers: 'Liv · Chip (Christian on the contract) · Andrew · Ian',
       includes: 'Damage waiver · unlimited mileage · ≈ CHF 1,860 total',
       find: 'Stay on the Swiss side of the airport → rental counter → shuttle to the P51 car park → finish at the kiosk. Desk open 6:30–23:30.'
     },
     privacyNote: 'Full confirmation codes are in your email — kept off this public page on purpose.',
-    flightsNote: 'Christian & Ian — travel details coming (they owe us their bookings 😄). Both are already named drivers on the van.',
+    flightsNote: 'Chip & Ian — travel details coming (they owe us their bookings). Both are already named drivers on the van.',
     departure: 'Departure Saturday (29 Aug) is tight: Andrew flies 09:20 (at GVA by ~07:15), the van is due back 09:30, Liv flies 11:40 — one early run leaving Veyrier ~06:15. Arrange early checkout + deposit handback with Casa Elisa in advance (their normal window opens 08:30).'
   };
 
   // The four of us — used for the per-person Ideas boards (saved on each phone).
-  const PEOPLE = ['Olivia', 'Andrew', 'Christian', 'Ian'];
+  const PEOPLE = ['Olivia', 'Andrew', 'Chip', 'Ian'];
 
   /* ---------- AREAS (the mental map of the lake and its edges) -------- */
   const AREAS = [
@@ -1302,25 +1302,6 @@ window.DATA = (function () {
     src: 'mobil-ete'
   };
 
-  /* ---------- WEATHER (links + suitability legend, no live data) ------ */
-  const WEATHER = {
-    note: 'This app never invents live conditions. On the trip, open these official forecasts each morning — the August risks here are afternoon thunderstorms in the mountains and a thermal breeze that builds on the lake after lunch.',
-    links: [
-      { label: 'Météo-France — Haute-Savoie (towns, hourly)', src: 'meteo' },
-      { label: 'Météo-France Montagne — Alpes du Nord (storm timing for cols & ridges)', src: 'meteo-montagne' },
-      { label: 'Vigilance Météo-France (storm & heat alerts)', src: 'vigilance' },
-      { label: 'Windfinder — Veyrier-du-Lac (lake wind for paddling & sailing)', src: 'windfinder' }
-    ],
-    questions: [
-      { q: 'Clear morning?', a: 'Cols, Semnoz, the Glières gravel, Mont Veyrier, a paddle before the breeze.' },
-      { q: 'Storms after 2 pm?', a: 'Stay low: lake swims, the greenway, Annecy market, or be down off any ridge before lunch.' },
-      { q: 'Raining?', a: 'Gorges du Fier, the animation museum, Les Halles du Haras, the Roc de Chère woods, a cheese-cave tasting.' },
-      { q: 'Heat wave?', a: 'Shaded and cool: the gorge walkway, Cascade d’Angon, early-morning rides, late swims and apéro.' },
-      { q: 'Needs calm water / clear air?', a: 'SUP and sailing want a calm morning; paragliding and the big view days want a settled, clear sky.' }
-    ]
-  };
-
-  /* ---------- DISCOVER content (kept, superlative corrected) ---------- */
   const STORY = [
     { emoji: '🧊', title: 'Carved by ice', text: 'The lake sits in a trough that Ice-Age glaciers scooped out, then filled as they melted. The walls of peaks around it are what the ice left behind.' },
     { emoji: '💧', title: 'One of the purest lakes in Europe', text: 'By the 1960s it was badly polluted. The towns around the shore built one of Europe’s first lake-wide sewer systems and brought it back — the tourism office calls it “l’un des plus purs d’Europe”, and it’s fiercely protected.' },
@@ -1553,7 +1534,7 @@ window.DATA = (function () {
     VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT, PEOPLE,
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
-    EVENTS, TRANSPORT_GUIDE, WEATHER,
+    EVENTS, TRANSPORT_GUIDE,
     STORY, HISTORY, DISCOVERIES, ZONES,
     CATEGORIES, CATEGORY_BY_ID,
     MAP_POIS, ARCHIVE, BUILD, FEATURED, LESGETS_TOP3, LAKE_EXCURSIONS, CREDITS
