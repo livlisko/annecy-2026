@@ -67,12 +67,15 @@
   /* ---------- ideas boards / notes (this-phone-only localStorage) ---- */
   function jget(k, def) { try { return JSON.parse(localStorage.getItem(k)) || def; } catch (e) { return def; } }
   function jset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  const PEOPLE = D.PEOPLE || ['Olivia', 'Andrew', 'Christian', 'Ian'];
+  const PEOPLE = D.PEOPLE || ['Olivia', 'Andrew', 'Chip', 'Ian'];
   function activePerson() { const p = localStorage.getItem('a26.person'); return PEOPLE.includes(p) ? p : PEOPLE[0]; }
   function setPerson(p) { if (PEOPLE.includes(p)) localStorage.setItem('a26.person', p); }
   const Ideas = {
     boards() {
       // one-time migration from the old single shortlist → first person's board
+      if (localStorage.getItem('a26.person') === 'Christian') localStorage.setItem('a26.person', 'Chip');
+      const all0 = jget('a26.ideas', null);
+      if (all0 && all0.Christian && !all0.Chip) { all0.Chip = all0.Christian; delete all0.Christian; jset('a26.ideas', all0); }
       const old = jget('a26.saved', null);
       if (old && !localStorage.getItem('a26.ideas')) { jset('a26.ideas', { [PEOPLE[0]]: old }); localStorage.removeItem('a26.saved'); localStorage.removeItem('a26.compare'); }
       return jget('a26.ideas', {});
@@ -112,9 +115,9 @@
   function upcomingEvents(dt, baseId) { return D.EVENTS.filter((e) => e.end >= dt && (e.base === baseId || e.base === 'both')).sort((a, b) => a.start.localeCompare(b.start)); }
 
   /* =========================== chrome =============================== */
-  const PRIMARY = ['today', 'activities', 'ideas', 'trip', 'map'];
-  const NAV_FOR = { today: 'today', activities: 'activities', plan: 'activities', bike: 'activities', ideas: 'ideas', trip: 'trip', event: 'trip', map: 'map', areas: 'map', archive: 'map' };
-  const TITLES = { today: 'Today', activities: 'Activities', ideas: 'Ideas', bike: 'Cycling', map: 'Map', trip: 'Trip', areas: 'Areas', archive: 'The cut list' };
+  const PRIMARY = ['home', 'activities', 'ideas', 'trip', 'map'];
+  const NAV_FOR = { home: 'home', today: 'home', activities: 'activities', plan: 'activities', bike: 'activities', ideas: 'ideas', trip: 'trip', event: 'trip', map: 'map', areas: 'map', archive: 'map' };
+  const TITLES = { home: 'Annecy & Les Gets', today: 'Today', activities: 'Activities', ideas: 'Ideas', bike: 'Cycling', map: 'Map', trip: 'Trip', areas: 'Areas', archive: 'The cut list' };
 
   function setChrome(route) {
     const isPrimary = PRIMARY.includes(route.name) && route.parts.length === 0;
@@ -150,10 +153,10 @@
     return `<p class="source-line">${verify} Source: <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.type)} ↗</a> · checked ${esc(s.on || D.VERIFIED)}</p>`;
   }
 
-  /* ---------- save / status controls (♥ = idea for the active person) */
+  /* ---------- save / status controls (Save = idea for the active person) */
   function saveBtn(id, cls) {
     const st = Ideas.status(id); const p = activePerson();
-    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${st ? `On ${esc(p)}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${esc(p)}’s ideas`}">${st ? '♥' : '♡'}<span class="save-txt">${st ? STATUS_LABEL[st] : 'Idea'}</span></button>`;
+    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${st ? `On ${esc(p)}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${esc(p)}’s ideas`}">${st ? `Saved · ${esc(p)}` : 'Save'}</button>`;
   }
   // event delegation for save buttons (bound once)
   document.addEventListener('click', (e) => {
@@ -162,37 +165,21 @@
     const id = b.dataset.save; const st = Ideas.toggle(id); const p = activePerson();
     b.classList.toggle('on', !!st); b.setAttribute('aria-pressed', String(!!st));
     b.setAttribute('aria-label', st ? `On ${p}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${p}’s ideas`);
-    b.innerHTML = (st ? '♥' : '♡') + `<span class="save-txt">${st ? STATUS_LABEL[st] : 'Idea'}</span>`;
+    b.textContent = st ? `Saved · ${p}` : 'Save';
     announce(st ? `Added to ${p}’s ideas` : `Removed from ${p}’s ideas`);
     // screens that show saved state beyond the heart itself must repaint
     if (screenEl.querySelector('.status-picker, .person-row')) render();
   });
 
   /* ---------- activity card ----------------------------------------- */
-  function actTags(a) {
-    const base = activeBase(); const dd = travelFromBase(a, base);
-    const tags = [];
-    if (a.effort) tags.push(`<span class="pc-tag">${EFFORT_LABEL[a.effort]}</span>`);
-    if (a.duration) tags.push(`<span class="pc-tag">${DUR_LABEL[a.duration]}</span>`);
-    if (dd) tags.push(`<span class="pc-tag">${dd.approx ? '≈' : ''}${dd.min}′ ${esc(dd.mode)}</span>`);
-    if (a.booking === 'required') tags.push(`<span class="pc-tag warn">Book ahead</span>`);
-    else if (a.booking === 'recommended') tags.push(`<span class="pc-tag">Booking advised</span>`);
-    if (a.verifyBeforeGo) tags.push(`<span class="pc-tag verify">Verify</span>`);
-    return tags.join('');
-  }
-  function activityCard(a, opts) {
-    opts = opts || {};
-    const fit = opts.fit ? `<div class="fit-row"><span class="fit-badge ${opts.fit === 'Best fit' ? 'best' : 'close'}">${esc(opts.fit)}</span>${opts.relaxed ? `<span class="fit-relaxed">relaxed ${esc(opts.relaxed)}</span>` : ''}</div>` : '';
-    const reasons = opts.reasons && opts.reasons.length ? `<ul class="fit-why">${opts.reasons.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : '';
+  function activityCard(a) {
     const sub = a.subtype ? `<span class="pc-sub">${esc(a.subtype)}</span>` : '';
     return `<article class="plan-card">
-      ${fit}
       <a class="pc-hit" href="#/plan/${esc(a.id)}">
         <div class="pc-top"><h3>${esc(a.title)}</h3>${sub}</div>
         <p class="pc-desc">${esc(a.summary)}</p>
       </a>
-      ${reasons}
-      <div class="pc-meta">${actTags(a)}</div>
+      <p class="pin-meta">${esc(pinMeta(a))}</p>
       <div class="pc-actions">${saveBtn(a.id)}<a class="pc-open" href="#/plan/${esc(a.id)}">Details →</a></div>
     </article>`;
   }
@@ -225,7 +212,64 @@
   /* =========================== VIEWS ================================ */
   const Views = {};
 
-  /* ---------- TODAY (home dashboard) -------------------------------- */
+  /* ---------- HOME (the front cover + table of contents) ------------ */
+  Views.home = function () {
+    const real = parisToday();
+    const inTrip = real >= D.TRIP.window.start && real <= D.TRIP.window.end;
+    const post = isPostTrip();
+    const live = inTrip
+      ? `<a class="hm-live" href="#/today"><span>Day ${dayNumber(real)} · ${esc(stayForDate(real).village)}</span><span class="hm-go">Open Today →</span></a>`
+      : '';
+    const coverTail = inTrip ? `Day ${dayNumber(real)} of 18` : (post ? 'Well, that happened' : `${daysUntilTrip()} days away`);
+    const taster = ['forclaz-climb-lake', 'angon-apero', 'semnoz-picnic', 'annecy-market']
+      .map((id) => D.ACT_BY_ID[id]).filter(Boolean);
+    const tasterCards = (taster.length >= 4 ? taster : D.FEATURED.map((id) => D.ACT_BY_ID[id]).filter((a) => a && actCover(a).photo).slice(0, 4))
+      .map(pinCard).join('');
+    return `
+      ${live}
+      <header class="hm-cover">
+        <img src="assets/wiki/hero-lake.jpg" alt="Lake Annecy from the Forclaz" width="1200" height="800" fetchpriority="high" />
+        <div class="hm-cover-txt">
+          <p class="hm-eyebrow">Haute-Savoie · ${esc(D.TRIP.datesLabel)}</p>
+          <h2 class="hm-title">Annecy<br><em>&amp; Les Gets</em></h2>
+          <p class="hm-dek">Four of us, two weeks, one impossibly blue lake and a great many mountains.</p>
+          <p class="hm-meta">The lake · The cols · The cheese · ${esc(coverTail)}</p>
+        </div>
+      </header>
+
+      <section class="hm-intro">
+        <p class="hm-lead">A little guide to <strong>where we’re going</strong> — the rides, the swims, the villages and the history around the lake, plus everything we’ve actually booked.</p>
+        <p class="hm-sub">Not a schedule. A place to get excited, save what you fancy, and find the address when you need it.</p>
+      </section>
+
+      <div class="hm-lab"><h3>Where to start</h3><span class="hm-eyebrow">Contents</span></div>
+      <nav class="hm-index" aria-label="Site contents">
+        <a class="hm-ix" href="#/activities"><span class="hm-no">01</span><img src="assets/wiki/forclaz.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Activities</strong><span>Everything to do — rides, water, walks, food, history</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/ideas"><span class="hm-no">02</span><img src="assets/wiki/lake-swim.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Ideas</strong><span>Each of us saves the ones we like</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/trip"><span class="hm-no">03</span><img src="assets/wiki/veyrier.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Trip</strong><span>Stays, flights, the van — the source of truth</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/map"><span class="hm-no">04</span><img src="assets/wiki/duingt.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Map</strong><span>All of it, pinned around the lake</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+      </nav>
+
+      <section class="hm-place">
+        <div class="hm-lab"><h3>A sense of the place</h3><span class="hm-eyebrow">Read a little</span></div>
+        <div class="hm-scroll">
+          <a class="hm-pc" href="#/activities?cat=water"><img src="assets/wiki/lake-beach.jpg" alt="" loading="lazy" /><strong>The lake</strong><span>Turquoise, swimmable, ringed by beaches and a flat greenway.</span></a>
+          <a class="hm-pc" href="#/bike"><img src="assets/wiki/les-gets-mtb.jpg" alt="" loading="lazy" /><strong>The mountains</strong><span>Les Gets bike park, the cols, and the Aravis behind them.</span></a>
+          <a class="hm-pc" href="#/activities?cat=food"><img src="assets/wiki/annecy-market.jpg" alt="" loading="lazy" /><strong>The table</strong><span>Reblochon, tartiflette, lake fish and old-town markets.</span></a>
+          <a class="hm-pc" href="#/plan/glieres-walk"><img src="assets/wiki/glieres.jpg" alt="" loading="lazy" /><strong>The history</strong><span>The Glières plateau and the Resistance in these hills.</span></a>
+        </div>
+      </section>
+
+      <section class="hm-taster">
+        <div class="hm-lab"><h3>A few to whet the appetite</h3><a class="hm-eyebrow" href="#/activities">All ${D.ACTIVITIES.length} →</a></div>
+        <div class="pin-grid hm-pad">${tasterCards}</div>
+      </section>
+
+      ${!inTrip ? `<a class="hm-today" href="#/today"><strong>During the trip → open Today</strong><span>Where you’re staying, what’s on, and directions home.</span></a>` : ''}
+    `;
+  };
+
+  /* ---------- TODAY (the during-trip page) -------------------------- */
   function daysUntilTrip() { const t = parisToday(); return Math.max(0, Math.round((Date.UTC(...D.TRIP.window.start.split('-').map((x, i) => i === 1 ? x - 1 : +x)) - Date.UTC(...t.split('-').map((x, i) => i === 1 ? x - 1 : +x))) / 86400000)); }
   Views.today = function () {
     const dt = activeDate(); const stay = activeStay(); const base = stay.baseId; const co = changeoverOn(dt);
@@ -240,13 +284,13 @@
 
     // Gentle nudges, only on the days that genuinely need them.
     const notes = [];
-    if (isPreTrip()) notes.push(`<div class="note-box pre">🗓️ <strong>Trip starts ${esc(prettyDay(D.TRIP.window.start))}</strong> — ${daysUntilTrip()} days away. You’re previewing Day 1; flip through days with ‹ › above, or <a href="#/trip">see the whole trip →</a></div>`);
-    if (dt === D.TRIP.window.start && !isPreTrip()) notes.push(`<div class="note-box">🛬 <strong>Arrival day.</strong> Van pickup: ${esc(T.car.pickup)}. ${esc(T.car.find)} <a href="#/trip">Trip details →</a></div>`);
-    if (co) notes.push(`<div class="note-box warn">🔁 <strong>Changeover day.</strong> Out of ${esc(co.out.name)} (${esc(co.out.checkout)}), into ${esc(co.inn.name)} (${esc(co.inn.checkin)}). ${dt === '2026-08-22' ? 'Also the Les Gets World-Cup Downhill day — expect crowds if you go near Les Gets.' : ''}</div>`);
+    if (isPreTrip()) notes.push(`<div class="note-box pre"><strong>Trip starts ${esc(prettyDay(D.TRIP.window.start))}</strong> — ${daysUntilTrip()} days away. You’re previewing Day 1; flip through days with ‹ › above, or <a href="#/trip">see the whole trip →</a></div>`);
+    if (dt === D.TRIP.window.start && !isPreTrip()) notes.push(`<div class="note-box"><strong>Arrival day.</strong> Van pickup: ${esc(T.car.pickup)}. ${esc(T.car.find)} <a href="#/trip">Trip details →</a></div>`);
+    if (co) notes.push(`<div class="note-box warn"><strong>Changeover day.</strong> Out of ${esc(co.out.name)} (${esc(co.out.checkout)}), into ${esc(co.inn.name)} (${esc(co.inn.checkin)}). ${dt === '2026-08-22' ? 'Also the Les Gets World-Cup Downhill day — expect crowds if you go near Les Gets.' : ''}</div>`);
     const coTomorrow = changeoverOn(addDays(dt, 1));
-    if (coTomorrow && !co) notes.push(`<div class="note-box">🧳 <strong>Heads-up:</strong> tomorrow is changeover — out of ${esc(coTomorrow.out.name)} (${esc(coTomorrow.out.checkout)}). Worth packing tonight.</div>`);
-    if (dt === D.TRIP.window.end) notes.push(`<div class="note-box warn">⏰ ${esc(T.departure)} <a href="#/trip">Full plan →</a></div>`);
-    else if (addDays(dt, 1) === D.TRIP.window.end) notes.push(`<div class="note-box">⏰ <strong>Heads-up:</strong> tomorrow is the early departure (leave ~06:15). Sort packing + the Casa Elisa deposit today.</div>`);
+    if (coTomorrow && !co) notes.push(`<div class="note-box"><strong>Heads-up:</strong> tomorrow is changeover — out of ${esc(coTomorrow.out.name)} (${esc(coTomorrow.out.checkout)}). Worth packing tonight.</div>`);
+    if (dt === D.TRIP.window.end) notes.push(`<div class="note-box warn"><strong>Departure day.</strong> ${esc(T.departure)} <a href="#/trip">Full plan →</a></div>`);
+    else if (addDays(dt, 1) === D.TRIP.window.end) notes.push(`<div class="note-box"><strong>Heads-up:</strong> tomorrow is the early departure (leave ~06:15). Sort packing + the Casa Elisa deposit today.</div>`);
 
     return `
       ${contextBar()}
@@ -260,7 +304,7 @@
           <div class="ac-tags">${stay.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
         </details>
         <div class="actions hero-actions">
-          <a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stay.address)}" target="_blank" rel="noopener">🧭 Directions home ↗</a>
+          <a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(stay.address)}" target="_blank" rel="noopener">Directions home ↗</a>
           <a class="btn ghost" href="#/trip">Trip &amp; logistics</a>
         </div>
       </section>
@@ -268,19 +312,15 @@
       ${notes.join('')}
 
       <div class="action-row">
-        <a class="action-tile" href="#/activities"><span class="at-em" aria-hidden="true">🧭</span><span>Activities</span></a>
-        <a class="action-tile" href="#/bike"><span class="at-em" aria-hidden="true">🚴</span><span>Cycling</span></a>
-        <a class="action-tile" href="#/activities?f=book"><span class="at-em" aria-hidden="true">📌</span><span>Must book</span></a>
+        <a class="action-tile" href="#/activities">Activities</a>
+        <a class="action-tile" href="#/bike">Cycling</a>
+        <a class="action-tile" href="#/activities?f=book">Must book</a>
       </div>
 
       <div class="section-head"><h2>Today &amp; next up</h2></div>
       ${todays.length ? `<p class="intro">On today near you:</p>` + todays.map(eventRow).join('') : `<p class="intro">Nothing fixed today — a blank canvas. ${upcoming.length ? 'Coming up:' : ''}</p>`}
       ${upcoming.map(eventRow).join('')}
       <a class="see-all block" href="#/trip">See the whole trip, day by day →</a>
-
-      <div class="section-head"><h2>Weather-led</h2><a class="see-all" href="#/activities?f=rain">More</a></div>
-      <div class="weather-quick">${D.WEATHER.questions.slice(0, 4).map((q) => `<div class="wq"><strong>${esc(q.q)}</strong><span>${esc(q.a)}</span></div>`).join('')}</div>
-      <p class="intro"><a href="${esc(D.SOURCES[D.WEATHER.links[0].src].url)}" target="_blank" rel="noopener">Open the forecast ↗</a> — this app never fakes live weather.</p>
 
       ${ideasBlock}
     `;
@@ -301,11 +341,11 @@
      Everything is always visible — no day/leg gating; filters are
      light moods, not machinery. -------------------------------------- */
   const FACETS = [
-    { id: 'chill', label: '🛋️ Chill', test: (a) => ['recovery', 'easy'].includes(a.effort) },
-    { id: 'big', label: '🔥 Big day out', test: (a) => a.effort === 'big' || a.duration === 'full' },
-    { id: 'book', label: '📌 Must book', test: (a) => a.booking === 'required' || a.booking === 'recommended' },
-    { id: 'rain', label: '🌧️ Rain-proof', test: (a) => (a.weather && (a.weather.rain === 'good' || a.weather.rain === 'ok')) || (a.themes || []).includes('rainy') },
-    { id: 'group', label: '🎉 Easy group win', test: (a) => a.group === 'all' }
+    { id: 'chill', label: 'Chill', test: (a) => ['recovery', 'easy'].includes(a.effort) },
+    { id: 'big', label: 'Big day out', test: (a) => a.effort === 'big' || a.duration === 'full' },
+    { id: 'book', label: 'Must book', test: (a) => a.booking === 'required' || a.booking === 'recommended' },
+    { id: 'rain', label: 'Rainy day', test: (a) => (a.weather && (a.weather.rain === 'good' || a.weather.rain === 'ok')) || (a.themes || []).includes('rainy') },
+    { id: 'group', label: 'Easy group win', test: (a) => a.group === 'all' }
   ];
   let actState = { cat: 'all', f: null, q: '' };
   function readActQuery(route) {
@@ -323,36 +363,36 @@
     if (actState.q) { const q = actState.q.trim().toLowerCase(); if (q) { const hay = [a.title, a.summary, a.subtype, a.cat, (a.themes || []).join(' '), (D.AREA_BY_ID[a.areaId] || {}).name].join(' ').toLowerCase(); if (!hay.includes(q)) return false; } }
     return true;
   }
-  function pinTags(a) {
-    const t = [];
-    if (a.effort) t.push([EFFORT_LABEL[a.effort], '']);
-    if (a.duration) t.push([DUR_LABEL[a.duration], '']);
-    if (a.booking === 'required') t.push(['Book ahead', ' warn']);
-    else if (a.booking === 'recommended') t.push(['Booking advised', '']);
-    if (a.verifyBeforeGo) t.push(['Verify', ' verify']);
-    return t.map(([x, cls]) => `<span class="pc-tag${cls}">${esc(x)}</span>`).join('');
+  function pinMeta(a) {
+    const bits = [CAT_LABEL[a.cat], EFFORT_LABEL[a.effort], DUR_LABEL[a.duration]].filter(Boolean);
+    if (a.booking === 'required') bits.push('Must book');
+    else if (a.booking === 'recommended') bits.push('Book ahead');
+    if (a.verifyBeforeGo) bits.push('Verify');
+    return bits.join(' · ');
   }
   function pinCard(a) {
-    const legTag = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets leg</span>` : '';
+    const img = actCover(a); const hasPhoto = !!(img && img.photo);
+    const leg = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets</span>` : '';
     return `<article class="pin-card">
       <a class="pin-hit" href="#/plan/${esc(a.id)}">
-        <div class="pin-img">${cover(actCover(a), { alt: '' })}${legTag}</div>
+        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="" loading="lazy" decoding="async" />${leg}</div>` : ''}
         <h3>${esc(a.title)}</h3>
-        <p>${esc(a.summary)}</p>
+        <p class="pin-meta">${esc(pinMeta(a))}${!hasPhoto && a.base === 'lesgets' ? ' · Les Gets leg' : ''}</p>
+        <p class="pin-sum">${esc(a.summary)}</p>
       </a>
-      <div class="pin-foot"><span class="pin-tags">${pinTags(a)}</span>${saveBtn(a.id)}</div>
+      <div class="pin-foot">${saveBtn(a.id)}</div>
     </article>`;
   }
   Views.activities = function (route) {
     readActQuery(route);
     const worlds = D.CATEGORIES.map((c) => `<button type="button" class="world-card wc-btn" data-actcat="${esc(c.id)}" aria-pressed="${actState.cat === c.id}"><div class="world-cover">${cover(c.media, { tint: c.tint, emoji: c.emoji, label: c.title, alt: c.title })}</div><span class="world-body"><span class="wc-t">${esc(c.title)}</span><span class="wc-p">${esc(c.vibe)}</span></span></button>`).join('');
     const facetChips = FACETS.map((f) => `<button class="chip facet" data-actfacet="${f.id}" aria-pressed="${actState.f === f.id}">${esc(f.label)}</button>`).join('');
-    const disc = D.DISCOVERIES.map((d) => `<a class="disc-card" href="${esc(d.route)}"><span class="disc-em" aria-hidden="true">${d.emoji}</span><strong>${esc(d.title)}</strong><span class="disc-text">${esc(d.text)}</span><span class="disc-go">Show me →</span></a>`).join('');
-    const story = (arr) => arr.map((s) => `<div class="story-item"><span class="story-em" aria-hidden="true">${s.emoji}</span><div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`).join('');
+    const disc = D.DISCOVERIES.map((d) => `<a class="disc-card" href="${esc(d.route)}"><strong>${esc(d.title)}</strong><span class="disc-text">${esc(d.text)}</span><span class="disc-go">Show me →</span></a>`).join('');
+    const story = (arr) => arr.map((s) => `<div class="story-item"><div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`).join('');
     return `
       <div class="detail-hero" style="min-height:150px">${cover({ photo: 'assets/wiki/lake-sunset.jpg' }, { alt: 'Sunset over the lake', eager: true, cls: 'cover-fill' })}<div class="dh-inner"><div class="dh-zone">The guidebook</div><h2 class="dh-h1">Everything we could do</h2></div></div>
-      <p class="detail-lede">All of it, all the time — nothing hidden by dates. Tap ♡ to pin anything to <strong>${esc(activePerson())}’s</strong> ideas board.</p>
-      <a class="bike-banner" href="#/bike"><span class="bb-em" aria-hidden="true">🚴</span><span><strong>Cycling HQ</strong> — cols, gravel, bike parks, rentals &amp; races</span><span class="bb-go" aria-hidden="true">→</span></a>
+      <p class="detail-lede">All of it, all the time — nothing hidden by dates. Tap Save to pin anything to <strong>${esc(activePerson())}’s</strong> ideas board.</p>
+      <a class="bike-banner" href="#/bike"><span><strong>Cycling HQ</strong> — cols, gravel, bike parks, rentals &amp; races</span><span class="bb-go" aria-hidden="true">→</span></a>
       <input class="search-input" id="act-q" type="search" value="${esc(actState.q)}" placeholder="Filter: canyoning, market, Semnoz…" aria-label="Filter activities" autocomplete="off">
       <div class="chips-row facet-row">${facetChips}</div>
       <div class="section-head"><h2>Worlds</h2><button class="see-all link-btn" data-actcat="all" ${actState.cat === 'all' ? 'hidden' : ''}>✕ Clear world</button></div>
@@ -360,7 +400,7 @@
       <div class="section-head"><h2>All ideas</h2><span class="see-all" id="act-count"></span></div>
       <div class="pin-grid" id="act-grid"></div>
       <div class="section-head"><h2>Stories &amp; background</h2></div>
-      <button class="btn block" id="surprise" type="button">🎲 Surprise me — 3 ideas</button>
+      <button class="btn block" id="surprise" type="button">Surprise me — three ideas</button>
       <div id="surprise-out"></div>
       <div class="section-head"><h2>You might not know you can…</h2></div>
       <div class="h-scroll">${disc}</div>
@@ -368,7 +408,7 @@
       <div class="story">${story(D.STORY)}</div>
       <div class="section-head"><h2>The war in these mountains</h2></div>
       <div class="story">${story(D.HISTORY)}</div>
-      <div class="actions" style="margin-top:.8rem"><a class="btn" href="#/plan/glieres-walk">🕊️ Go stand where it happened</a><a class="btn ghost" href="#/areas">All the places, one by one →</a></div>
+      <div class="actions" style="margin-top:.8rem"><a class="btn" href="#/plan/glieres-walk">Go stand where it happened</a><a class="btn ghost" href="#/areas">All the places, one by one →</a></div>
       ${creditsBlock()}
     `;
   };
@@ -424,7 +464,7 @@
     if (a.safety) details.push(['Safety', a.safety]);
     if (a.access) details.push(['Getting there', a.access]);
     if (a.facilities) details.push(['On site', a.facilities]);
-    const weather = a.weather ? weatherLine(a.weather) : '';
+    if (a.weather && a.weather.note) details.push(['Conditions', a.weather.note]);
 
     const pair = (a.pairWith || []).map((id) => D.ACT_BY_ID[id]).filter(Boolean);
     const alt = a.easierAlt ? D.ACT_BY_ID[a.easierAlt] : null;
@@ -440,8 +480,8 @@
         <div class="dh-inner"><div class="dh-zone">${esc(CAT_LABEL[a.cat] || '')}${area ? ' · ' + esc(area.name) : ''}</div><h2 class="dh-h1">${esc(a.title)}</h2></div>
       </div>
 
-      ${!relevant && !isPreTrip() ? `<div class="note-box warn">You’re based at <strong>${esc(D.BASES[base].label)}</strong> right now — this is a ${esc(D.BASES[a.base] ? D.BASES[a.base].label : 'different-base')} activity${ddOther ? ` (${ddOther.approx ? '≈' : ''}${ddOther.min} min from there)` : ''}.</div>` : `${!relevant ? `<p class="intro">${a.base === 'lesgets' ? '🏔️ A Les Gets-leg option (12–15 Aug).' : '🌊 A lake-leg option (15–29 Aug).'}</p>` : ''}`}
-      ${a.status === 'closed' ? `<div class="note-box warn">⚠️ Currently closed — not available for the trip.</div>` : ''}
+      ${!relevant && !isPreTrip() ? `<div class="note-box warn">You’re based at <strong>${esc(D.BASES[base].label)}</strong> right now — this is a ${esc(D.BASES[a.base] ? D.BASES[a.base].label : 'different-base')} activity${ddOther ? ` (${ddOther.approx ? '≈' : ''}${ddOther.min} min from there)` : ''}.</div>` : `${!relevant ? `<p class="intro">${a.base === 'lesgets' ? 'A Les Gets-leg option (12–15 Aug).' : 'A lake-leg option (15–29 Aug).'}</p>` : ''}`}
+      ${a.status === 'closed' ? `<div class="note-box warn"><strong>Currently closed</strong> — not available for the trip.</div>` : ''}
 
       <p class="detail-lede">${esc(a.summary)}</p>
       ${a.why ? `<p class="detail-why">${esc(a.why)}</p>` : ''}
@@ -449,13 +489,12 @@
       <div class="detail-actions">${saveBtn(a.id, 'big')} ${statusPicker(a.id)}</div>
 
       <dl class="spec">${facts.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
-      ${weather ? `<div class="weather-strip">${weather}</div>` : ''}
 
       <div class="actions">${links.join('')}</div>
 
       ${details.length ? `<details class="logi"><summary>Logistics &amp; safety</summary><dl class="spec">${details.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></details>` : ''}
 
-      ${a.availability ? `<p class="avail-line">📅 ${esc(a.availability)}</p>` : ''}
+      ${a.availability ? `<p class="avail-line"><strong>When:</strong> ${esc(a.availability)}</p>` : ''}
 
       ${pair.length ? `<div class="section-head"><h2>Pair it with</h2></div><div class="cards">${pair.map((p) => activityCard(p)).join('')}</div>` : ''}
       ${alt ? `<div class="section-head"><h2>Easier / weather-proof alternative</h2></div><div class="cards">${activityCard(alt)}</div>` : ''}
@@ -466,16 +505,6 @@
       ${sourceLine(a)}
     `;
   };
-  function weatherLine(w) {
-    const bits = [];
-    if (w.rain) bits.push(`Rain: ${w.rain}`);
-    if (w.heat) bits.push(`Heat: ${w.heat}`);
-    if (w.storm) bits.push(`Storm: ${w.storm}`);
-    if (w.wind) bits.push(`Wind: ${w.wind}`);
-    if (w.shade) bits.push(w.shade);
-    if (w.best) bits.push(`Best: ${w.best}`);
-    return `<span class="ws-label">Conditions</span> ${bits.map((b) => `<span class="ws-chip">${esc(b)}</span>`).join('')}${w.note ? `<p class="ws-note">${esc(w.note)}</p>` : ''}`;
-  }
   function statusPicker(id) {
     const cur = Ideas.status(id);
     return `<span class="status-picker" role="group" aria-label="Set status">${['maybe', 'booked', 'done'].map((s) => `<button type="button" class="sp-btn" data-status="${id}:${s}" aria-pressed="${cur === s}">${STATUS_LABEL[s]}</button>`).join('')}</span>`;
@@ -534,7 +563,7 @@
         <dt>Tickets</dt><dd>${e.booking === 'no' ? 'Free / no ticket' : e.booking === 'yes' ? 'Ticketed — book' : 'Some free, some ticketed'}${e.price ? ' · ' + esc(e.price) : ''}</dd>
       </dl>
       <p class="detail-why">${esc(e.why)}</p>
-      ${e.impact ? `<div class="note-box${e.conflict ? ' warn' : ''}">${e.conflict ? '⚠️ ' : 'ℹ️ '}${esc(e.impact)}</div>` : ''}
+      ${e.impact ? `<div class="note-box${e.conflict ? ' warn' : ''}">${esc(e.impact)}</div>` : ''}
       <div class="detail-actions">${saveBtn(e.id, 'big')}</div>
       ${s ? `<p class="source-line">${e.verifyBeforeGo ? '<span class="verify-badge">Verify before going</span> ' : ''}Source: <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.type)} ↗</a> · checked ${esc(s.on || D.VERIFIED)}</p>` : ''}
     `;
@@ -547,7 +576,7 @@
     const ids = Ideas.ids(p);
     let board;
     if (!ids.length) {
-      board = `<div class="empty">Nothing on ${esc(p)}’s board yet. Wander through <a href="#/activities">Activities</a> and tap ♡ on anything that looks fun.</div>`;
+      board = `<div class="empty">Nothing on ${esc(p)}’s board yet. Wander through <a href="#/activities">Activities</a> and tap Save on anything that looks fun.</div>`;
     } else {
       const groups = { maybe: [], booked: [], done: [] };
       ids.forEach((id) => { const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id); if (a) (groups[Ideas.status(id, p)] || groups.maybe).push({ id, a, isEvent: !D.ACT_BY_ID[id] }); });
@@ -556,10 +585,10 @@
         : '').join('');
     }
     return `
-      <div class="section-head" style="margin-top:.4rem"><h2>Ideas</h2><p>Everyone’s maybe-pile. Tap ♡ anywhere to add to the selected board.</p></div>
+      <div class="section-head" style="margin-top:.4rem"><h2>Ideas</h2><p>Everyone’s maybe-pile. Tap Save anywhere to add to the selected board.</p></div>
       <div class="chips-row person-row" role="group" aria-label="Whose board">${chips}</div>
       ${board}
-      <p class="intro local-note">💾 Boards are saved on <strong>this phone only</strong> — everyone keeps their own on their own phone.</p>
+      <p class="intro local-note">Boards are saved on <strong>this phone only</strong> — everyone keeps their own on their own phone.</p>
     `;
   };
   function ideaEventCard(id, e) {
@@ -622,14 +651,14 @@
   Views.trip = function () {
     const T = D.TRANSPORT;
     const stays = D.STAYS.map((s) => `<div class="stay-card"><div class="stay-top"><div><div class="ac-zone">${esc(s.legLabel)} · ${esc(s.village)}</div><h3>${esc(s.name)}</h3></div><span class="stay-dates">${esc(s.dates)}</span></div>
-      <p class="stay-addr">📍 ${esc(s.address)}</p>
+      <p class="stay-addr">${esc(s.address)}</p>
       <dl class="spec" style="margin:.5rem 0 .3rem"><dt>In</dt><dd>${esc(s.checkin)}</dd><dt>Out</dt><dd>${esc(s.checkout)}</dd></dl>
       <div class="ac-tags">${s.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
       <div class="actions" style="margin:.7rem 0 0"><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a><a class="btn ghost" href="#/map?place=${esc(s.id)}">On map</a></div></div>`).join('');
-    const flights = T.flights.map((f) => `<div class="flight-card"><div class="fc-top"><span class="fc-who">${f.dir === 'out' ? '🛬' : '🛫'} ${esc(f.who)}</span><span class="fc-date">${esc(f.date)}</span></div><div class="fc-route">${esc(f.legs)}</div><div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}</div>`)
-      .join('') + (T.flightsNote ? `<div class="flight-card placeholder"><div class="fc-top"><span class="fc-who">✈️ Christian &amp; Ian</span><span class="fc-date">TBC</span></div><p class="fc-note">${esc(T.flightsNote)}</p></div>` : '');
+    const flights = T.flights.map((f) => `<div class="flight-card"><div class="fc-top"><span class="fc-who">${f.dir === 'out' ? 'Arrives · ' : 'Departs · '}${esc(f.who)}</span><span class="fc-date">${esc(f.date)}</span></div><div class="fc-route">${esc(f.legs)}</div><div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}</div>`)
+      .join('') + (T.flightsNote ? `<div class="flight-card placeholder"><div class="fc-top"><span class="fc-who">Chip &amp; Ian</span><span class="fc-date">TBC</span></div><p class="fc-note">${esc(T.flightsNote)}</p></div>` : '');
     const modes = D.TRANSPORT_GUIDE.modes.map((m) => `<div class="info-card"><h3>${esc(m.label)}</h3><p>${esc(m.summary)}${m.verifyBeforeGo ? ' <span class="pc-tag verify">Verify</span>' : ''}</p></div>`).join('');
-    const jump = [['trip-days', '🗓️ Days'], ['trip-stays', '🏠 Stays'], ['trip-travel', '✈️ Flights & van'], ['trip-around', '🚌 Getting around']]
+    const jump = [['trip-days', 'Days'], ['trip-stays', 'Stays'], ['trip-travel', 'Flights & van'], ['trip-around', 'Getting around']]
       .map(([id, label]) => `<button type="button" class="chip" data-jump="${id}">${label}</button>`).join('');
     return `
       <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2><p>${esc(D.TRIP.datesLabel)} — mountains first, then the lake. Everything confirmed lives here.</p></div>
@@ -639,9 +668,9 @@
       <div class="section-head" id="trip-stays"><h2>Where we’re sleeping</h2></div>
       <div class="cards" style="grid-template-columns:1fr">${stays}</div>
       <div class="section-head" id="trip-travel"><h2>Getting there &amp; back</h2><p>${esc(T.privacyNote)}</p></div>
-      <div class="note-box warn">⏰ ${esc(T.departure)}</div>
+      <div class="note-box warn"><strong>Departure day plan.</strong> ${esc(T.departure)}</div>
       <div class="flights">${flights}</div>
-      <div class="stay-card"><div class="stay-top"><div><div class="ac-zone">The van · ${esc(T.car.conf)}</div><h3>${esc(T.car.name)}</h3></div></div><dl class="spec" style="margin:.5rem 0 .3rem"><dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd><dt>Return</dt><dd>${esc(T.car.ret)}</dd><dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd><dt>Included</dt><dd>${esc(T.car.includes)}</dd></dl><p class="fc-note">📍 ${esc(T.car.find)}</p></div>
+      <div class="stay-card"><div class="stay-top"><div><div class="ac-zone">The van · ${esc(T.car.conf)}</div><h3>${esc(T.car.name)}</h3></div></div><dl class="spec" style="margin:.5rem 0 .3rem"><dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd><dt>Return</dt><dd>${esc(T.car.ret)}</dd><dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd><dt>Included</dt><dd>${esc(T.car.includes)}</dd></dl><p class="fc-note">${esc(T.car.find)}</p></div>
       <div class="section-head" id="trip-around"><h2>Getting around (no-car friendly)</h2><p>${esc(D.TRANSPORT_GUIDE.intro)}</p></div>
       ${modes}
       <div class="info-card"><h3>Parking &amp; traffic</h3><p>${esc(D.TRANSPORT_GUIDE.parking)}</p></div>
@@ -731,8 +760,7 @@
       <h3 class="arch-h">${esc(title)}</h3>
       ${items.map((a) => `
         <div class="arch-item">
-          <span class="arch-em" aria-hidden="true">${a.em || '🗄️'}</span>
-          <div class="arch-body">
+                    <div class="arch-body">
             <strong>${esc(a.name)}</strong>
             <p>${esc(a.reason)}</p>
             ${a.href ? `<a class="pop-link" href="${esc(a.href)}" target="_blank" rel="noopener">Source ↗</a>` : ''}
@@ -740,7 +768,7 @@
         </div>`).join('')}` : '';
     return `
       <section class="wrap">
-        <h2>The cut list 🗄️</h2>
+        <h2>The cut list</h2>
         <p class="lede">Everything from our research and the guide PDFs that is deliberately <em>not</em> a plan — so nobody spots it on Instagram in August and wonders why it isn’t on the map. Closed-but-worth-knowing spots like La Tournette <em>are</em> on the <a href="#/map">map</a>, greyed out with a ⛔ — and the Thônes via ferrata turned out to be open after all, so it’s on the map in full colour.</p>
         ${section('Closed in 2026 — re-check when we’re in France', groups.closed)}
         ${section('Not happening — hard no', groups.no)}
@@ -769,7 +797,7 @@
     if (!shown.length) { el.innerHTML = `<div class="empty">No places in the selected filters. <button class="link-btn" id="ml-reset">Reset filters</button></div>`; const r = document.getElementById('ml-reset'); if (r) r.addEventListener('click', () => { mapState.active = new Set(MAP_CATS.map((c) => c.id)); applyMap(places); }); return; }
     const cat = Object.fromEntries(MAP_CATS.map((c) => [c.id, c]));
     el.innerHTML = shown.map((p) => `<button class="ml-item${p.closed ? ' is-closed' : ''}" data-mid="${esc(p.id)}"><span class="ml-em${p.closed ? ' closed' : ''}" style="border-color:${cat[p.cat].color}" aria-hidden="true">${pinEmoji(p)}</span><span class="ml-body"><strong>${esc(p.name)}${p.closed ? ' <span class="closed-chip">Closed</span>' : ''}</strong><span>${esc(p.blurb)}</span></span></button>`).join('') +
-      `<a class="ml-archive" href="#/archive">🗄️ Not on this map — the cut list & why →</a>`;
+      `<a class="ml-archive" href="#/archive">Not on this map — the cut list &amp; why →</a>`;
     el.querySelectorAll('[data-mid]').forEach((b) => b.addEventListener('click', () => focusMarker(b.dataset.mid)));
   }
   function focusMarker(id) {
@@ -834,22 +862,22 @@
   /* =========================== router =============================== */
   function parse() {
     let h = location.hash.replace(/^#\/?/, '');
-    if (!h) return { name: 'today', parts: [], query: {} };
+    if (!h) return { name: 'home', parts: [], query: {} };
     const [path, qs] = h.split('?'); const parts = path.split('/').filter(Boolean); const query = {};
     if (qs) qs.split('&').forEach((kv) => { const [k, v] = kv.split('='); query[decodeURIComponent(k)] = decodeURIComponent(v || ''); });
     return { name: parts[0] || 'today', parts: parts.slice(1), query };
   }
   // Old routes keep working: every retired screen forwards to its new home.
-  const ALIAS = { home: 'today', day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip', events: 'trip' };
+  const ALIAS = { day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip', events: 'trip' };
   function render() {
     let route = parse();
     if (ALIAS[route.name]) route.name = ALIAS[route.name];
     if (route.name === 'category' && route.parts[0]) route = { name: 'activities', parts: [], query: { cat: route.parts[0] } };
     if (route.name === 'plan' && !route.parts[0]) route = { name: 'activities', parts: [], query: route.query.must ? { f: 'book' } : route.query };
     teardownMap();
-    const view = Views[route.name] || Views.today;
+    const view = Views[route.name] || Views.home;
     screenEl.innerHTML = view(route);
-    screenEl.className = 'screen' + (route.name === 'map' ? ' is-map' : '');
+    screenEl.className = 'screen' + (route.name === 'map' ? ' is-map' : '') + (route.name === 'home' ? ' is-home' : '');
     setChrome(route);
     window.scrollTo(0, 0); screenEl.scrollTop = 0;
     // focus management for hash-route changes
@@ -865,7 +893,7 @@
   }
 
   /* ---------- appbar back ------------------------------------------- */
-  document.getElementById('ab-back').addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/today'; });
+  document.getElementById('ab-back').addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
   window.addEventListener('hashchange', render);
   render();
 
