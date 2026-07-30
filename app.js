@@ -313,7 +313,7 @@
       </section>
 
       <section class="hm-taster">
-        <div class="hm-lab"><h3>A few to whet the appetite</h3><a class="hm-eyebrow" href="#/activities">Browse all ${D.ACTIVITIES.length} →</a></div>
+        <div class="hm-lab"><h3>A few highlights</h3><a class="hm-eyebrow" href="#/activities">Browse all ${D.ACTIVITIES.length} →</a></div>
         <div class="pin-grid hm-pad">${tasterCards}</div>
       </section>
 

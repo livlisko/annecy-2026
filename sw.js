@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v20';
+const VERSION = 'a26-v21';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -15,7 +15,7 @@ const CORE_ASSETS = [
   './index.html',
   './styles.css?v=20',
   './data.js?v=20',
-  './app.js?v=20',
+  './app.js?v=21',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
