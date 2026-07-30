@@ -905,7 +905,7 @@
       coords: [45.8758, 6.1852], route: '#/areas/veyrier'
     },
     { id: 'semnoz', label: 'Semnoz', x: 35, y: 55, kind: 'col', colId: 'semnoz' },
-    { id: 'forclaz', label: 'Forclaz', x: 92, y: 49, kind: 'col', colId: 'forclaz', edge: true },
+    { id: 'forclaz', label: 'Forclaz', x: 89.5, y: 49, kind: 'col', colId: 'forclaz', edge: true },
     { id: 'aravis', label: 'Col des Aravis', x: 59, y: 23, kind: 'col', colId: 'aravis' },
     { id: 'colombiere', label: 'Colombière', x: 18, y: 22, kind: 'col', colId: 'colombiere' },
     {
