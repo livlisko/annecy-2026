@@ -2,10 +2,8 @@
    Annecy & Les Gets 2026 — app shell, router and screens.
    Plain JS, no framework. Reads everything from window.DATA.
 
-   Built around the question "what makes sense today, from where we're
-   staying?" — an Europe/Paris date resolves the active stay + base,
-   every screen is date/base-aware, and the day builder ranks activities
-   rather than hard-filtering them.
+   A photographic field guide first, with quiet trip logistics and an
+   optional date-aware Today view while the group is travelling.
    ===================================================================== */
 (function () {
   'use strict';
@@ -21,11 +19,19 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const announce = (m) => { if (liveEl) { liveEl.textContent = ''; setTimeout(() => { liveEl.textContent = m; }, 30); } };
-  function sample(arr, n) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); }
   const EFFORT_LABEL = { recovery: 'Recovery', easy: 'Easy', moderate: 'Moderate', big: 'Big' };
   const DUR_LABEL = { evening: 'Evening', '2h': '~2 h', half: 'Half day', full: 'Full day' };
-  const THEME_LABEL = { water: 'Water', bikes: 'Bikes', views: 'Views', food: 'Food', adrenaline: 'Adrenaline', rainy: 'Rainy', recovery: 'Recovery' };
-  const CAT_LABEL = { road: 'Road', gravel: 'Gravel', mtb: 'MTB', easybike: 'Easy ride', hike: 'Hike', walk: 'Walk', viaferrata: 'Via ferrata', canyoning: 'Canyoning', paragliding: 'Paragliding', swim: 'Swim', paddle: 'Water sport', boat: 'Boat', food: 'Food', culture: 'Culture', village: 'Day trip', family: 'Family', recovery: 'Rest' };
+  const CAT_LABEL = { road: 'Road', gravel: 'Gravel', mtb: 'MTB', easybike: 'Easy ride', hike: 'Hike', walk: 'Walk', viaferrata: 'Via ferrata', canyoning: 'Canyoning', paragliding: 'Paragliding', swim: 'Swim', paddle: 'Water sport', boat: 'Boat', food: 'Food', culture: 'Culture', village: 'Day trip', family: 'Easy day', recovery: 'Rest' };
+  const GUIDE_CATS = [
+    { id: 'water', label: 'Lake & water', test: (a) => ['swim', 'paddle', 'boat'].includes(a.cat) || (a.themes || []).includes('water') },
+    { id: 'cycling', label: 'Cycling', test: (a) => ['road', 'gravel', 'mtb', 'easybike'].includes(a.cat) || (a.themes || []).includes('bikes') },
+    { id: 'mountains', label: 'Hikes & views', test: (a) => ['hike', 'walk'].includes(a.cat) || (a.themes || []).includes('views') },
+    { id: 'food', label: 'Food & history', test: (a) => ['food', 'culture', 'village'].includes(a.cat) || (a.themes || []).some((t) => t === 'food' || t === 'culture') },
+    { id: 'adrenaline', label: 'Adrenaline', test: (a) => ['viaferrata', 'canyoning', 'paragliding'].includes(a.cat) || (a.themes || []).includes('adrenaline') },
+    { id: 'easy', label: 'Easy days', test: (a) => ['family', 'recovery'].includes(a.cat) || ['recovery', 'easy'].includes(a.effort) || a.group === 'all' }
+  ];
+  const GUIDE_BY_ID = Object.fromEntries(GUIDE_CATS.map((c) => [c.id, c]));
+  const bookmarkIcon = (saved) => `<svg class="bookmark-icon" aria-hidden="true" viewBox="0 0 24 24"><path${saved ? ' fill="currentColor"' : ''} d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
 
   /* ---------- Europe/Paris date engine ------------------------------ */
   const parisFmt = new Intl.DateTimeFormat('en-CA', { timeZone: D.TRIP.tz || 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -122,6 +128,8 @@
   function setChrome(route) {
     const isPrimary = PRIMARY.includes(route.name) && route.parts.length === 0;
     appbar.classList.toggle('has-back', !isPrimary);
+    document.body.classList.toggle('route-home', route.name === 'home');
+    document.body.classList.toggle('route-map', route.name === 'map');
     let title = TITLES[route.name] || 'Annecy 2026';
     if (route.name === 'areas' && route.parts[0]) { const a = D.AREA_BY_ID[route.parts[0]]; title = a ? a.name : 'Area'; }
     if (route.name === 'plan' && route.parts[0]) { const a = D.ACT_BY_ID[route.parts[0]]; title = a ? a.title : 'Plan'; }
@@ -137,13 +145,17 @@
     opts = opts || {}; const extra = opts.cls ? ' ' + opts.cls : '';
     if (media && media.photo) return `<img class="cover-img${extra}" src="${esc(media.photo)}" alt="${esc(opts.alt || '')}" width="1200" height="800" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />`;
     const tint = (media && media.tint) || opts.tint || 'alpine';
-    const emoji = (media && media.emoji) || opts.emoji || '📍';
     const label = (media && media.label) || opts.label || '';
-    return `<div class="cover-ph${extra}" data-tint="${esc(tint)}" role="img" aria-label="${esc(label || opts.alt || 'illustration')}"><span class="cover-em" aria-hidden="true">${emoji}</span>${label ? `<span class="cover-label">${esc(label)}</span>` : ''}</div>`;
+    return `<div class="cover-ph${extra}" data-tint="${esc(tint)}" role="img" aria-label="${esc(label || opts.alt || 'illustration')}">${label ? `<span class="cover-label">${esc(label)}</span>` : ''}</div>`;
   }
   function coverOf(obj) { if (!obj) return null; if (obj.media) return obj.media; if (obj.photo) return { photo: obj.photo }; return null; }
-  function actCover(a) { return coverOf(a) || coverOf(D.AREA_BY_ID[a.areaId]) || { emoji: catEmoji(a.cat), label: a.title, tint: catTint(a.cat) }; }
-  function catEmoji(c) { return ({ road: '🚴', gravel: '🚵', mtb: '🚵', easybike: '🚲', hike: '🥾', walk: '🚶', viaferrata: '🧗', canyoning: '🌊', paragliding: '🪂', swim: '🏊', paddle: '🛶', boat: '⛴️', food: '🧀', culture: '🏛️', village: '🏔️', family: '🌳', recovery: '🛋️' })[c] || '📍'; }
+  function actCover(a) {
+    const own = coverOf(a);
+    if (own && own.photo) return own;
+    const area = coverOf(D.AREA_BY_ID[a.areaId]);
+    if (area && area.photo) return area;
+    return own || { label: a.title, tint: catTint(a.cat) };
+  }
   function catTint(c) { if (['road', 'gravel', 'mtb', 'easybike'].includes(c)) return 'pine'; if (['swim', 'paddle', 'boat'].includes(c)) return 'aqua'; if (['viaferrata', 'canyoning', 'paragliding'].includes(c)) return 'purple'; if (['food'].includes(c)) return 'sun'; return 'alpine'; }
 
   /* ---------- provenance ------------------------------------------- */
@@ -156,7 +168,8 @@
   /* ---------- save / status controls (Save = idea for the active person) */
   function saveBtn(id, cls) {
     const st = Ideas.status(id); const p = activePerson();
-    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${st ? `On ${esc(p)}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${esc(p)}’s ideas`}">${st ? `Saved · ${esc(p)}` : 'Save'}</button>`;
+    const label = st ? `Remove from ${esc(p)}’s ideas (${STATUS_LABEL[st]})` : `Save to ${esc(p)}’s ideas`;
+    return `<button type="button" class="save-btn${st ? ' on' : ''} ${cls || ''}" data-save="${esc(id)}" aria-pressed="${!!st}" aria-label="${label}" title="${label}">${bookmarkIcon(!!st)}</button>`;
   }
   // event delegation for save buttons (bound once)
   document.addEventListener('click', (e) => {
@@ -164,8 +177,9 @@
     e.preventDefault();
     const id = b.dataset.save; const st = Ideas.toggle(id); const p = activePerson();
     b.classList.toggle('on', !!st); b.setAttribute('aria-pressed', String(!!st));
-    b.setAttribute('aria-label', st ? `On ${p}’s ideas board (${STATUS_LABEL[st]}) — tap to remove` : `Save to ${p}’s ideas`);
-    b.textContent = st ? `Saved · ${p}` : 'Save';
+    const label = st ? `Remove from ${p}’s ideas (${STATUS_LABEL[st]})` : `Save to ${p}’s ideas`;
+    b.setAttribute('aria-label', label); b.setAttribute('title', label);
+    b.innerHTML = bookmarkIcon(!!st);
     announce(st ? `Added to ${p}’s ideas` : `Removed from ${p}’s ideas`);
     // screens that show saved state beyond the heart itself must repaint
     if (screenEl.querySelector('.status-picker, .person-row')) render();
@@ -221,51 +235,89 @@
       ? `<a class="hm-live" href="#/today"><span>Day ${dayNumber(real)} · ${esc(stayForDate(real).village)}</span><span class="hm-go">Open Today →</span></a>`
       : '';
     const coverTail = inTrip ? `Day ${dayNumber(real)} of 18` : (post ? 'Well, that happened' : `${daysUntilTrip()} days away`);
-    const taster = ['forclaz-climb-lake', 'angon-apero', 'semnoz-picnic', 'annecy-market']
-      .map((id) => D.ACT_BY_ID[id]).filter(Boolean);
-    const tasterCards = (taster.length >= 4 ? taster : D.FEATURED.map((id) => D.ACT_BY_ID[id]).filter((a) => a && actCover(a).photo).slice(0, 4))
-      .map(pinCard).join('');
+    const taster = [...new Map(
+      ['lake-loop-road', 'angon-apero', 'semnoz-picnic', 'annecy-market', ...D.FEATURED]
+        .map((id) => [id, D.ACT_BY_ID[id]])
+    ).values()].filter((a) => a && actCover(a)?.photo).slice(0, 4);
+    const tasterCards = taster.map((a) => pinCard(a, { eager: true })).join('');
+    const regionCopy = {
+      water: 'Beaches, paddling, boats & swims',
+      cycling: 'Road cols, greenways & bike parks',
+      mountains: 'Trails, panoramas & mountain walks',
+      food: 'Cheese, markets & local stories',
+      adrenaline: 'Paragliding, canyoning & big days',
+      easy: 'Villages, lakeside towns & slow mornings'
+    };
+    const regionLinks = GUIDE_CATS.map((cat) => `
+      <a class="hm-region-link" href="#/activities?cat=${esc(cat.id)}">
+        <span><strong>${esc(cat.label)}</strong><small>${esc(regionCopy[cat.id])}</small></span>
+        <span class="hm-region-go" aria-hidden="true">→</span>
+      </a>`).join('');
     return `
-      ${live}
-      <header class="hm-cover">
-        <img src="assets/wiki/hero-lake.jpg" alt="Lake Annecy from the Forclaz" width="1200" height="800" fetchpriority="high" />
-        <div class="hm-cover-txt">
-          <p class="hm-eyebrow">Haute-Savoie · ${esc(D.TRIP.datesLabel)}</p>
-          <h2 class="hm-title">Annecy<br><em>&amp; Les Gets</em></h2>
-          <p class="hm-dek">Four of us, two weeks, one impossibly blue lake and a great many mountains.</p>
-          <p class="hm-meta">The lake · The cols · The cheese · ${esc(coverTail)}</p>
-        </div>
-      </header>
+      <section class="hm-world">
+        ${live}
+        <header class="hm-cover">
+          <div class="hm-cover-txt">
+            <h2 class="hm-title">Annecy &amp; Les Gets</h2>
+            <p class="hm-dek">The lake, the cols, the cheese, and everything we need in one place.</p>
+            <p class="hm-meta">${esc(D.TRIP.datesLabel)} · Haute-Savoie · ${esc(coverTail)}</p>
+            <a class="hm-cta" href="#/activities">Explore activities</a>
+          </div>
 
-      <section class="hm-intro">
-        <p class="hm-lead">A little guide to <strong>where we’re going</strong> — the rides, the swims, the villages and the history around the lake, plus everything we’ve actually booked.</p>
-        <p class="hm-sub">Not a schedule. A place to get excited, save what you fancy, and find the address when you need it.</p>
+          <div class="hm-portal">
+            <div class="hm-portal-view">
+              <img src="assets/art/annecy-waterfront-v3.jpg" alt="An illustrated Annecy waterfront with turquoise water, small boats, limestone mountains, and flowered ironwork" width="2135" height="736" fetchpriority="high" />
+              <span class="hm-portal-caption">Annecy waterfront · turquoise shallows &amp; La Tournette</span>
+            </div>
+            <div class="hm-portal-body">
+              <div class="hm-portal-head">
+                <div>
+                  <h3>Explore the region</h3>
+                  <p>All ${D.ACTIVITIES.length} ideas, loosely organized for browsing.</p>
+                </div>
+                <a href="#/activities">See everything →</a>
+              </div>
+              <nav class="hm-region-index" aria-label="Explore activity categories">
+                ${regionLinks}
+              </nav>
+            </div>
+          </div>
+        </header>
       </section>
 
-      <div class="hm-lab"><h3>Where to start</h3><span class="hm-eyebrow">Contents</span></div>
+      <section class="hm-intro">
+        <p class="hm-lead">Our field guide to the rides, swims, villages, food, and history around the lake — plus the trip details we’ll actually need.</p>
+        <p class="hm-sub">Browse everything, save what looks good, and decide as we go.</p>
+      </section>
+
       <nav class="hm-index" aria-label="Site contents">
-        <a class="hm-ix" href="#/activities"><span class="hm-no">01</span><img src="assets/wiki/forclaz.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Activities</strong><span>Everything to do — rides, water, walks, food, history</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
-        <a class="hm-ix" href="#/ideas"><span class="hm-no">02</span><img src="assets/wiki/lake-swim.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Ideas</strong><span>Each of us saves the ones we like</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
-        <a class="hm-ix" href="#/trip"><span class="hm-no">03</span><img src="assets/wiki/veyrier.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Trip</strong><span>Stays, flights, the van — the source of truth</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
-        <a class="hm-ix" href="#/map"><span class="hm-no">04</span><img src="assets/wiki/duingt.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Map</strong><span>All of it, pinned around the lake</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/ideas"><img src="assets/wiki/col-aravis.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Our ideas</strong><span>What each of us wants to remember</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/trip"><img src="assets/wiki/veyrier.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Trip details</strong><span>Stays, flights, the van, and essentials</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
+        <a class="hm-ix" href="#/map"><img src="assets/wiki/duingt.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Open the map</strong><span>See how the lake and mountains fit together</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
       </nav>
 
       <section class="hm-place">
-        <div class="hm-lab"><h3>A sense of the place</h3><span class="hm-eyebrow">Read a little</span></div>
+        <div class="hm-lab"><h3>Get a feel for the place</h3></div>
         <div class="hm-scroll">
-          <a class="hm-pc" href="#/activities?cat=water"><img src="assets/wiki/lake-beach.jpg" alt="" loading="lazy" /><strong>The lake</strong><span>Turquoise, swimmable, ringed by beaches and a flat greenway.</span></a>
-          <a class="hm-pc" href="#/bike"><img src="assets/wiki/les-gets-mtb.jpg" alt="" loading="lazy" /><strong>The mountains</strong><span>Les Gets bike park, the cols, and the Aravis behind them.</span></a>
-          <a class="hm-pc" href="#/activities?cat=food"><img src="assets/wiki/annecy-market.jpg" alt="" loading="lazy" /><strong>The table</strong><span>Reblochon, tartiflette, lake fish and old-town markets.</span></a>
-          <a class="hm-pc" href="#/plan/glieres-walk"><img src="assets/wiki/glieres.jpg" alt="" loading="lazy" /><strong>The history</strong><span>The Glières plateau and the Resistance in these hills.</span></a>
+          <a class="hm-pc" href="#/activities?cat=water"><img src="assets/wiki/lake-beach.jpg" alt="" loading="lazy" /><strong>The lake</strong><span>Turquoise water, village beaches, paddling, and the flat greenway.</span></a>
+          <a class="hm-pc" href="#/activities?cat=mountains"><img src="assets/wiki/les-gets-mtb.jpg" alt="" loading="lazy" /><strong>The mountains</strong><span>Les Gets bike park, famous cols, and the Aravis behind them.</span></a>
+          <a class="hm-pc" href="#/activities?cat=food"><img src="assets/wiki/glieres.jpg" alt="" loading="lazy" /><strong>Food &amp; history</strong><span>Reblochon country, old-town markets, and the Resistance story in these hills.</span></a>
+        </div>
+      </section>
+
+      <section class="hm-context">
+        <div class="hm-lab"><h3>A little context</h3><a class="hm-eyebrow" href="#/plan/glieres-walk">Visit the Glières →</a></div>
+        <div class="hm-context-grid">
+          ${[D.STORY[0], D.STORY[4], D.HISTORY[1]].map((item) => `<article><h4>${esc(item.title)}</h4><p>${esc(item.text)}</p></article>`).join('')}
         </div>
       </section>
 
       <section class="hm-taster">
-        <div class="hm-lab"><h3>A few to whet the appetite</h3><a class="hm-eyebrow" href="#/activities">All ${D.ACTIVITIES.length} →</a></div>
+        <div class="hm-lab"><h3>A few to whet the appetite</h3><a class="hm-eyebrow" href="#/activities">Browse all ${D.ACTIVITIES.length} →</a></div>
         <div class="pin-grid hm-pad">${tasterCards}</div>
       </section>
 
-      ${!inTrip ? `<a class="hm-today" href="#/today"><strong>During the trip → open Today</strong><span>Where you’re staying, what’s on, and directions home.</span></a>` : ''}
+      ${!inTrip ? `<a class="hm-today" href="#/today"><strong>During the trip: Today</strong><span>The current stay, useful reminders, and directions home.</span></a>` : ''}
     `;
   };
 
@@ -320,7 +372,7 @@
       <div class="section-head"><h2>Today &amp; next up</h2></div>
       ${todays.length ? `<p class="intro">On today near you:</p>` + todays.map(eventRow).join('') : `<p class="intro">Nothing fixed today — a blank canvas. ${upcoming.length ? 'Coming up:' : ''}</p>`}
       ${upcoming.map(eventRow).join('')}
-      <a class="see-all block" href="#/trip">See the whole trip, day by day →</a>
+      <a class="see-all block" href="#/trip">Open trip details →</a>
 
       ${ideasBlock}
     `;
@@ -340,26 +392,34 @@
      One screen replaces Discover / Browse / Search / Build-a-day.
      Everything is always visible — no day/leg gating; filters are
      light moods, not machinery. -------------------------------------- */
-  const FACETS = [
-    { id: 'chill', label: 'Chill', test: (a) => ['recovery', 'easy'].includes(a.effort) },
-    { id: 'big', label: 'Big day out', test: (a) => a.effort === 'big' || a.duration === 'full' },
-    { id: 'book', label: 'Must book', test: (a) => a.booking === 'required' || a.booking === 'recommended' },
-    { id: 'rain', label: 'Rainy day', test: (a) => (a.weather && (a.weather.rain === 'good' || a.weather.rain === 'ok')) || (a.themes || []).includes('rainy') },
-    { id: 'group', label: 'Easy group win', test: (a) => a.group === 'all' }
-  ];
-  let actState = { cat: 'all', f: null, q: '' };
+  let actState = { cat: 'all', area: 'all', effort: 'all', booking: 'all', rain: false, q: '' };
   function readActQuery(route) {
     actState = {
-      cat: route.query.cat && D.CATEGORY_BY_ID[route.query.cat] ? route.query.cat : 'all',
-      f: FACETS.some((x) => x.id === route.query.f) ? route.query.f : null,
+      cat: route.query.cat && GUIDE_BY_ID[route.query.cat] ? route.query.cat : 'all',
+      area: route.query.area && D.AREA_BY_ID[route.query.area] ? route.query.area : 'all',
+      effort: ['recovery', 'easy', 'moderate', 'big'].includes(route.query.effort) ? route.query.effort : 'all',
+      booking: ['required', 'recommended', 'no'].includes(route.query.booking) ? route.query.booking : 'all',
+      rain: route.query.rain === '1',
       q: route.query.q || ''
     };
   }
-  function buildActQS() { const p = []; if (actState.cat !== 'all') p.push('cat=' + actState.cat); if (actState.f) p.push('f=' + actState.f); if (actState.q) p.push('q=' + encodeURIComponent(actState.q)); return p.length ? '?' + p.join('&') : ''; }
+  function buildActQS() {
+    const p = [];
+    if (actState.cat !== 'all') p.push('cat=' + actState.cat);
+    if (actState.area !== 'all') p.push('area=' + actState.area);
+    if (actState.effort !== 'all') p.push('effort=' + actState.effort);
+    if (actState.booking !== 'all') p.push('booking=' + actState.booking);
+    if (actState.rain) p.push('rain=1');
+    if (actState.q) p.push('q=' + encodeURIComponent(actState.q));
+    return p.length ? '?' + p.join('&') : '';
+  }
   function actMatches(a) {
     if (a.status === 'closed') return false;
-    if (actState.cat !== 'all') { const c = D.CATEGORY_BY_ID[actState.cat]; if (!c || !(a.themes || []).some((t) => c.themes.includes(t))) return false; }
-    if (actState.f) { const f = FACETS.find((x) => x.id === actState.f); if (f && !f.test(a)) return false; }
+    if (actState.cat !== 'all') { const c = GUIDE_BY_ID[actState.cat]; if (!c || !c.test(a)) return false; }
+    if (actState.area !== 'all' && a.areaId !== actState.area) return false;
+    if (actState.effort !== 'all' && a.effort !== actState.effort) return false;
+    if (actState.booking !== 'all' && (a.booking || 'no') !== actState.booking) return false;
+    if (actState.rain && !((a.weather && a.weather.rain === 'good') || (a.themes || []).includes('rainy'))) return false;
     if (actState.q) { const q = actState.q.trim().toLowerCase(); if (q) { const hay = [a.title, a.summary, a.subtype, a.cat, (a.themes || []).join(' '), (D.AREA_BY_ID[a.areaId] || {}).name].join(' ').toLowerCase(); if (!hay.includes(q)) return false; } }
     return true;
   }
@@ -370,13 +430,16 @@
     if (a.verifyBeforeGo) bits.push('Verify');
     return bits.join(' · ');
   }
-  function pinCard(a) {
+  function pinCard(a, opts) {
+    opts = opts || {};
     const img = actCover(a); const hasPhoto = !!(img && img.photo);
+    const area = D.AREA_BY_ID[a.areaId];
     const leg = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets</span>` : '';
     return `<article class="pin-card">
       <a class="pin-hit" href="#/plan/${esc(a.id)}">
-        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="" loading="lazy" decoding="async" />${leg}</div>` : ''}
+        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />${leg}</div>` : ''}
         <h3>${esc(a.title)}</h3>
+        ${area ? `<p class="pin-place">${esc(area.name)}</p>` : ''}
         <p class="pin-meta">${esc(pinMeta(a))}${!hasPhoto && a.base === 'lesgets' ? ' · Les Gets leg' : ''}</p>
         <p class="pin-sum">${esc(a.summary)}</p>
       </a>
@@ -385,30 +448,34 @@
   }
   Views.activities = function (route) {
     readActQuery(route);
-    const worlds = D.CATEGORIES.map((c) => `<button type="button" class="world-card wc-btn" data-actcat="${esc(c.id)}" aria-pressed="${actState.cat === c.id}"><div class="world-cover">${cover(c.media, { tint: c.tint, emoji: c.emoji, label: c.title, alt: c.title })}</div><span class="world-body"><span class="wc-t">${esc(c.title)}</span><span class="wc-p">${esc(c.vibe)}</span></span></button>`).join('');
-    const facetChips = FACETS.map((f) => `<button class="chip facet" data-actfacet="${f.id}" aria-pressed="${actState.f === f.id}">${esc(f.label)}</button>`).join('');
-    const disc = D.DISCOVERIES.map((d) => `<a class="disc-card" href="${esc(d.route)}"><strong>${esc(d.title)}</strong><span class="disc-text">${esc(d.text)}</span><span class="disc-go">Show me →</span></a>`).join('');
-    const story = (arr) => arr.map((s) => `<div class="story-item"><div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div></div>`).join('');
+    const categories = `<button type="button" class="category-tab" data-actcat="all" aria-pressed="${actState.cat === 'all'}">All</button>` +
+      GUIDE_CATS.map((c) => `<button type="button" class="category-tab" data-actcat="${esc(c.id)}" aria-pressed="${actState.cat === c.id}">${esc(c.label)}</button>`).join('');
+    const areas = D.AREAS.map((a) => `<option value="${esc(a.id)}"${actState.area === a.id ? ' selected' : ''}>${esc(a.name)}</option>`).join('');
     return `
-      <div class="detail-hero" style="min-height:150px">${cover({ photo: 'assets/wiki/lake-sunset.jpg' }, { alt: 'Sunset over the lake', eager: true, cls: 'cover-fill' })}<div class="dh-inner"><div class="dh-zone">The guidebook</div><h2 class="dh-h1">Everything we could do</h2></div></div>
-      <p class="detail-lede">All of it, all the time — nothing hidden by dates. Tap Save to pin anything to <strong>${esc(activePerson())}’s</strong> ideas board.</p>
-      <a class="bike-banner" href="#/bike"><span><strong>Cycling HQ</strong> — cols, gravel, bike parks, rentals &amp; races</span><span class="bb-go" aria-hidden="true">→</span></a>
-      <input class="search-input" id="act-q" type="search" value="${esc(actState.q)}" placeholder="Filter: canyoning, market, Semnoz…" aria-label="Filter activities" autocomplete="off">
-      <div class="chips-row facet-row">${facetChips}</div>
-      <div class="section-head"><h2>Worlds</h2><button class="see-all link-btn" data-actcat="all" ${actState.cat === 'all' ? 'hidden' : ''}>✕ Clear world</button></div>
-      <div class="h-scroll worlds-strip">${worlds}</div>
-      <div class="section-head"><h2>All ideas</h2><span class="see-all" id="act-count"></span></div>
+      <header class="page-head">
+        <p class="page-kicker">Explore</p>
+        <h2>What could we do?</h2>
+        <p>${D.ACTIVITIES.length} ideas around Annecy, Les Gets, and the mountains in between. Nothing is hidden by day or trip leg.</p>
+      </header>
+      <div class="category-tabs" role="group" aria-label="Activity category">${categories}</div>
+      <div class="activity-tools">
+        <label class="filter-field"><span>Area</span><select id="act-area"><option value="all">Everywhere</option>${areas}</select></label>
+        <label class="filter-field"><span>Effort</span><select id="act-effort">
+          <option value="all">Any effort</option>
+          ${Object.entries(EFFORT_LABEL).map(([id, label]) => `<option value="${id}"${actState.effort === id ? ' selected' : ''}>${esc(label)}</option>`).join('')}
+        </select></label>
+        <label class="filter-field"><span>Booking</span><select id="act-booking">
+          <option value="all">Any booking</option>
+          <option value="required"${actState.booking === 'required' ? ' selected' : ''}>Must book</option>
+          <option value="recommended"${actState.booking === 'recommended' ? ' selected' : ''}>Book ahead</option>
+          <option value="no"${actState.booking === 'no' ? ' selected' : ''}>No booking</option>
+        </select></label>
+        <button type="button" class="rain-toggle" id="act-rain" aria-pressed="${actState.rain}">Rain-safe</button>
+        <label class="activity-search"><span class="sr-only">Find an activity</span><input class="search-input" id="act-q" type="search" value="${esc(actState.q)}" placeholder="Find an activity" autocomplete="off"></label>
+        <span class="activity-count" id="act-count"></span>
+      </div>
+      <a class="bike-banner" href="#/bike"><span><strong>Cycling guide</strong><small>Cols, gravel, bike parks, rentals, and races</small></span><span class="bb-go" aria-hidden="true">→</span></a>
       <div class="pin-grid" id="act-grid"></div>
-      <div class="section-head"><h2>Stories &amp; background</h2></div>
-      <button class="btn block" id="surprise" type="button">Surprise me — three ideas</button>
-      <div id="surprise-out"></div>
-      <div class="section-head"><h2>You might not know you can…</h2></div>
-      <div class="h-scroll">${disc}</div>
-      <div class="section-head"><h2>The short story of the lake</h2></div>
-      <div class="story">${story(D.STORY)}</div>
-      <div class="section-head"><h2>The war in these mountains</h2></div>
-      <div class="story">${story(D.HISTORY)}</div>
-      <div class="actions" style="margin-top:.8rem"><a class="btn" href="#/plan/glieres-walk">Go stand where it happened</a><a class="btn ghost" href="#/areas">All the places, one by one →</a></div>
       ${creditsBlock()}
     `;
   };
@@ -417,24 +484,23 @@
     const redraw = () => {
       const list = D.ACTIVITIES.filter(actMatches);
       grid.innerHTML = list.length ? list.map(pinCard).join('') : `<div class="empty">Nothing matches those filters. <button class="link-btn" id="act-clear">Clear filters</button></div>`;
-      const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => { actState = { cat: 'all', f: null, q: '' }; const inp = document.getElementById('act-q'); if (inp) inp.value = ''; sync(); });
+      const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => { actState = { cat: 'all', area: 'all', effort: 'all', booking: 'all', rain: false, q: '' }; render(); });
       const cnt = document.getElementById('act-count'); if (cnt) cnt.textContent = list.length + ' of ' + D.ACTIVITIES.length;
     };
     const sync = () => {
       history.replaceState(null, '', '#/activities' + buildActQS());
-      screenEl.querySelectorAll('[data-actcat]').forEach((b) => {
-        if (b.classList.contains('link-btn')) { b.hidden = actState.cat === 'all'; return; }
-        b.setAttribute('aria-pressed', String(b.dataset.actcat === actState.cat));
-      });
-      screenEl.querySelectorAll('[data-actfacet]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.actfacet === actState.f)));
+      screenEl.querySelectorAll('[data-actcat]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.actcat === actState.cat)));
+      const rain = document.getElementById('act-rain'); if (rain) rain.setAttribute('aria-pressed', String(actState.rain));
       redraw();
       announce(D.ACTIVITIES.filter(actMatches).length + ' activities shown');
     };
-    screenEl.querySelectorAll('[data-actcat]').forEach((b) => b.addEventListener('click', () => { const c = b.dataset.actcat; actState.cat = (c === 'all' || actState.cat === c) ? 'all' : c; sync(); }));
-    screenEl.querySelectorAll('[data-actfacet]').forEach((b) => b.addEventListener('click', () => { actState.f = actState.f === b.dataset.actfacet ? null : b.dataset.actfacet; sync(); }));
+    screenEl.querySelectorAll('[data-actcat]').forEach((b) => b.addEventListener('click', () => { actState.cat = b.dataset.actcat; sync(); }));
+    [['act-area', 'area'], ['act-effort', 'effort'], ['act-booking', 'booking']].forEach(([id, key]) => {
+      const el = document.getElementById(id); if (el) el.addEventListener('change', () => { actState[key] = el.value; sync(); });
+    });
+    const rain = document.getElementById('act-rain'); if (rain) rain.addEventListener('click', () => { actState.rain = !actState.rain; sync(); });
     const inp = document.getElementById('act-q');
     if (inp) inp.addEventListener('input', () => { actState.q = inp.value; history.replaceState(null, '', '#/activities' + buildActQS()); redraw(); });
-    wireSurprise();
     redraw();
   }
 
@@ -448,7 +514,7 @@
 
     const facts = [];
     if (a.subtype) facts.push(['Type', esc(a.subtype)]);
-    facts.push(['Where', esc(area ? area.name : (a.where || '—'))]);
+    facts.push(['Where', esc(a.where || (area ? area.name : '—'))]);
     if (dd) facts.push(['Door-to-door', `${dd.approx ? '≈' : ''}${dd.min} min ${esc(dd.mode)} from ${esc(D.BASES[base].label)}`]);
     if (a.activityTime) facts.push(['Time out there', esc(a.activityTime)]);
     facts.push(['Effort', EFFORT_LABEL[a.effort] || '—']);
@@ -509,12 +575,15 @@
     const cur = Ideas.status(id);
     return `<span class="status-picker" role="group" aria-label="Set status">${['maybe', 'booked', 'done'].map((s) => `<button type="button" class="sp-btn" data-status="${id}:${s}" aria-pressed="${cur === s}">${STATUS_LABEL[s]}</button>`).join('')}</span>`;
   }
-  function wireActivity() {
+  function wireStatusButtons() {
     screenEl.querySelectorAll('[data-status]').forEach((b) => b.addEventListener('click', () => {
       const [id, s] = b.dataset.status.split(':'); const cur = Ideas.status(id);
       Ideas.set(id, cur === s ? null : s);
       render(); const again = screenEl.querySelector(`[data-status="${b.dataset.status}"]`); if (again) again.focus({ preventScroll: true }); announce(cur === s ? 'Status cleared' : 'Marked ' + STATUS_LABEL[s]);
     }));
+  }
+  function wireActivity() {
+    wireStatusButtons();
     const ta = screenEl.querySelector('[data-note]');
     if (ta) ta.addEventListener('change', () => { Ideas.note(ta.dataset.note, ta.value); announce('Note saved'); });
   }
@@ -572,30 +641,46 @@
   /* ---------- IDEAS (per-person boards, this phone only) ------------ */
   Views.ideas = function () {
     const p = activePerson();
-    const chips = PEOPLE.map((name) => { const n = Ideas.ids(name).length; return `<button type="button" class="chip person${name === p ? ' me' : ''}" data-person="${esc(name)}" aria-pressed="${name === p}">${esc(name)}${n ? ` <span class="mc-count">${n}</span>` : ''}</button>`; }).join('');
+    const chips = PEOPLE.map((name) => { const n = Ideas.ids(name).length; return `<button type="button" class="person-tab" data-person="${esc(name)}" aria-pressed="${name === p}"><span>${esc(name)}</span><span class="mc-count">${n}</span></button>`; }).join('');
     const ids = Ideas.ids(p);
     let board;
     if (!ids.length) {
-      board = `<div class="empty">Nothing on ${esc(p)}’s board yet. Wander through <a href="#/activities">Activities</a> and tap Save on anything that looks fun.</div>`;
+      board = `<div class="empty">Nothing on ${esc(p)}’s board yet. Browse <a href="#/activities">Activities</a> and bookmark anything that looks good.</div>`;
     } else {
-      const groups = { maybe: [], booked: [], done: [] };
-      ids.forEach((id) => { const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id); if (a) (groups[Ideas.status(id, p)] || groups.maybe).push({ id, a, isEvent: !D.ACT_BY_ID[id] }); });
-      board = ['maybe', 'booked', 'done'].map((st) => groups[st].length
-        ? `<div class="group-label">${STATUS_LABEL[st]}</div><div class="pin-grid">${groups[st].map(({ id, a, isEvent }) => isEvent ? ideaEventCard(id, a) : pinCard(a)).join('')}</div>`
-        : '').join('');
+      const items = ids.map((id) => {
+        const a = D.ACT_BY_ID[id] || D.EVENTS.find((e) => e.id === id);
+        return a ? { id, a, isEvent: !D.ACT_BY_ID[id] } : null;
+      }).filter(Boolean);
+      board = `<div class="ideas-grid">${items.map(({ id, a, isEvent }) => isEvent ? ideaEventCard(id, a) : ideaCard(a)).join('')}</div>`;
     }
     return `
-      <div class="section-head" style="margin-top:.4rem"><h2>Ideas</h2><p>Everyone’s maybe-pile. Tap Save anywhere to add to the selected board.</p></div>
-      <div class="chips-row person-row" role="group" aria-label="Whose board">${chips}</div>
+      <header class="page-head ideas-head">
+        <div><p class="page-kicker">Saved boards</p><h2>Our ideas</h2><p>Things each of us wants to remember.</p></div>
+        <a class="text-link" href="#/activities">Browse all activities →</a>
+      </header>
+      <div class="person-row" role="group" aria-label="Whose board">${chips}</div>
+      <p class="board-meta">${ids.length} saved for ${esc(p)}</p>
       ${board}
-      <p class="intro local-note">Boards are saved on <strong>this phone only</strong> — everyone keeps their own on their own phone.</p>
+      <p class="local-note"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Saved on this device.</p>
     `;
   };
+  function ideaCard(a) {
+    const img = actCover(a); const area = D.AREA_BY_ID[a.areaId];
+    return `<article class="idea-card">
+      <a class="idea-hit" href="#/plan/${esc(a.id)}">
+        ${img && img.photo ? `<img src="${esc(img.photo)}" alt="" loading="lazy" decoding="async" />` : ''}
+        <span class="idea-copy"><strong>${esc(a.title)}</strong>${area ? `<span>${esc(area.name)}</span>` : ''}</span>
+      </a>
+      <div class="idea-save">${saveBtn(a.id)}</div>
+      ${statusPicker(a.id)}
+    </article>`;
+  }
   function ideaEventCard(id, e) {
-    return `<article class="pin-card"><a class="pin-hit" href="#/event/${esc(id)}"><h3>${esc(e.name)}</h3><p>${esc(e.where || '')} · ${esc(e.datesLabel || '')}</p></a><div class="pin-foot"><span class="pin-tags"><span class="pc-tag">Event</span></span>${saveBtn(id)}</div></article>`;
+    return `<article class="idea-card idea-event"><a class="idea-hit" href="#/event/${esc(id)}"><span class="idea-event-date">${esc(e.datesLabel || '')}</span><span class="idea-copy"><strong>${esc(e.name)}</strong><span>${esc(e.where || '')}</span></span></a><div class="idea-save">${saveBtn(id)}</div>${statusPicker(id)}</article>`;
   }
   function wireIdeas() {
     screenEl.querySelectorAll('[data-person]').forEach((b) => b.addEventListener('click', () => { const who = b.dataset.person; setPerson(who); render(); const again = screenEl.querySelector(`[data-person="${who}"]`); if (again) again.focus({ preventScroll: true }); announce('Showing ' + who + '’s ideas'); }));
+    wireStatusButtons();
   }
 
   /* ---------- BIKE (cycling hub) ------------------------------------ */
@@ -620,28 +705,19 @@
       <p class="source-line">Route stats tie to a named start point and are checked against official sources — see any climb’s detail page.</p>`;
   };
 
-  /* ---------- credits + surprise (used by Activities) --------------- */
+  /* ---------- credits ----------------------------------------------- */
   function creditsBlock() { return `<details class="credits"><summary>Photo credits (Wikimedia Commons)</summary><p>${D.CREDITS.map((c) => `<a href="${esc(c.source)}" target="_blank" rel="noopener">${esc(c.subject)}</a> — ${esc(c.author)}, ${esc(c.license)}`).join(' · ')}</p></details>`; }
-  function wireSurprise() {
-    const btn = document.getElementById('surprise'), out = document.getElementById('surprise-out'); if (!btn || !out) return;
-    btn.addEventListener('click', () => {
-      const cats = sample(D.CATEGORIES, 3);
-      const picks = cats.map((c) => { const pool = D.ACTIVITIES.filter((a) => a.status !== 'closed' && (a.themes || []).some((t) => c.themes.includes(t))); return pool.length ? sample(pool, 1)[0] : null; }).filter(Boolean);
-      out.innerHTML = `<div class="cards" style="margin-top:.7rem">${picks.map((a) => activityCard(a)).join('')}</div>`;
-      announce('Three ideas: ' + picks.map((p) => p.title).join(', '));
-    });
-  }
 
   /* ---------- AREAS ------------------------------------------------- */
   Views.areas = function (route) {
     if (route.parts[0]) return Views.areaDetail(route.parts[0]);
-    const cards = D.AREAS.map((a) => `<a class="area-card" href="#/areas/${esc(a.id)}"><div class="ac-img-wrap">${cover(coverOf(a), { emoji: '📍', label: a.name, alt: a.name, cls: 'ac-cover' })}</div><div class="ac-body"><div class="ac-zone">${esc(a.zone)}</div><h3>${esc(a.name)}</h3><p class="ac-why">${esc(a.why)}</p></div></a>`).join('');
+    const cards = D.AREAS.map((a) => `<a class="area-card" href="#/areas/${esc(a.id)}"><div class="ac-img-wrap">${cover(coverOf(a), { label: a.name, alt: a.name, cls: 'ac-cover' })}</div><div class="ac-body"><div class="ac-zone">${esc(a.zone)}</div><h3>${esc(a.name)}</h3><p class="ac-why">${esc(a.why)}</p></div></a>`).join('');
     return `<div class="section-head" style="margin-top:.4rem"><h2>Around the lake &amp; beyond</h2></div><div class="cards" style="grid-template-columns:1fr">${cards}</div>`;
   };
   Views.areaDetail = function (id) {
     const a = D.AREA_BY_ID[id]; if (!a) return `<div class="empty">Unknown area.</div>`;
     const here = D.ACTIVITIES.filter((x) => x.areaId === id);
-    return `<div class="detail-hero">${cover(coverOf(a), { emoji: '📍', label: a.name, alt: a.name, cls: 'cover-fill', eager: true })}<div class="dh-inner"><div class="dh-zone">${esc(a.zone)}</div><h2 class="dh-h1">${esc(a.name)}</h2></div></div>
+    return `<div class="detail-hero">${cover(coverOf(a), { label: a.name, alt: a.name, cls: 'cover-fill', eager: true })}<div class="dh-inner"><div class="dh-zone">${esc(a.zone)}</div><h2 class="dh-h1">${esc(a.name)}</h2></div></div>
       <p class="detail-lede">${esc(a.why)}</p>
       <div class="actions"><a class="btn" href="#/map?place=area-${esc(a.id)}">On map</a><a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${a.coords.join(',')}" target="_blank" rel="noopener">Directions ↗</a>${a.official ? `<a class="btn ghost" href="${esc(a.official)}" target="_blank" rel="noopener">Official ↗</a>` : ''}</div>
       ${here.length ? `<div class="section-head"><h2>Things to do here</h2></div><div class="cards">${here.map((x) => activityCard(x)).join('')}</div>` : ''}`;
@@ -650,30 +726,60 @@
   /* ---------- TRIP (logistics + the 18 days at a glance) ------------ */
   Views.trip = function () {
     const T = D.TRANSPORT;
-    const stays = D.STAYS.map((s) => `<div class="stay-card"><div class="stay-top"><div><div class="ac-zone">${esc(s.legLabel)} · ${esc(s.village)}</div><h3>${esc(s.name)}</h3></div><span class="stay-dates">${esc(s.dates)}</span></div>
-      <p class="stay-addr">${esc(s.address)}</p>
-      <dl class="spec" style="margin:.5rem 0 .3rem"><dt>In</dt><dd>${esc(s.checkin)}</dd><dt>Out</dt><dd>${esc(s.checkout)}</dd></dl>
-      <div class="ac-tags">${s.features.map((f) => `<span class="tag">${esc(f)}</span>`).join('')}</div>
-      <div class="actions" style="margin:.7rem 0 0"><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a><a class="btn ghost" href="#/map?place=${esc(s.id)}">On map</a></div></div>`).join('');
-    const flights = T.flights.map((f) => `<div class="flight-card"><div class="fc-top"><span class="fc-who">${f.dir === 'out' ? 'Arrives · ' : 'Departs · '}${esc(f.who)}</span><span class="fc-date">${esc(f.date)}</span></div><div class="fc-route">${esc(f.legs)}</div><div class="fc-meta">${esc(f.flight)} · conf ${esc(f.conf)}</div>${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}</div>`)
-      .join('') + (T.flightsNote ? `<div class="flight-card placeholder"><div class="fc-top"><span class="fc-who">Chip &amp; Ian</span><span class="fc-date">TBC</span></div><p class="fc-note">${esc(T.flightsNote)}</p></div>` : '');
+    const stays = D.STAYS.map((s) => `<article class="stay-row">
+      <img src="${esc(s.photo)}" alt="" loading="lazy" decoding="async" />
+      <div class="stay-main">
+        <p class="row-kicker">${esc(s.legLabel)} · ${esc(s.dates)}</p>
+        <h3>${esc(s.name)}</h3>
+        <p class="stay-addr">${esc(s.address)}</p>
+        <dl class="stay-times"><div><dt>Check-in</dt><dd>${esc(s.checkin)}</dd></div><div><dt>Check-out</dt><dd>${esc(s.checkout)}</dd></div></dl>
+      </div>
+      <div class="stay-actions"><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.address)}" target="_blank" rel="noopener">Directions ↗</a><a href="#/map?place=${esc(s.id)}">Open map</a></div>
+    </article>`).join('');
+    const flights = T.flights.map((f) => `<article class="flight-row">
+      <div class="flight-direction">${f.dir === 'out' ? 'Outbound' : 'Return'}</div>
+      <div class="flight-main"><strong>${esc(f.legs)}</strong><span>${esc(f.who)} · ${esc(f.date)}</span></div>
+      <div class="flight-number"><span>${esc(f.flight)}</span><small>Ref ${esc(f.conf)}</small></div>
+      ${f.note ? `<p class="fc-note">${esc(f.note)}</p>` : ''}
+    </article>`).join('') + (T.flightsNote ? `<article class="flight-row placeholder"><div class="flight-direction">Travel TBC</div><div class="flight-main"><strong>Chip &amp; Ian</strong><span>${esc(T.flightsNote)}</span></div></article>` : '');
     const modes = D.TRANSPORT_GUIDE.modes.map((m) => `<div class="info-card"><h3>${esc(m.label)}</h3><p>${esc(m.summary)}${m.verifyBeforeGo ? ' <span class="pc-tag verify">Verify</span>' : ''}</p></div>`).join('');
-    const jump = [['trip-days', 'Days'], ['trip-stays', 'Stays'], ['trip-travel', 'Flights & van'], ['trip-around', 'Getting around']]
+    const jump = [['trip-stays', 'Stays'], ['trip-travel', 'Flights'], ['trip-van', 'Van'], ['trip-around', 'Essentials']]
       .map(([id, label]) => `<button type="button" class="chip" data-jump="${id}">${label}</button>`).join('');
     return `
-      <div class="section-head" style="margin-top:.4rem"><h2>The shape of it</h2><p>${esc(D.TRIP.datesLabel)} — mountains first, then the lake. Everything confirmed lives here.</p></div>
-      <div class="chips-row jump-row" role="group" aria-label="Jump to section">${jump}</div>
-      <div class="section-head" id="trip-days"><h2>The 18 days at a glance</h2><p>Base changes and fixed events only — the rest stays gloriously open. Tap a date to preview it on Today.</p></div>
-      <div class="timeline">${timelineRows()}</div>
-      <div class="section-head" id="trip-stays"><h2>Where we’re sleeping</h2></div>
-      <div class="cards" style="grid-template-columns:1fr">${stays}</div>
-      <div class="section-head" id="trip-travel"><h2>Getting there &amp; back</h2><p>${esc(T.privacyNote)}</p></div>
-      <div class="note-box warn"><strong>Departure day plan.</strong> ${esc(T.departure)}</div>
-      <div class="flights">${flights}</div>
-      <div class="stay-card"><div class="stay-top"><div><div class="ac-zone">The van · ${esc(T.car.conf)}</div><h3>${esc(T.car.name)}</h3></div></div><dl class="spec" style="margin:.5rem 0 .3rem"><dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd><dt>Return</dt><dd>${esc(T.car.ret)}</dd><dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd><dt>Included</dt><dd>${esc(T.car.includes)}</dd></dl><p class="fc-note">${esc(T.car.find)}</p></div>
-      <div class="section-head" id="trip-around"><h2>Getting around (no-car friendly)</h2><p>${esc(D.TRANSPORT_GUIDE.intro)}</p></div>
-      ${modes}
-      <div class="info-card"><h3>Parking &amp; traffic</h3><p>${esc(D.TRANSPORT_GUIDE.parking)}</p></div>
+      <header class="page-head">
+        <p class="page-kicker">Reference</p>
+        <h2>Trip details</h2>
+        <p>${esc(D.TRIP.datesLabel)} · Les Gets, then Lake Annecy</p>
+      </header>
+      <div class="chips-row jump-row" role="group" aria-label="Trip sections">${jump}</div>
+
+      <section class="trip-section" id="trip-stays"><div class="section-head"><h2>Where we’re staying</h2></div><div class="stay-list">${stays}</div></section>
+
+      <section class="trip-section" id="trip-travel">
+        <div class="section-head"><h2>Flights</h2><p>${esc(T.privacyNote)}</p></div>
+        <div class="flights">${flights}</div>
+        <div class="note-box warn"><strong>Departure day.</strong> ${esc(T.departure)}</div>
+      </section>
+
+      <section class="trip-section" id="trip-van">
+        <div class="section-head"><h2>Van</h2></div>
+        <article class="van-card">
+          <div><p class="row-kicker">${esc(T.car.conf)}</p><h3>${esc(T.car.name)}</h3></div>
+          <dl class="spec"><dt>Pick up</dt><dd>${esc(T.car.pickup)}</dd><dt>Return</dt><dd>${esc(T.car.ret)}</dd><dt>Drivers</dt><dd>${esc(T.car.drivers)}</dd><dt>Included</dt><dd>${esc(T.car.includes)}</dd></dl>
+          <p class="fc-note">${esc(T.car.find)}</p>
+        </article>
+      </section>
+
+      <section class="trip-section" id="trip-around">
+        <div class="section-head"><h2>Getting around</h2><p>${esc(D.TRANSPORT_GUIDE.intro)}</p></div>
+        <div class="info-grid">${modes}<div class="info-card"><h3>Parking &amp; traffic</h3><p>${esc(D.TRANSPORT_GUIDE.parking)}</p></div></div>
+      </section>
+
+      <details class="trip-calendar">
+        <summary>Fixed dates and base changes</summary>
+        <p>Only the dates that are actually fixed. Everything else stays open.</p>
+        <div class="timeline">${timelineRows()}</div>
+      </details>
       <p class="source-line">Transport: <a href="${esc(D.SOURCES['mobilite'].url)}" target="_blank" rel="noopener">Grand Annecy Mobilités ↗</a> · checked ${esc(D.VERIFIED)}. Timetables change — verify exact times before travel.</p>`;
   };
   function wireTrip() {
@@ -682,29 +788,25 @@
   }
 
   /* ---------- MAP (rebuilt) ----------------------------------------- */
+  const MAP_COLORS = { water: '#0B6FB8', cycling: '#2C6A4F', mountains: '#596F62', food: '#8A613A', adrenaline: '#8C4E6D', easy: '#6D7F8A' };
   const MAP_CATS = [
-    { id: 'stay', label: 'Stays', color: '#d1495b', emoji: '🏠' },
-    { id: 'cycling', label: 'Cycling', color: '#2f6b4f', emoji: '🚴' },
-    { id: 'water', label: 'Water & swim', color: '#2fb5c8', emoji: '🏊' },
-    { id: 'hike', label: 'Hikes & views', color: '#6b4fa0', emoji: '🥾' },
-    { id: 'adrenaline', label: 'Adrenaline', color: '#b0487d', emoji: '🪂' },
-    { id: 'food', label: 'Food & drink', color: '#b35a1f', emoji: '🧀' },
-    { id: 'culture', label: 'Culture & villages', color: '#1f7fb3', emoji: '🏛️' },
-    { id: 'event', label: 'Events', color: '#114b73', emoji: '🏁' },
-    { id: 'area', label: 'Towns', color: '#51697b', emoji: '📍' }
+    { id: 'stay', label: 'Stays', color: '#B4533C' },
+    ...GUIDE_CATS.map((c) => ({ id: c.id, label: c.label, color: MAP_COLORS[c.id] })),
+    { id: 'event', label: 'Events', color: '#173F5F' },
+    { id: 'place', label: 'Places', color: '#60717C' }
   ];
   function mapCatOf(a) {
-    if (['swim', 'paddle', 'boat'].includes(a.cat)) return 'water';
     if (['road', 'gravel', 'mtb', 'easybike'].includes(a.cat)) return 'cycling';
-    if (['hike', 'walk'].includes(a.cat)) return 'hike';
-    if (['viaferrata', 'canyoning', 'paragliding', 'family'].includes(a.cat)) return 'adrenaline';
-    if (['food', 'recovery'].includes(a.cat)) return 'food';
-    if (['culture', 'village'].includes(a.cat)) return 'culture';
-    return 'area';
+    if (['swim', 'paddle', 'boat'].includes(a.cat)) return 'water';
+    if (['hike', 'walk'].includes(a.cat)) return 'mountains';
+    if (['viaferrata', 'canyoning', 'paragliding'].includes(a.cat)) return 'adrenaline';
+    if (['food', 'culture', 'village'].includes(a.cat)) return 'food';
+    if (['family', 'recovery'].includes(a.cat)) return 'easy';
+    return 'place';
   }
-  // Every pin shows a symbol for its own activity type (bike, food, swim…),
-  // so the map reads at a glance without opening anything.
-  function pinEmoji(p) { return p.em || (MAP_CATS.find((c) => c.id === p.cat) || {}).emoji || '📍'; }
+  function mapPoiCat(p) {
+    return ({ cycling: 'cycling', water: 'water', hike: 'mountains', adrenaline: 'adrenaline', food: 'food', culture: 'food' })[p.cat] || 'place';
+  }
   // Activities and POIs can share a spot (a village square, a lift base) —
   // fan overlapping pins out in a tiny circle so all stay visible/tappable.
   function deoverlap(places) {
@@ -723,14 +825,14 @@
   }
   function mapPlaces() {
     const out = [];
-    D.STAYS.forEach((s) => out.push({ id: s.id, cat: 'stay', em: '🏠', name: s.name, coords: s.coords.slice(), blurb: `${s.village} · ${s.dates}`, sub: s.address, route: '#/trip', dir: s.coords }));
-    D.ACTIVITIES.forEach((a) => { if (a.coords) out.push({ id: 'act-' + a.id, cat: mapCatOf(a), em: catEmoji(a.cat), name: a.title, coords: a.coords.slice(), blurb: a.summary, route: '#/plan/' + a.id, dir: a.coords, verify: !!a.verifyBeforeGo }); });
-    (D.MAP_POIS || []).forEach((p) => out.push({ id: 'poi-' + p.id, cat: p.cat, em: p.em, name: p.name, coords: p.coords.slice(), blurb: p.blurb, sub: p.note, route: p.route || null, href: p.href || null, dir: p.coords, verify: !!p.verify, closed: !!p.closed }));
-    D.EVENTS.forEach((e) => { if (e.coords) out.push({ id: 'ev-' + e.id, cat: 'event', em: '🏁', name: e.name, coords: e.coords.slice(), blurb: e.datesLabel, route: '#/event/' + e.id, dir: e.coords }); });
-    D.AREAS.forEach((a) => out.push({ id: 'area-' + a.id, cat: 'area', em: '📍', name: a.name, coords: a.coords.slice(), blurb: a.zone, route: '#/areas/' + a.id, dir: a.coords }));
+    D.STAYS.forEach((s) => out.push({ id: s.id, cat: 'stay', name: s.name, coords: s.coords.slice(), blurb: `${s.village} · ${s.dates}`, sub: s.address, route: '#/trip', dir: s.coords }));
+    D.ACTIVITIES.forEach((a) => { if (a.coords) out.push({ id: 'act-' + a.id, cat: mapCatOf(a), name: a.title, coords: a.coords.slice(), blurb: a.summary, route: '#/plan/' + a.id, dir: a.coords, verify: !!a.verifyBeforeGo }); });
+    (D.MAP_POIS || []).forEach((p) => out.push({ id: 'poi-' + p.id, cat: mapPoiCat(p), name: p.name, coords: p.coords.slice(), blurb: p.blurb, sub: p.note, route: p.route || null, href: p.href || null, dir: p.coords, verify: !!p.verify, closed: !!p.closed }));
+    D.EVENTS.forEach((e) => { if (e.coords) out.push({ id: 'ev-' + e.id, cat: 'event', name: e.name, coords: e.coords.slice(), blurb: e.datesLabel, route: '#/event/' + e.id, dir: e.coords }); });
+    D.AREAS.forEach((a) => out.push({ id: 'area-' + a.id, cat: 'place', name: a.name, coords: a.coords.slice(), blurb: a.zone, route: '#/areas/' + a.id, dir: a.coords }));
     return deoverlap(out);
   }
-  let mapInstance = null, mapMarkers = {}, mapState = null;
+  let mapInstance = null, mapMarkers = {}, mapState = null, mapGeneration = 0;
 
   Views.map = function (route) {
     const active = new Set(MAP_CATS.map((c) => c.id));
@@ -739,9 +841,9 @@
     const places = mapPlaces();
     const counts = {}; MAP_CATS.forEach((c) => counts[c.id] = places.filter((p) => p.cat === c.id).length);
     const chips = `<button class="map-chip" data-cat="all" aria-pressed="${active.size === MAP_CATS.length}"><span class="cdot"></span>All</button>` +
-      MAP_CATS.map((c) => `<button class="map-chip" data-cat="${c.id}" aria-pressed="${active.has(c.id)}" style="--cat:${c.color}"><span class="chip-em" aria-hidden="true">${c.emoji}</span>${esc(c.label)} <span class="mc-count">${counts[c.id]}</span></button>`).join('');
+      MAP_CATS.map((c) => `<button class="map-chip" data-cat="${c.id}" aria-pressed="${active.has(c.id)}" style="--cat:${c.color}"><span class="cdot" aria-hidden="true"></span>${esc(c.label)} <span class="mc-count">${counts[c.id]}</span></button>`).join('');
     return `
-      <h2 class="sr-only">Map</h2>
+      <div class="map-intro"><div><h2>Map</h2><p>Activities, stays, and useful places around the lake and mountains.</p></div></div>
       <div class="map-toolbar">
         <div class="map-filters" id="map-filters" role="group" aria-label="Filter map">${chips}</div>
         <div class="map-tools"><button class="mini-btn" id="map-reset" type="button">Reset</button><button class="mini-btn" id="map-base" type="button">Near ${esc(activeStay().village)}</button></div>
@@ -796,7 +898,7 @@
     const shown = places.filter((p) => mapState.active.has(p.cat));
     if (!shown.length) { el.innerHTML = `<div class="empty">No places in the selected filters. <button class="link-btn" id="ml-reset">Reset filters</button></div>`; const r = document.getElementById('ml-reset'); if (r) r.addEventListener('click', () => { mapState.active = new Set(MAP_CATS.map((c) => c.id)); applyMap(places); }); return; }
     const cat = Object.fromEntries(MAP_CATS.map((c) => [c.id, c]));
-    el.innerHTML = shown.map((p) => `<button class="ml-item${p.closed ? ' is-closed' : ''}" data-mid="${esc(p.id)}"><span class="ml-em${p.closed ? ' closed' : ''}" style="border-color:${cat[p.cat].color}" aria-hidden="true">${pinEmoji(p)}</span><span class="ml-body"><strong>${esc(p.name)}${p.closed ? ' <span class="closed-chip">Closed</span>' : ''}</strong><span>${esc(p.blurb)}</span></span></button>`).join('') +
+    el.innerHTML = shown.map((p) => `<button class="ml-item${p.closed ? ' is-closed' : ''}" data-mid="${esc(p.id)}"><span class="ml-mark" style="--cat:${cat[p.cat].color}" aria-hidden="true"></span><span class="ml-body"><strong>${esc(p.name)}${p.closed ? ' <span class="closed-chip">Closed</span>' : ''}</strong><span>${esc(p.blurb)}</span></span></button>`).join('') +
       `<a class="ml-archive" href="#/archive">Not on this map — the cut list &amp; why →</a>`;
     el.querySelectorAll('[data-mid]').forEach((b) => b.addEventListener('click', () => focusMarker(b.dataset.mid)));
   }
@@ -810,6 +912,7 @@
     renderMapList(places);
   }
   function initMapView(route) {
+    const generation = ++mapGeneration;
     const places = mapPlaces();
     // wire filters + tools (work even if the map lib fails)
     const filters = document.getElementById('map-filters');
@@ -819,6 +922,7 @@
     renderMapList(places);
 
     ensureLeaflet().then((ok) => {
+      if (generation !== mapGeneration) return;
       const mapEl = document.getElementById('map'); if (!mapEl) return;
       if (!ok || !window.L) { mapEl.innerHTML = `<div class="map-offline"><p><strong>Map needs a connection.</strong> The place list on the right still works offline — tap any item for directions and details.</p></div>`; return; }
       const cat = Object.fromEntries(MAP_CATS.map((c) => [c.id, c]));
@@ -827,12 +931,12 @@
       mapMarkers = {};
       places.forEach((p) => {
         const c = cat[p.cat];
-        const icon = L.divIcon({ className: 'mk-wrap', html: `<div class="mk${p.closed ? ' closed' : ''}" style="--cat:${c.color}"><span class="g" aria-hidden="true">${pinEmoji(p)}</span>${p.closed ? '<span class="mk-no" aria-hidden="true">⛔</span>' : ''}</div>`, iconSize: [32, 38], iconAnchor: [16, 36], popupAnchor: [0, -32] });
+        const icon = L.divIcon({ className: 'mk-wrap', html: `<div class="mk${p.closed ? ' closed' : ''}" style="--cat:${c.color}"><span class="mk-core" aria-hidden="true"></span>${p.closed ? '<span class="mk-no" aria-hidden="true">×</span>' : ''}</div>`, iconSize: [28, 34], iconAnchor: [14, 32], popupAnchor: [0, -28] });
         const dir = (p.dir && !p.closed) ? `<a class="pop-link" href="https://www.google.com/maps/dir/?api=1&origin=${activeStay().coords.join(',')}&destination=${p.dir.join(',')}" target="_blank" rel="noopener">Directions ↗</a>` : '';
         const open = p.route ? `<a class="pop-link" href="${esc(p.route)}" data-nav-link>Open</a>` : (p.href ? `<a class="pop-link" href="${esc(p.href)}" target="_blank" rel="noopener">Official ↗</a>` : '');
         const verify = p.verify && !p.closed ? `<span class="verify-badge">Verify before going</span> ` : '';
-        const closedB = p.closed ? `<span class="closed-badge">⛔ Closed — don’t plan around this</span> ` : '';
-        const html = `<div class="pop" style="--cat:${c.color}"><span class="pc">${pinEmoji(p)} ${esc(c.label)}</span><h3>${esc(p.name)}</h3><p>${closedB}${verify}${esc(p.blurb)}</p>${p.sub ? `<p class="pop-sub">${esc(p.sub)}</p>` : ''}${open} ${dir}</div>`;
+        const closedB = p.closed ? `<span class="closed-badge">Closed — don’t plan around this</span> ` : '';
+        const html = `<div class="pop" style="--cat:${c.color}"><span class="pc">${esc(c.label)}</span><h3>${esc(p.name)}</h3><p>${closedB}${verify}${esc(p.blurb)}</p>${p.sub ? `<p class="pop-sub">${esc(p.sub)}</p>` : ''}${open} ${dir}</div>`;
         const m = L.marker(p.coords, { icon, title: p.name, alt: p.name, keyboard: true }).addTo(map);
         m.bindPopup(html, { closeButton: true, maxWidth: 250, minWidth: 200 });
         mapMarkers[p.id] = { marker: m, cat: p.cat };
@@ -840,10 +944,19 @@
       map.on('popupopen', (e) => { const el = e.popup.getElement(); if (!el) return; el.querySelectorAll('a[data-nav-link]').forEach((a) => a.addEventListener('click', (ev) => { const h = a.getAttribute('href'); if (h && h[0] === '#') { ev.preventDefault(); location.hash = h; } })); });
       mapInstance = map;
       applyMap(places);
-      setTimeout(() => map.invalidateSize(), 80);
       setTimeout(() => {
+        if (generation === mapGeneration && mapInstance === map) map.invalidateSize();
+      }, 80);
+      setTimeout(() => {
+        if (generation !== mapGeneration || mapInstance !== map) return;
         map.invalidateSize();
-        if (mapState.focus && mapMarkers[mapState.focus]) { const mk = mapMarkers[mapState.focus]; map.setView(mk.marker.getLatLng(), 14); setTimeout(() => mk.marker.openPopup(), 150); }
+        if (mapState.focus && mapMarkers[mapState.focus]) {
+          const mk = mapMarkers[mapState.focus];
+          map.setView(mk.marker.getLatLng(), 14);
+          setTimeout(() => {
+            if (generation === mapGeneration && mapInstance === map) mk.marker.openPopup();
+          }, 150);
+        }
         else fitLake(map, places);
       }, 320);
     });
@@ -857,7 +970,14 @@
     const pts = (near.length ? near : places).map((p) => p.coords);
     if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding: [30, 30], maxZoom: 13 });
   }
-  function teardownMap() { if (mapInstance) { mapInstance.remove(); mapInstance = null; mapMarkers = {}; } }
+  function teardownMap() {
+    mapGeneration += 1;
+    if (mapInstance) {
+      mapInstance.remove();
+      mapInstance = null;
+      mapMarkers = {};
+    }
+  }
 
   /* =========================== router =============================== */
   function parse() {
@@ -872,8 +992,11 @@
   function render() {
     let route = parse();
     if (ALIAS[route.name]) route.name = ALIAS[route.name];
-    if (route.name === 'category' && route.parts[0]) route = { name: 'activities', parts: [], query: { cat: route.parts[0] } };
-    if (route.name === 'plan' && !route.parts[0]) route = { name: 'activities', parts: [], query: route.query.must ? { f: 'book' } : route.query };
+    if (route.name === 'category' && route.parts[0]) {
+      const legacy = { rainy: 'easy' };
+      route = { name: 'activities', parts: [], query: { cat: legacy[route.parts[0]] || route.parts[0] } };
+    }
+    if (route.name === 'plan' && !route.parts[0]) route = { name: 'activities', parts: [], query: route.query.must ? { booking: 'required' } : route.query };
     teardownMap();
     const view = Views[route.name] || Views.home;
     screenEl.innerHTML = view(route);

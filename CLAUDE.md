@@ -12,34 +12,33 @@ things the group may want to get around to.
 It is not a minute-by-minute vacation scheduler. Avoid overplanning, rigid daily
 agendas, heavy comparison tables, and anything that makes the trip feel managed.
 
-## Current Phase
+## Current Architecture
 
-Phase 1 is about getting the bones right:
+The approved primary navigation is:
 
-- Information architecture and navigation
-- Content clarity and completeness
-- Trip logistics structure
-- Activity discovery and bookmarking
-- Maintainable data/setup patterns
-
-Major mobile polish, map clustering, bottom sheets, weather integrations, and
-large visual redesigns are later-phase work unless explicitly requested.
-
-## Navigation Direction
-
-Before deleting, merging, or renaming major sections, propose the information
-architecture and wait for approval.
-
-The likely direction is a simpler bottom nav:
-
-- Today
+- Home
 - Activities
+- Ideas
 - Trip
 - Map
-- Bike
 
-Treat Plan, Discover, Browse, Search, Saved, Events, and logistics as surfaces
-that may need to be merged or clarified, not blindly preserved as separate pages.
+Today is a contextual during-trip view, not the default front door. Cycling is
+specialist content within Activities. Legacy Discover, Browse, Search, Build,
+Saved, Compare, Timeline, and Events routes redirect into the current surfaces.
+
+The visual system is a luminous Alpine field guide inspired by Portal: Fraunces
+display type, restrained Avenir-style utility text, violet-blue twilight,
+Annecy aquamarine, leafy alpine green, tiny geranium-pink accents, atmospheric
+regional imagery, and soft white controls. Violet supplies atmosphere rather
+than dominating the interface. Home should feel like one immersive landscape
+with a large framed window into the guide. Avoid
+beige paper themes, emoji-led controls, generic bento grids, unrelated visual
+effects, or stacks of cards inside cards. Home artwork must remain recognizably
+Lake Annecy, using the real basin, Roc de Chère, Semnoz, La Tournette, Annecy at
+the northern end, and Château de Duingt rather than generic Alpine geography.
+
+Major mobile map work such as clustering and a bottom sheet, weather
+integrations, and shared-board synchronization remain later-phase work.
 
 ## Product Priorities
 
@@ -84,6 +83,10 @@ intentionally public.
 Use placeholders, local-only storage, ignored private config files, or clear
 warnings for sensitive trip data.
 
+The owner explicitly confirmed on 2026-07-29 that the stay addresses currently
+shown in `data.js` are intentionally public. Preserve them and do not raise them
+as a review finding. Confirmation codes must remain masked.
+
 Run the privacy-check skill before finishing any work that touches trip
 logistics, data files, links, or content copied from confirmations.
 
@@ -96,6 +99,8 @@ logistics, data files, links, or content copied from confirmations.
   is later.
 - Do not let update toasts, banners, or floating UI block bottom navigation or
   important content.
+- Keep the Activities and Map taxonomies aligned: Lake & water, Cycling, Hikes
+  & views, Food & history, Adrenaline, and Easy days.
 
 ## Development Workflow
 

@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Annecy &amp; Les Gets — August 2026</title>
-  <meta name="description" content="A trip companion for four riders in Haute-Savoie, 12–29 August 2026: what makes sense today from where we're staying, what to book, and the best of the lake, the cols and the mountains." />
+  <meta name="description" content="Our Annecy and Les Gets field guide: activities, saved ideas, trip details, and the best of the lake and mountains." />
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#2b4a4f" />
+  <meta name="theme-color" content="#6f73ca" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -19,50 +19,56 @@
 
   <!-- Social -->
   <meta property="og:title" content="Annecy &amp; Les Gets — August 2026" />
-  <meta property="og:description" content="What makes sense today, from where we're staying." />
+  <meta property="og:description" content="The lake, the cols, the cheese, and everything we need in one place." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="assets/wiki/hero-lake.jpg" />
 
-  <!-- Self-hosted fonts (assets/fonts) via @font-face in styles.css -->
+  <!-- Self-hosted font (assets/fonts) via @font-face in styles.css -->
   <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin />
 
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=20" />
   <!-- Leaflet is loaded lazily only when the Map screen opens, so a slow or
        failed CDN can never block the rest of the app from booting. -->
 </head>
-<body>
+<body class="route-home">
   <a class="skip-link" href="#screen">Skip to content</a>
 
   <div class="app">
     <header class="appbar" id="appbar">
-      <button class="ab-back" id="ab-back" type="button" aria-label="Go back">‹</button>
-      <span class="ab-brand-dot" aria-hidden="true"></span>
-      <h1 class="ab-title" id="ab-title">Annecy 2026</h1>
-      <a class="ab-action" id="ab-action" href="#/ideas" aria-label="Saved plans" hidden>★</a>
+      <button class="ab-back" id="ab-back" type="button" aria-label="Go back">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <a class="ab-brand" href="#/" aria-label="Annecy 2026 home">Annecy 2026</a>
+      <h1 class="ab-title" id="ab-title">Home</h1>
+      <nav class="bottomnav" id="bottomnav" aria-label="Primary">
+        <a href="#/" data-nav="home"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+        <a href="#/activities" data-nav="activities"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-4 2 2-5z"/></svg><span>Activities</span></a>
+        <a href="#/ideas" data-nav="ideas"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Ideas</span></a>
+        <a href="#/trip" data-nav="trip"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Trip</span></a>
+        <a href="#/map" data-nav="map"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 4 6 2 6-2v14l-6 2-6-2-6 2V6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></a>
+      </nav>
+      <a class="ab-today" href="#/today">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+        <span>During the trip: Today</span>
+      </a>
     </header>
 
     <main class="screen" id="screen" tabindex="-1"><!-- rendered by app.js --></main>
-
-    <nav class="bottomnav" id="bottomnav" aria-label="Primary">
-      <a href="#/"           data-nav="home"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
-      <a href="#/activities" data-nav="activities"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-4 2 2-5z"/></svg>Activities</a>
-      <a href="#/ideas"      data-nav="ideas"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20s-7-4.35-7-9.5A3.5 3.5 0 0 1 12 7a3.5 3.5 0 0 1 7 3.5C19 15.65 12 20 12 20z"/></svg>Ideas</a>
-      <a href="#/trip"       data-nav="trip"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Trip</a>
-      <a href="#/map"        data-nav="map"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 4 6 2 6-2v14l-6 2-6-2-6 2V6z"/><path d="M9 4v14M15 6v14"/></svg>Map</a>
-    </nav>
   </div>
 
   <!-- transient UI, outside the scroll container -->
   <div id="offline-bar" class="offline-bar" role="status" hidden>Offline — showing saved trip data.</div>
   <div id="sw-toast" class="sw-toast" role="status" hidden>
-    <span>New version available.</span>
-    <button type="button" id="sw-reload">Refresh</button>
-    <button type="button" id="sw-dismiss" aria-label="Dismiss update notice">✕</button>
+    <span>Site update ready</span>
+    <button type="button" id="sw-reload">Update</button>
+    <button type="button" id="sw-dismiss" aria-label="Dismiss update notice">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
   </div>
   <div id="live" class="sr-only" aria-live="polite"></div>
 
-  <script src="data.js?v=16"></script>
-  <script src="app.js?v=16"></script>
+  <script src="data.js?v=20"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>

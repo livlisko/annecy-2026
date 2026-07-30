@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v15';
+const VERSION = 'a26-v20';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -13,9 +13,9 @@ const RUNTIME = 'runtime-' + VERSION;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './styles.css',
-  './data.js',
-  './app.js',
+  './styles.css?v=20',
+  './data.js?v=20',
+  './app.js?v=20',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
@@ -34,6 +34,8 @@ const CORE_ASSETS = [
   './assets/wiki/lake-sunset.jpg',
   './assets/wiki/les-gets-mtb.jpg',
   './assets/wiki/veyrier.jpg',
+  './assets/art/annecy-twilight-v3.jpg',
+  './assets/art/annecy-waterfront-v3.jpg',
   './assets/orientation/orientation_relief_card.jpg'
 ];
 
@@ -74,7 +76,7 @@ self.addEventListener('fetch', (e) => {
   // Same-origin app code/data/images: cache-first, then network (and cache).
   if (sameOrigin) {
     e.respondWith(
-      caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req).then((res) => {
+      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
         const copy = res.clone();
         caches.open(RUNTIME).then((c) => c.put(req, copy)).catch(() => {});
         return res;

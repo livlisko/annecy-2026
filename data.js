@@ -1028,7 +1028,7 @@ window.DATA = (function () {
     },
     {
       id: 'vitam-aquapark', title: 'Vitam aqua zone (Neydens)', base: 'lake', cat: 'family', subtype: 'Indoor waterpark',
-      coords: [46.1228, 6.0968],
+      areaId: 'annecy', where: 'Neydens', coords: [46.1228, 6.0968],
       summary: 'The region’s big indoor waterpark — slides, wave pool, outdoor lagoon — 35 minutes north. The nuclear option for a truly wet day.',
       duration: 'half', effort: 'easy', transport: ['car'], themes: ['water','rainy'],
       booking: 'no', bookingUrl: 'https://ucpavitam.fr/fr/infos-pratiques/tarifs/aquatique', price: '€25/4 h · €29/day (high season)',
@@ -1038,7 +1038,7 @@ window.DATA = (function () {
     },
     {
       id: 'karting-rumilly', title: 'Outdoor karting at Rumilly', base: 'lake', cat: 'family', subtype: '1,150 m outdoor circuit',
-      coords: [45.8467, 5.9686],
+      areaId: 'annecy', where: 'Rumilly', coords: [45.8467, 5.9686],
       summary: 'A proper 1,150 m outdoor circuit 35 minutes west — 10-minute sessions, two kart classes, four riders, one championship.',
       duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline'],
       booking: 'recommended', bookingUrl: 'https://www.kartingrumilly.fr/tarifs-location-karting-rumilly/', price: '€27–30 per 10-min session',
@@ -1069,7 +1069,7 @@ window.DATA = (function () {
     },
     {
       id: 'tamie-abbey', title: 'Abbaye de Tamié — Trappist cheese at the source', base: 'lake', cat: 'food', subtype: 'Working abbey + farm shop',
-      coords: [45.68722, 6.30363],
+      areaId: 'doussard', where: 'Plancherine · Col de Tamié', coords: [45.68722, 6.30363],
       summary: 'Buy Tamié from the monks who made it, in the abbey where it’s been made since 1132 — free entry, a film on the cheese, and mountain silence.',
       duration: 'half', effort: 'recovery', transport: ['car'], themes: ['food','views'],
       booking: 'no', bookingUrl: 'https://www.abbaye-tamie.com/informations-pratiques', price: 'Free entry; cheese at farm-shop prices',
@@ -1079,7 +1079,7 @@ window.DATA = (function () {
     },
     {
       id: 'jardins-secrets', title: 'Jardins Secrets (Vaulx)', base: 'lake', cat: 'culture', subtype: 'Hand-built gardens',
-      coords: [45.91871, 5.98653],
+      areaId: 'annecy', where: 'Vaulx', coords: [45.91871, 5.98653],
       summary: 'One family spent 40 years hand-building a labyrinth of Moorish courtyards, painted galleries and rose gardens in the middle of farmland. Genuinely odd, genuinely lovely.',
       duration: '2h', effort: 'recovery', transport: ['car'], themes: ['rainy','recovery'],
       booking: 'no', bookingUrl: 'https://www.jardins-secrets.com/informations-pratiques/', price: '€10 adult',
@@ -1121,7 +1121,7 @@ window.DATA = (function () {
     },
     {
       id: 'fantasticable', title: 'Fantasticable — giant zipline (Châtel)', base: 'lesgets', cat: 'paragliding', subtype: 'Zipline · 100+ km/h',
-      coords: [46.2333, 6.7881],
+      areaId: 'les-gets', where: 'Châtel · Plaine Dranse', coords: [46.2333, 6.7881],
       summary: 'Superman-position zipline across the Plaine Dranse — over a kilometre of cable at motorway speed, ~35 minutes from Les Gets.',
       duration: 'half', effort: 'recovery', transport: ['car'], themes: ['adrenaline','views'],
       booking: 'recommended', bookingUrl: 'https://www.chatel.com/en/activities/the-fantasticable-in-summer-chatel/', price: '€45 solo · €90 duo',
@@ -1131,7 +1131,7 @@ window.DATA = (function () {
     },
     {
       id: 'avokart', title: 'Avokart — downhill karting (Avoriaz)', base: 'lesgets', cat: 'family', subtype: 'Gravity karts',
-      coords: [46.1925, 6.7703],
+      areaId: 'les-gets', where: 'Avoriaz · Prodains', coords: [46.1925, 6.7703],
       summary: 'Three-wheeled gravity karts down the Avoriaz slopes — cable car up, chaos down. First run includes the Prodains Express ascent.',
       duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline'],
       booking: 'recommended', bookingUrl: 'https://www.skipass-avoriaz.com/infos/avokart', price: '€27 first run, €12 per re-run',
@@ -1141,7 +1141,7 @@ window.DATA = (function () {
     },
     {
       id: 'aquariaz', title: 'Aquariaz — tropical waterpark (Avoriaz)', base: 'lesgets', cat: 'swim', subtype: 'Indoor tropical pools',
-      coords: [46.1912, 6.7741],
+      areaId: 'les-gets', where: 'Avoriaz', coords: [46.1912, 6.7741],
       summary: '29 °C water, real tropical plants and a halfpipe slide inside a glass hall at 1,800 m — the Les Gets-leg answer to a washout day.',
       duration: '2h', effort: 'recovery', transport: ['car'], themes: ['water','rainy','recovery'],
       booking: 'no', bookingUrl: 'https://www.avoriaz.com/en/fiche/aquariaz-tropical-paradise/', price: '€12 adult',
@@ -1151,7 +1151,7 @@ window.DATA = (function () {
     },
     {
       id: 'rafting-dranse', title: 'Raft the Dranse gorges', base: 'lesgets', cat: 'canyoning', subtype: 'Rafting · ~1 h on water',
-      coords: [46.3244, 6.5879],
+      areaId: 'les-gets', where: 'Dranse gorges · near Thonon', coords: [46.3244, 6.5879],
       summary: 'The Haute-Savoie’s rafting river — a classic gorge descent ~35 minutes from Les Gets, all kit provided, departures four times a day.',
       duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
       booking: 'required', bookingUrl: 'https://an-rafting.com/prestation/rafting-haute-savoie/', price: '€52 adult',
@@ -1161,7 +1161,7 @@ window.DATA = (function () {
     },
     {
       id: 'nautichill-montriond', title: 'Lac de Montriond — beach, SUP & canoe', base: 'lesgets', cat: 'paddle', subtype: 'Mountain lake · 1,060 m',
-      coords: [46.2090, 6.7291],
+      areaId: 'les-gets', where: 'Lac de Montriond', coords: [46.2090, 6.7291],
       summary: 'The emerald cliff-ringed lake 20 minutes from Les Gets, with a little SUP/canoe base right off the beach and a snack terrace.',
       why: 'The best water day of the mountain leg — bring the swim stuff.',
       duration: 'half', effort: 'easy', transport: ['car'], themes: ['water','views','recovery'],
@@ -1172,7 +1172,7 @@ window.DATA = (function () {
     },
     {
       id: 'pont-du-diable', title: 'Gorges du Pont du Diable', base: 'lesgets', cat: 'culture', subtype: 'Show gorge · walkways',
-      coords: [46.3068, 6.6158],
+      areaId: 'les-gets', where: 'La Vernaz · Dranse valley', coords: [46.3068, 6.6158],
       summary: 'Walkways bolted through a marble gorge the Dranse carved 60 m deep — the classic wet-morning wonder between Morzine and Thonon.',
       duration: '2h', effort: 'easy', transport: ['car'], themes: ['views','rainy'],
       booking: 'no', bookingUrl: 'https://www.lepontdudiable.com/informations-tarifs/', price: '€19 adult',
@@ -1315,95 +1315,6 @@ window.DATA = (function () {
     { emoji: '🪂', title: 'The answer from the sky', text: 'On 1 August 1944 the plateau got its reply: a huge daylight parachute drop of arms. Weeks later, on 19 August, Haute-Savoie did something almost unique — it freed itself, the German garrison surrendering to the Resistance in Annecy before any Allied army arrived.' },
     { emoji: '🕊️', title: 'You can stand there', text: 'The plateau is an easy drive: the national monument, open walking country, and the Resistance museum and necropolis at Morette on the Thônes road — the same road you’ll take toward the Aravis and the cheese.' }
   ];
-  const DISCOVERIES = [
-    { emoji: '🚵', title: 'You’re sleeping in a world-class bike park', text: 'Leg one puts you at the foot of the Les Gets slopes — 128 km of lift-served trails from the front door, before the lake even starts.', route: '#/plan/lesgets-bikepark' },
-    { emoji: '🌄', title: 'The nearest bike park is 20 minutes away', text: 'The Semnoz above Annecy runs a summer bike park and luge daily through 30 August — the closest lift-served descents to the lake.', route: '#/plan/semnoz-bikepark' },
-    { emoji: '🪂', title: 'You can fly off the Forclaz', text: 'Tandem paragliders launch off Col de la Forclaz and float down to Doussard with the whole lake below. Book a calm morning.', route: '#/plan/paragliding-forclaz' },
-    { emoji: '🏞️', title: 'There’s a canyon 15 minutes from the house', text: 'Guided canyoning in the Angon gorge — rappels and pool swims for beginners, a jumpier sporty version at Montmin next door.', route: '#/plan/canyoning-angon' },
-    { emoji: '🚴', title: 'A World Cup lands mid-trip', text: 'The UCI MTB World Cup returns to Les Gets 20–23 Aug — free to watch, a day-trip from the lake (mind the Aug 22 crowds).', route: '#/event/lesgets-worldcup' },
-    { emoji: '🕊️', title: 'The Resistance made its stand next door', text: 'In 1944 the Maquis des Glières held a plateau just north-east of the lake. You can walk it — and visit the museum on the Thônes road.', route: '#/plan/glieres-walk' }
-  ];
-  const ZONES = [
-    { region: 'top', emoji: '🏛️', label: 'Annecy', text: 'Old town, market, canals, the Haras' },
-    { region: 'west', emoji: '🚲', label: 'West shore', text: 'Sévrier · Saint-Jorioz · Duingt — the greenway & beaches' },
-    { region: 'east', emoji: '🏠', label: 'East shore · home', text: 'Veyrier (home) · Menthon · Talloires — swims, pontoons, the Forclaz' },
-    { region: 'south', emoji: '🌾', label: 'South end', text: 'Doussard / Bout-du-Lac — calm water, SUP, paragliding landing' },
-    { region: 'heights', emoji: '🌄', label: 'Above the lake', text: 'Semnoz & Forclaz — climbs, bike park, big views' },
-    { region: 'beyond', emoji: '🏔️', label: 'Beyond', text: 'Aravis · Glières · Les Gets · Chamonix' }
-  ];
-
-  const CATEGORIES = [
-    { id: 'cycling', title: 'Cycling', emoji: '🚴', tint: 'pine', media: { photo: 'assets/wiki/col-aravis.jpg' },
-      vibe: 'Road, gravel, MTB and bike parks — this trip’s beating heart.',
-      looksLike: 'A col before breakfast heat, a gravel epic over the Glières, a lift-served bike-park afternoon, or a flat greenway spin between swims.',
-      themes: ['bikes'] },
-    { id: 'water', title: 'Water & swimming', emoji: '🏊', tint: 'aqua', media: { photo: 'assets/wiki/lake-swim.jpg' },
-      vibe: 'Clean, cold, turquoise water you can walk into — plus paddle, sail and dive.',
-      looksLike: 'Walk-down swims at La Brune, a SUP off the home beach before the breeze, pontoon jumps at Menthon, a first dive off the town shore.',
-      themes: ['water'] },
-    { id: 'adrenaline', title: 'Adrenaline', emoji: '🪂', tint: 'purple', media: { photo: 'assets/wiki/forclaz.jpg' },
-      vibe: 'Fly, drop and scramble — guided and serious.',
-      looksLike: 'A tandem flight off the Forclaz, canyoning the Angon gorge, the Jallouvre via ferrata, or a bike-park day.',
-      themes: ['adrenaline'] },
-    { id: 'mountains', title: 'Hikes & big views', emoji: '🏔️', tint: 'alpine', media: { photo: 'assets/wiki/semnoz.jpg' },
-      vibe: 'Up high on a clear day for the view that makes everyone stop talking.',
-      looksLike: 'The Semnoz ridge picnic, the airy Mont Veyrier loop, the easy Trois Lacs stroll, the Glières plateau.',
-      themes: ['views'] },
-    { id: 'food', title: 'Markets & food', emoji: '🧀', tint: 'sun', media: { photo: 'assets/wiki/annecy-market.jpg' },
-      vibe: 'Cheap, joyful eating — markets, cheese caves and lake-fish lunches beat fancy dinners here.',
-      looksLike: 'The old-town market, a cheese run at Pierre Gay, the new Halles du Haras food hall, one Savoyard night.',
-      themes: ['food'] },
-    { id: 'rainy', title: 'Rainy & rest days', emoji: '🌧️', tint: 'alpine-deep', media: { photo: 'assets/wiki/gorges-fier.jpg' },
-      vibe: 'Grey skies and tired legs have good plans too.',
-      looksLike: 'The Gorges du Fier walkway, the animation museum, the Roc de Chère woods, the pool at Casa Elisa, a long market lunch.',
-      themes: ['rainy','recovery'] }
-  ];
-  const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
-
-  /* ---------- BUILD-A-DAY (five primary questions) ------------------- */
-  const BUILD = {
-    time:   [
-      { id: '2h', label: '2 hours', emoji: '⏱️' },
-      { id: 'half', label: 'Half day', emoji: '🌤️' },
-      { id: 'full', label: 'Full day', emoji: '☀️' },
-      { id: 'evening', label: 'Evening', emoji: '🌅' }
-    ],
-    effort: [
-      { id: 'recovery', label: 'Recovery', emoji: '🛋️' },
-      { id: 'easy', label: 'Easy', emoji: '🚶' },
-      { id: 'moderate', label: 'Moderate', emoji: '🚲' },
-      { id: 'big', label: 'Big', emoji: '🚵' }
-    ],
-    transport: [
-      { id: 'walk', label: 'On foot', emoji: '🚶' },
-      { id: 'bike', label: 'By bike', emoji: '🚴' },
-      { id: 'busboat', label: 'Bus / boat', emoji: '⛴️' },
-      { id: 'car', label: 'Car’s fine', emoji: '🚗' }
-    ],
-    theme:  [
-      { id: 'any', label: 'Anything', emoji: '✨' },
-      { id: 'water', label: 'Water', emoji: '🏊' },
-      { id: 'bikes', label: 'Bikes', emoji: '🚴' },
-      { id: 'views', label: 'Views', emoji: '🌄' },
-      { id: 'food', label: 'Food', emoji: '🧀' },
-      { id: 'adrenaline', label: 'Adrenaline', emoji: '🪂' },
-      { id: 'rainy', label: 'Rainy', emoji: '🌧️' }
-    ],
-    // progressive optional filters
-    weather: [
-      { id: 'any', label: 'Any weather' },
-      { id: 'clear', label: 'Clear & settled' },
-      { id: 'rain', label: 'Wet' },
-      { id: 'heat', label: 'Heat wave' },
-      { id: 'storm-pm', label: 'Storms later' }
-    ],
-    booking: [
-      { id: 'any', label: 'Either' },
-      { id: 'spontaneous', label: 'Spontaneous now' },
-      { id: 'ok-to-book', label: 'Happy to book' }
-    ]
-  };
-
   /* ---------- FEATURED + shortlists --------------------------------- */
   const FEATURED = ['lake-loop-road', 'canyoning-angon', 'semnoz-bikepark', 'paragliding-forclaz'];
   const LESGETS_TOP3 = ['lesgets-bikepark', 'morillon-enduro', 'lesgets-lift-walk'];
@@ -1535,9 +1446,7 @@ window.DATA = (function () {
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
     EVENTS, TRANSPORT_GUIDE,
-    STORY, HISTORY, DISCOVERIES, ZONES,
-    CATEGORIES, CATEGORY_BY_ID,
-    MAP_POIS, ARCHIVE, BUILD, FEATURED, LESGETS_TOP3, LAKE_EXCURSIONS, CREDITS
+    STORY, HISTORY,
+    MAP_POIS, ARCHIVE, FEATURED, LESGETS_TOP3, LAKE_EXCURSIONS, CREDITS
   };
 })();
-

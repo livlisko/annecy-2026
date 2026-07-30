@@ -14,7 +14,7 @@ seasons, prices and schedules move.
   for our exact dates. Those render an amber **“Verify before going”** badge.
 - **`data.js` → `EVENTS[]`** — each event has `confidence`
   (`confirmed` / `likely`), `src` and a `conflict` flag for changeover days.
-- **`data.js` → `TRANSPORT_GUIDE` / `WEATHER`** — transport and forecast links.
+- **`data.js` → `TRANSPORT_GUIDE`** — transport notes and source links.
 
 ## Priority re-checks (highest churn first)
 
@@ -52,12 +52,6 @@ seasons, prices and schedules move.
 1. Open the official page (`SOURCES[id].url`).
 2. Edit the value in `data.js` and bump that source’s `on:` date (or the
    activity/event field). Set `verifyBeforeGo` back to `false` once confirmed.
-3. Bump `VERSION` in `sw.js` (e.g. `a26-v10`) so the offline cache refreshes.
+3. Bump `VERSION` in `sw.js` (e.g. `a26-v18`) and update the query versions in
+   `index.html` / `CORE_ASSETS` so the offline cache refreshes.
 4. No build step — commit and it deploys via GitHub Pages.
-
-## Weather
-
-The app never fabricates live conditions. During the trip, open the links on
-the Today screen each morning: **Météo-France** (towns + hourly), **Météo-France
-Montagne — Alpes du Nord** (afternoon-storm timing for cols/ridges), the
-**Vigilance** map (storm/heat alerts) and **Windfinder Veyrier** (lake wind).
