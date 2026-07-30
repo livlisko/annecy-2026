@@ -105,7 +105,19 @@ window.DATA = (function () {
     'avokart':         { url: 'https://www.skipass-avoriaz.com/infos/avokart', type: 'Operator', on: '2026-07-26' },
     'aquariaz':        { url: 'https://www.avoriaz.com/en/fiche/aquariaz-tropical-paradise/', type: 'Tourism office', on: '2026-07-26' },
     'an-rafting':      { url: 'https://an-rafting.com/prestation/rafting-haute-savoie/', type: 'Operator', on: '2026-07-26' },
-    'music-meca':      { url: 'https://musicmecalesgets.org/horaires-tarifs/', type: 'Operator', on: '2026-07-26' }
+    'music-meca':      { url: 'https://musicmecalesgets.org/horaires-tarifs/', type: 'Operator', on: '2026-07-26' },
+    // Iconic-col guide (official Tour and local tourism sources, checked 30 Jul)
+    'tdf-joux-plane':  { url: 'https://www.letour.fr/en/news/2023/carlos-rodriguez-the-birth-of-a-champion/1314125', type: 'Tour de France', on: '2026-07-30' },
+    'tdf-ramaz':       { url: 'https://www.letour.fr/en/news/2010/andy-the-winner-while-evans-is-the-leader/1044994', type: 'Tour de France', on: '2026-07-30' },
+    'tdf-semnoz-2013': { url: 'https://www.letour.fr/en/news/2013/quintana-s-coup-the-arrival-of-a-climbing-king/1045288', type: 'Tour de France', on: '2026-07-30' },
+    'tdf-colombiere':  { url: 'https://www.letour.fr/en/news/2021/stage-8/teuns-doubles-up-pogacar-takes-yellow/1294702', type: 'Tour de France', on: '2026-07-30' },
+    'tdf-haute-savoie':{ url: 'https://www.letour.fr/en/news/2023/stage-15/commentary-from-christian-prudhomme-26/1308898', type: 'Tour de France', on: '2026-07-30' },
+    'forclaz-summit':  { url: 'https://www.haute-savoie-tourisme.org/nature/points-vue/117371-belvedere-de-montmin-col-de-la-forclaz', type: 'Tourism office', on: '2026-07-30' },
+    'semnoz-summer':   { url: 'https://www.lac-annecy.com/idees-de-sejour/ete/une-journee-d-ete-au-semnoz/', type: 'Tourism office', on: '2026-07-30' },
+    'aravis-summit':   { url: 'https://www.haute-savoie-tourisme.org/nature/cols-montagnes/209204-col-des-aravis', type: 'Tourism office', on: '2026-07-30' },
+    'colombiere-summit': { url: 'https://en.legrandbornand.com/le-col-de-la-colombiere-colombiere-pass.html', type: 'Tourism office', on: '2026-07-30' },
+    'joux-plane-summit': { url: 'https://www.haut-giffre.fr/equipements/peche-au-lac-de-joux-plane/', type: 'Tourism office', on: '2026-07-30' },
+    'ramaz-summit':    { url: 'https://en.prazdelys-sommand.com/equipement/col-de-la-ramaz-tourist-route/', type: 'Tourism office', on: '2026-07-30' }
   };
 
   /* ---------- TRIP: legs, bases, stays (personal, kept in full) ------
@@ -184,6 +196,60 @@ window.DATA = (function () {
 
   // The four of us — used for the per-person Ideas boards (saved on each phone).
   const PEOPLE = ['Olivia', 'Andrew', 'Chip', 'Ian'];
+
+  /* ---------- ICONIC TOUR COLS ----------------------------------------
+     A deliberately short recognition guide, not another climb database.
+     Coordinates/elevations come from the verified French Cols Tracker. */
+  const TOUR_COLS = [
+    {
+      id: 'forclaz', name: 'Col de la Forclaz de Montmin', elevation: 1150,
+      region: 'Above Lake Annecy', coords: [45.8085, 6.2448],
+      iconic: 'Annecy’s balcony: the lake drops away below the road and paragliders launch almost at eye level.',
+      tour: 'Crossed on Stage 15 of the 2023 Tour, from Les Gets to Saint-Gervais Mont-Blanc.',
+      summit: 'The belvedere and launch deck, farm-made cheese and Savoyard food at La Ferme, snacks, terraces and short viewpoint walks.',
+      tourSrc: 'tdf-haute-savoie', summitSrc: 'forclaz-summit', ideaId: 'forclaz-lunch'
+    },
+    {
+      id: 'semnoz', name: 'Semnoz · Crêt de Châtillon', elevation: 1670,
+      region: 'Above Annecy', coords: [45.7977, 6.1072],
+      iconic: 'Annecy’s own summit road, with a huge horizon over the lake, Bauges, Aravis and Mont Blanc.',
+      tour: 'The summit finish of Stage 20 in the 100th Tour in 2013: Nairo Quintana won the stage and mountains jersey while Chris Froome secured the Tour.',
+      summit: 'Panoramic ridge walks, summer luge, mountain activities, several restaurants and alpage farms. Easy to enjoy without a bike.',
+      tourSrc: 'tdf-semnoz-2013', summitSrc: 'semnoz-summer', ideaId: 'semnoz-picnic'
+    },
+    {
+      id: 'aravis', name: 'Col des Aravis', elevation: 1487,
+      region: 'La Clusaz · Aravis', coords: [45.8723, 6.4649],
+      iconic: 'The postcard pass: limestone teeth behind you and Mont Blanc framed across the valley.',
+      tour: 'One of the region’s true Tour fixtures, crossed 38 times in all; the race returned again on the 2023 Les Gets stage.',
+      summit: 'The 1650 Sainte-Anne chapel, Mont Blanc viewpoint, restaurants, cheese and souvenir shops, plus several walks from the pass.',
+      tourSrc: 'tdf-haute-savoie', summitSrc: 'aravis-summit', ideaId: 'aravis-cheese'
+    },
+    {
+      id: 'colombiere', name: 'Col de la Colombière', elevation: 1613,
+      region: 'Le Grand-Bornand · Aravis', coords: [45.9922, 6.4757],
+      iconic: 'A classic Route des Grandes Alpes pass squeezed between dramatic limestone walls, often with ibex above the road.',
+      tour: 'A regular Tour battleground since 1960. In 2021 the race crossed it before Le Grand-Bornand as Tadej Pogačar took yellow.',
+      summit: 'A mountain restaurant directly on the col, a broad viewpoint and several hike starts; look up for ibex on the cliffs.',
+      tourSrc: 'tdf-colombiere', summitSrc: 'colombiere-summit', ideaId: 'aravis-cheese'
+    },
+    {
+      id: 'joux-plane', name: 'Col de Joux Plane', elevation: 1712,
+      region: 'Morzine · Samoëns', coords: [46.1326, 6.7111],
+      iconic: 'The brutal final wall before the descent to Morzine: a name cycling fans immediately recognize.',
+      tour: 'In 2023 it became the Tour’s 250th hors-catégorie climb, with Vingegaard and Pogačar duelling over the summit before Carlos Rodríguez won in Morzine.',
+      summit: 'Lac de Joux Plane, easy lake walks, summer trout fishing and Le Relais des Vallées restaurant facing the water.',
+      tourSrc: 'tdf-joux-plane', summitSrc: 'joux-plane-summit'
+    },
+    {
+      id: 'ramaz', name: 'Col de la Ramaz', elevation: 1619,
+      region: 'Praz de Lys · Sommand', coords: [46.1593, 6.5807],
+      iconic: 'The quieter Portes du Soleil classic: a wild-feeling road with an enormous Mont Blanc panorama.',
+      tour: 'Used on major Tour stages in 2010 and 2023; in 2023 it came before Joux Plane on the mountain run into Morzine.',
+      summit: 'The panorama is the main event, plus an easy walk to Lac de Roy for marmots; Praz de Lys and Sommand have Savoyard restaurants nearby.',
+      tourSrc: 'tdf-ramaz', summitSrc: 'ramaz-summit'
+    }
+  ];
 
   /* ---------- AREAS (the mental map of the lake and its edges) -------- */
   const AREAS = [
@@ -1443,6 +1509,7 @@ window.DATA = (function () {
 
   return {
     VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT, PEOPLE,
+    TOUR_COLS,
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
     EVENTS, TRANSPORT_GUIDE,

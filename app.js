@@ -683,6 +683,48 @@
     wireStatusButtons();
   }
 
+  /* ---------- ICONIC COLS ------------------------------------------- */
+  function sourceAnchor(id, label) {
+    const s = D.SOURCES[id];
+    return s ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(label)} ↗</a>` : '';
+  }
+  function tourColLinks(c, includeIdea) {
+    const links = [
+      `<a href="https://www.google.com/maps/dir/?api=1&destination=${c.coords.join(',')}" target="_blank" rel="noopener">Directions ↗</a>`,
+      includeIdea && c.ideaId && D.ACT_BY_ID[c.ideaId] ? `<a href="#/plan/${esc(c.ideaId)}">Related trip idea →</a>` : '',
+      sourceAnchor(c.tourSrc, 'Tour history'),
+      sourceAnchor(c.summitSrc, 'Summit guide')
+    ].filter(Boolean);
+    return `<div class="tour-col-links">${links.join('')}</div>`;
+  }
+  function tourColFacts(c) {
+    return `
+      <dl class="tour-col-facts">
+        <div><dt>Why it matters</dt><dd>${esc(c.iconic)}</dd></div>
+        <div><dt>Tour de France</dt><dd>${esc(c.tour)}</dd></div>
+        <div><dt>At the top</dt><dd>${esc(c.summit)}</dd></div>
+      </dl>`;
+  }
+  function tourColCard(c, index) {
+    return `<article class="tour-col-row" id="tour-col-${esc(c.id)}">
+      <div class="tour-col-name">
+        <span class="tour-col-number">${String(index + 1).padStart(2, '0')}</span>
+        <div><p>${esc(c.region)} · ${c.elevation} m</p><h4>${esc(c.name)}</h4></div>
+      </div>
+      <div class="tour-col-copy">${tourColFacts(c)}${tourColLinks(c, true)}</div>
+    </article>`;
+  }
+  function tourColPanel(c) {
+    if (!c) return '';
+    return `
+      <div class="alpine-detail-head">
+        <p>${esc(c.region)} · ${c.elevation} m</p>
+        <h3>${esc(c.name)}</h3>
+      </div>
+      ${tourColFacts(c)}
+      ${tourColLinks(c, true)}`;
+  }
+
   /* ---------- BIKE (cycling hub) ------------------------------------ */
   Views.bike = function () {
     const byCat = (cats) => D.ACTIVITIES.filter((a) => a.status !== 'closed' && cats.includes(a.cat));
@@ -693,8 +735,23 @@
       ['MTB & bike parks', byCat(['mtb'])]
     ];
     const races = D.EVENTS.filter((e) => e.kind === 'race');
+    const cols = D.TOUR_COLS || [];
     return `
-      <div class="section-head" style="margin-top:.4rem"><h2>Cycling</h2><p>Every ride on the trip — both legs, no filters. Honest labels: strong riders vs casual.</p></div>
+      <header class="page-head bike-head">
+        <p class="page-kicker">Cycling</p>
+        <h2>Rides, cols and bike parks</h2>
+        <p>Everything useful for the riders, plus six famous summits the rest of us might actually want to visit.</p>
+      </header>
+
+      <section class="tour-country" aria-labelledby="tour-country-title">
+        <div class="tour-country-head">
+          <div><p class="page-kicker">Tour country</p><h3 id="tour-country-title">The cols worth recognizing</h3><p>No climb spreadsheet: just why each one is famous, its Tour story, and what is waiting at the top.</p></div>
+          <div class="tour-country-actions"><a href="#/map?view=alpine&amp;spot=forclaz">Open Alpine map →</a><a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">All 113 cols ↗</a></div>
+        </div>
+        <div class="tour-col-list">${cols.map(tourColCard).join('')}</div>
+      </section>
+
+      <div class="section-head bike-rides-head"><h2>Actual rides</h2><p>Both legs, no day filters. Strong-rider and casual options stay clearly labelled.</p></div>
       ${groups.filter((g) => g[1].length).map((g) => `<div class="group-label">${esc(g[0])}</div><div class="cards">${g[1].map((a) => activityCard(a)).join('')}</div>`).join('')}
       <div class="group-label">Race spectating</div>
       ${races.map(eventRow).join('')}
@@ -834,16 +891,111 @@
   }
   let mapInstance = null, mapMarkers = {}, mapState = null, mapGeneration = 0;
 
+  const ALPINE_SPOTS = [
+    {
+      id: 'annecy', label: 'Annecy', x: 47, y: 76, kind: 'place',
+      eyebrow: 'At the head of the lake', title: 'Annecy',
+      text: 'The old town and north shore sit at the near end of the basin. Veyrier is just around the east-shore corner.',
+      coords: [45.8992, 6.1294], route: '#/areas/annecy'
+    },
+    {
+      id: 'veyrier', label: 'Our lake base', x: 66, y: 54, kind: 'home',
+      eyebrow: 'East shore', title: 'Veyrier-du-Lac',
+      text: 'Home for the lake weeks, below Mont Veyrier and opposite the long wooded ridge of the Semnoz.',
+      coords: [45.8758, 6.1852], route: '#/areas/veyrier'
+    },
+    { id: 'semnoz', label: 'Semnoz', x: 35, y: 55, kind: 'col', colId: 'semnoz' },
+    { id: 'forclaz', label: 'Forclaz', x: 92, y: 49, kind: 'col', colId: 'forclaz', edge: true },
+    { id: 'aravis', label: 'Col des Aravis', x: 59, y: 23, kind: 'col', colId: 'aravis' },
+    { id: 'colombiere', label: 'Colombière', x: 18, y: 22, kind: 'col', colId: 'colombiere' },
+    {
+      id: 'glieres', label: 'Glières', x: 21, y: 33, kind: 'place',
+      eyebrow: 'Bornes plateau', title: 'Plateau des Glières',
+      text: 'The high Resistance plateau between Annecy and the Aravis: monument, open walking country and the Tour’s famous gravel crossing.',
+      coords: [45.9630, 6.3260], route: '#/plan/glieres-walk'
+    },
+    {
+      id: 'mont-blanc', label: 'Mont Blanc', x: 61, y: 7, kind: 'peak',
+      eyebrow: 'Beyond the Aravis', title: 'Mont Blanc & Chamonix',
+      text: 'The white massif on the horizon is real orientation, not scenery: Chamonix sits in the valley directly beneath it.',
+      coords: [45.9237, 6.8694], route: '#/plan/chamonix-day'
+    }
+  ];
+  function mapViewTabs(view) {
+    return `<nav class="map-view-tabs" role="tablist" aria-label="Map view">
+      <a role="tab" aria-selected="${view === 'places'}" class="map-view-tab" href="#/map">Places</a>
+      <a role="tab" aria-selected="${view === 'alpine'}" class="map-view-tab" href="#/map?view=alpine">Alpine view</a>
+    </nav>`;
+  }
+  function alpinePlacePanel(spot) {
+    const links = [
+      spot.route ? `<a href="${esc(spot.route)}">Open guide →</a>` : '',
+      spot.coords ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${spot.coords.join(',')}" target="_blank" rel="noopener">Directions ↗</a>` : ''
+    ].filter(Boolean);
+    return `
+      <div class="alpine-detail-head"><p>${esc(spot.eyebrow)}</p><h3>${esc(spot.title)}</h3></div>
+      <p class="alpine-place-copy">${esc(spot.text)}</p>
+      <div class="tour-col-links">${links.join('')}</div>`;
+  }
+  function alpineDetail(id) {
+    const col = (D.TOUR_COLS || []).find((c) => c.id === id);
+    if (col) return tourColPanel(col);
+    const spot = ALPINE_SPOTS.find((s) => s.id === id);
+    return spot ? alpinePlacePanel(spot) : alpinePlacePanel(ALPINE_SPOTS[0]);
+  }
+  function alpineView(route) {
+    const valid = new Set([...ALPINE_SPOTS.map((s) => s.id), ...(D.TOUR_COLS || []).map((c) => c.id)]);
+    const selected = valid.has(route.query.spot) ? route.query.spot : 'forclaz';
+    const pins = ALPINE_SPOTS.map((s) => `
+      <button type="button" class="alpine-pin is-${esc(s.kind)}${s.edge ? ' edge' : ''}" style="--x:${s.x}%;--y:${s.y}%" data-alpine="${esc(s.colId || s.id)}" aria-pressed="${selected === (s.colId || s.id)}" aria-label="Open ${esc(s.label)}">
+        <span class="alpine-pin-dot" aria-hidden="true"></span><span class="alpine-pin-label">${esc(s.label)}</span>
+      </button>`).join('');
+    const index = (D.TOUR_COLS || []).map((c) => {
+      const inView = ALPINE_SPOTS.some((s) => s.colId === c.id);
+      return `<button type="button" class="alpine-col-button" data-alpine="${esc(c.id)}" aria-pressed="${selected === c.id}">
+        <span><strong>${esc(c.name)}</strong><small>${esc(c.region)} · ${c.elevation} m</small></span>
+        ${inView ? '' : '<small class="beyond-view">Les Gets side</small>'}
+      </button>`;
+    }).join('');
+    return `
+      <div class="alpine-layout">
+        <figure class="alpine-map-wrap">
+          <div class="alpine-map-canvas">
+            <img src="assets/orientation/orientation_relief.jpg" alt="Oblique relief map from Annecy across the Aravis to Mont Blanc" width="900" height="900" />
+            ${pins}
+          </div>
+          <figcaption>Lake Annecy in the foreground, the Aravis across the middle, Mont Blanc on the horizon.</figcaption>
+        </figure>
+        <aside class="alpine-side" aria-label="Alpine map guide">
+          <div class="alpine-detail" id="alpine-detail" aria-live="polite">${alpineDetail(selected)}</div>
+          <div class="alpine-index">
+            <div class="alpine-index-head"><h3>Tour cols worth knowing</h3><a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">All 113 ↗</a></div>
+            <div class="alpine-col-buttons">${index}</div>
+          </div>
+        </aside>
+      </div>`;
+  }
+
   Views.map = function (route) {
+    const view = route.query.view === 'alpine' ? 'alpine' : 'places';
+    const intro = `
+      <div class="map-intro">
+        <div><h2>Map</h2><p>${view === 'alpine' ? 'The lake, passes and high Alps in one view.' : 'Activities, stays, and useful places around the lake and mountains.'}</p></div>
+        ${mapViewTabs(view)}
+      </div>`;
+    if (view === 'alpine') {
+      mapState = { view: 'alpine', focus: route.query.spot || 'forclaz' };
+      return intro + alpineView(route);
+    }
     const active = new Set(MAP_CATS.map((c) => c.id));
     if (route.query.cat && MAP_CATS.some((c) => c.id === route.query.cat)) { active.clear(); active.add(route.query.cat); }
-    mapState = { active, focus: route.query.place || null };
+    mapState = { view: 'places', active, focus: route.query.place || null };
     const places = mapPlaces();
     const counts = {}; MAP_CATS.forEach((c) => counts[c.id] = places.filter((p) => p.cat === c.id).length);
     const chips = `<button class="map-chip" data-cat="all" aria-pressed="${active.size === MAP_CATS.length}"><span class="cdot"></span>All</button>` +
       MAP_CATS.map((c) => `<button class="map-chip" data-cat="${c.id}" aria-pressed="${active.has(c.id)}" style="--cat:${c.color}"><span class="cdot" aria-hidden="true"></span>${esc(c.label)} <span class="mc-count">${counts[c.id]}</span></button>`).join('');
     return `
-      <div class="map-intro"><div><h2>Map</h2><p>Activities, stays, and useful places around the lake and mountains.</p></div></div>
+      ${intro}
       <div class="map-toolbar">
         <div class="map-filters" id="map-filters" role="group" aria-label="Filter map">${chips}</div>
         <div class="map-tools"><button class="mini-btn" id="map-reset" type="button">Reset</button><button class="mini-btn" id="map-base" type="button">Near ${esc(activeStay().village)}</button></div>
@@ -911,7 +1063,21 @@
     document.querySelectorAll('#map-filters .map-chip').forEach((c) => { const id = c.dataset.cat; if (id === 'all') c.setAttribute('aria-pressed', String(mapState.active.size === MAP_CATS.length)); else c.setAttribute('aria-pressed', String(mapState.active.has(id))); });
     renderMapList(places);
   }
+  function wireAlpineView(route) {
+    const choose = (id) => {
+      const detail = document.getElementById('alpine-detail');
+      if (!detail) return;
+      detail.innerHTML = alpineDetail(id);
+      screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.alpine === id)));
+      history.replaceState(null, '', '#/map?view=alpine&spot=' + encodeURIComponent(id));
+      const col = (D.TOUR_COLS || []).find((c) => c.id === id);
+      const spot = ALPINE_SPOTS.find((s) => s.id === id);
+      announce('Showing ' + (col ? col.name : spot ? spot.title : 'Alpine place'));
+    };
+    screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.addEventListener('click', () => choose(b.dataset.alpine)));
+  }
   function initMapView(route) {
+    if (route.query.view === 'alpine') { wireAlpineView(route); return; }
     const generation = ++mapGeneration;
     const places = mapPlaces();
     // wire filters + tools (work even if the map lib fails)
@@ -1000,7 +1166,7 @@
     teardownMap();
     const view = Views[route.name] || Views.home;
     screenEl.innerHTML = view(route);
-    screenEl.className = 'screen' + (route.name === 'map' ? ' is-map' : '') + (route.name === 'home' ? ' is-home' : '');
+    screenEl.className = 'screen' + (route.name === 'map' ? ' is-map' : '') + (route.name === 'map' && route.query.view === 'alpine' ? ' is-alpine-map' : '') + (route.name === 'home' ? ' is-home' : '');
     setChrome(route);
     window.scrollTo(0, 0); screenEl.scrollTop = 0;
     // focus management for hash-route changes

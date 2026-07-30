@@ -1197,6 +1197,125 @@ main[tabindex="-1"]:focus {
   font-size: 22px;
 }
 
+.bike-head {
+  margin-bottom: 26px;
+}
+
+.tour-country {
+  margin: 0 0 52px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.tour-country-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 36px;
+  padding: 28px 0 24px;
+}
+
+.tour-country-head h3 {
+  margin: 3px 0 8px;
+  font-size: 36px;
+}
+
+.tour-country-head > div:first-child > p:last-child {
+  max-width: 680px;
+}
+
+.tour-country-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.tour-col-list {
+  border-top: 1px solid var(--border);
+}
+
+.tour-col-row {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 2fr);
+  gap: 34px;
+  padding: 27px 0 29px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tour-col-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.tour-col-number {
+  flex: 0 0 auto;
+  padding-top: 4px;
+  color: var(--lake);
+  font-family: var(--display);
+  font-size: 19px;
+  font-variation-settings: "SOFT" 30, "WONK" 0;
+}
+
+.tour-col-name p,
+.alpine-detail-head > p {
+  color: var(--alpine);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-col-name h4 {
+  margin-top: 5px;
+  font-size: 25px;
+}
+
+.tour-col-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.tour-col-facts > div {
+  padding: 0 20px;
+  border-left: 1px solid var(--border);
+}
+
+.tour-col-facts > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.tour-col-facts dt {
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tour-col-facts dd {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.tour-col-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  margin-top: 15px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.bike-rides-head {
+  margin-top: 0;
+}
+
 .pin-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2088,6 +2207,33 @@ main[tabindex="-1"]:focus {
   font-size: 12px;
 }
 
+.map-view-tabs {
+  display: inline-grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(2, auto);
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+}
+
+.map-view-tab {
+  min-width: 96px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+
+.map-view-tab[aria-selected="true"] {
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(21, 73, 80, 0.11);
+  color: var(--ink);
+}
+
 .map-toolbar {
   display: flex;
   align-items: center;
@@ -2162,6 +2308,225 @@ main[tabindex="-1"]:focus {
   overflow-y: auto;
   border-left: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.96);
+}
+
+.alpine-layout {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  background:
+    linear-gradient(145deg, rgba(205, 238, 229, 0.9), rgba(211, 231, 243, 0.92)),
+    var(--surface);
+}
+
+.alpine-map-wrap {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  padding: 16px 18px 10px;
+}
+
+.alpine-map-canvas {
+  position: relative;
+  width: min(100%, calc(100dvh - var(--header-h) - 148px));
+  max-height: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(31, 67, 80, 0.2);
+  isolation: isolate;
+}
+
+.alpine-map-canvas::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 1px solid rgba(9, 62, 72, 0.11);
+  border-radius: inherit;
+  box-shadow: inset 0 0 48px rgba(16, 51, 58, 0.1);
+  content: "";
+  pointer-events: none;
+}
+
+.alpine-map-canvas > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.alpine-map-wrap figcaption {
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.alpine-pin {
+  position: absolute;
+  z-index: 3;
+  top: var(--y);
+  left: var(--x);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translate(-50%, -50%);
+}
+
+.alpine-pin-dot {
+  display: block;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--alpine);
+  box-shadow: 0 3px 12px rgba(13, 51, 58, 0.38);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.alpine-pin-label {
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 6px;
+  background: rgba(250, 254, 253, 0.88);
+  box-shadow: 0 2px 8px rgba(21, 52, 59, 0.16);
+  color: #12383f;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.alpine-pin.edge {
+  flex-direction: row-reverse;
+}
+
+.alpine-pin.is-place .alpine-pin-dot {
+  background: var(--lake);
+}
+
+.alpine-pin.is-home .alpine-pin-dot {
+  background: var(--flower);
+}
+
+.alpine-pin.is-peak .alpine-pin-dot {
+  background: var(--twilight);
+}
+
+.alpine-pin:hover .alpine-pin-dot,
+.alpine-pin[aria-pressed="true"] .alpine-pin-dot {
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.54), 0 4px 14px rgba(13, 51, 58, 0.42);
+  transform: scale(1.14);
+}
+
+.alpine-pin[aria-pressed="true"] .alpine-pin-label {
+  background: #fff;
+  color: var(--lake);
+}
+
+.alpine-side {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 24px 30px;
+  border-left: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.alpine-detail {
+  padding-bottom: 26px;
+}
+
+.alpine-detail-head h3 {
+  margin: 5px 0 18px;
+  font-size: 34px;
+}
+
+.alpine-detail .tour-col-facts {
+  grid-template-columns: 1fr;
+}
+
+.alpine-detail .tour-col-facts > div {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-left: 0;
+}
+
+.alpine-place-copy {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.alpine-index {
+  padding-top: 22px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.alpine-index-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.alpine-index-head h3 {
+  font-size: 21px;
+}
+
+.alpine-index-head a {
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.alpine-col-buttons {
+  border-top: 1px solid var(--border);
+}
+
+.alpine-col-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.alpine-col-button > span:first-child {
+  min-width: 0;
+}
+
+.alpine-col-button strong,
+.alpine-col-button small {
+  display: block;
+}
+
+.alpine-col-button strong {
+  font-size: 12px;
+}
+
+.alpine-col-button small {
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.alpine-col-button[aria-pressed="true"] strong {
+  color: var(--lake);
+}
+
+.beyond-view {
+  flex: 0 0 auto;
+  color: var(--twilight) !important;
+  font-weight: 650;
 }
 
 .ml-item {
@@ -2387,6 +2752,11 @@ main[tabindex="-1"]:focus {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .tour-col-row {
+    grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1.7fr);
+    gap: 24px;
+  }
+
   .ideas-grid {
     columns: 3;
   }
@@ -2485,6 +2855,73 @@ main[tabindex="-1"]:focus {
     margin: 8px;
     padding: 0;
     border-radius: 20px;
+  }
+
+  .tour-country-head {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tour-country-actions {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+
+  .tour-col-row {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .tour-col-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-col-facts > div {
+    padding: 11px 0;
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+
+  .map-intro {
+    gap: 12px;
+    padding: 12px 14px 10px;
+  }
+
+  .map-intro h2 {
+    font-size: 25px;
+  }
+
+  .map-view-tab {
+    min-width: 88px;
+    padding: 6px 9px;
+  }
+
+  .alpine-layout {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .alpine-map-wrap {
+    min-height: auto;
+    padding: 10px 10px 8px;
+    overflow: visible;
+  }
+
+  .alpine-map-canvas {
+    width: min(100%, 620px);
+    max-height: none;
+  }
+
+  .alpine-side {
+    overflow: visible;
+    padding: 22px 20px calc(30px + var(--safe-b));
+    border-top: 1px solid var(--border);
+    border-left: 0;
   }
 
   .hm-world,
@@ -2823,6 +3260,35 @@ main[tabindex="-1"]:focus {
 
   .ideas-head .text-link {
     margin-top: 9px;
+  }
+
+  .tour-country-head h3 {
+    font-size: 31px;
+  }
+
+  .tour-col-name h4 {
+    font-size: 23px;
+  }
+
+  .map-intro p {
+    display: none;
+  }
+
+  .map-view-tab {
+    min-width: 82px;
+    font-size: 11px;
+  }
+
+  .alpine-pin-label {
+    display: none;
+  }
+
+  .alpine-pin[aria-pressed="true"] .alpine-pin-label {
+    display: block;
+  }
+
+  .alpine-detail-head h3 {
+    font-size: 30px;
   }
 
   .activity-tools {

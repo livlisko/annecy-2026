@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v21';
+const VERSION = 'a26-v22';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -13,9 +13,9 @@ const RUNTIME = 'runtime-' + VERSION;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './styles.css?v=20',
-  './data.js?v=20',
-  './app.js?v=21',
+  './styles.css?v=21',
+  './data.js?v=21',
+  './app.js?v=22',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
@@ -36,6 +36,7 @@ const CORE_ASSETS = [
   './assets/wiki/veyrier.jpg',
   './assets/art/annecy-twilight-v3.jpg',
   './assets/art/annecy-waterfront-v3.jpg',
+  './assets/orientation/orientation_relief.jpg',
   './assets/orientation/orientation_relief_card.jpg'
 ];
 
