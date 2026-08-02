@@ -1038,10 +1038,13 @@
       mapState = { view: 'alpine', focus: route.query.spot || 'forclaz' };
       return intro + alpineView(route);
     }
-    const active = new Set(MAP_CATS.map((c) => c.id));
-    if (route.query.cat && MAP_CATS.some((c) => c.id === route.query.cat)) { active.clear(); active.add(route.query.cat); }
-    mapState = { view: 'places', active, focus: route.query.place || null };
     const places = mapPlaces();
+    const active = new Set();
+    if (route.query.cat && MAP_CATS.some((c) => c.id === route.query.cat)) active.add(route.query.cat);
+    const focus = route.query.place || null;
+    const focusedPlace = focus ? places.find((p) => p.id === focus) : null;
+    if (focusedPlace) active.add(focusedPlace.cat);
+    mapState = { view: 'places', active, focus };
     const counts = {}; MAP_CATS.forEach((c) => counts[c.id] = places.filter((p) => p.cat === c.id).length);
     const chips = `<button class="map-chip" data-cat="all" aria-pressed="${active.size === MAP_CATS.length}"><span class="cdot"></span>All</button>` +
       MAP_CATS.map((c) => `<button class="map-chip" data-cat="${c.id}" aria-pressed="${active.has(c.id)}" style="--cat:${c.color}"><span class="cdot" aria-hidden="true"></span>${esc(c.label)} <span class="mc-count">${counts[c.id]}</span></button>`).join('');
@@ -1116,7 +1119,10 @@
   function renderMapList(places) {
     const el = document.getElementById('map-list'); if (!el) return;
     const shown = places.filter((p) => mapState.active.has(p.cat));
-    if (!shown.length) { el.innerHTML = `<div class="empty">No places in the selected filters. <button class="link-btn" id="ml-reset">Reset filters</button></div>`; const r = document.getElementById('ml-reset'); if (r) r.addEventListener('click', () => { mapState.active = new Set(MAP_CATS.map((c) => c.id)); applyMap(places); }); return; }
+    if (!shown.length) {
+      el.innerHTML = `<div class="empty">${mapState.active.size ? 'No places in the selected categories.' : 'Choose a category above to see places.'}</div>`;
+      return;
+    }
     const cat = Object.fromEntries(MAP_CATS.map((c) => [c.id, c]));
     el.innerHTML = shown.map((p) => `<button class="ml-item${p.closed ? ' is-closed' : ''}" data-mid="${esc(p.id)}"><span class="ml-mark" style="--cat:${cat[p.cat].color}" aria-hidden="true"></span><span class="ml-body"><strong>${esc(p.name)}${p.closed ? ' <span class="closed-chip">Closed</span>' : ''}</strong><span>${esc(p.blurb)}</span></span></button>`).join('') +
       `<a class="ml-archive" href="#/archive">Not on this map — the cut list &amp; why →</a>`;
@@ -1161,8 +1167,8 @@
     const places = mapPlaces();
     // wire filters + tools (work even if the map lib fails)
     const filters = document.getElementById('map-filters');
-    filters.addEventListener('click', (e) => { const b = e.target.closest('.map-chip'); if (!b) return; const id = b.dataset.cat; if (id === 'all') { mapState.active = new Set(MAP_CATS.map((c) => c.id)); } else { if (mapState.active.has(id)) mapState.active.delete(id); else mapState.active.add(id); } applyMap(places); });
-    document.getElementById('map-reset').addEventListener('click', () => { mapState.active = new Set(MAP_CATS.map((c) => c.id)); applyMap(places); });
+    filters.addEventListener('click', (e) => { const b = e.target.closest('.map-chip'); if (!b) return; const id = b.dataset.cat; if (id === 'all') { mapState.active = mapState.active.size === MAP_CATS.length ? new Set() : new Set(MAP_CATS.map((c) => c.id)); } else { if (mapState.active.has(id)) mapState.active.delete(id); else mapState.active.add(id); } applyMap(places); });
+    document.getElementById('map-reset').addEventListener('click', () => { mapState.active = new Set(); applyMap(places); });
     document.getElementById('map-base').addEventListener('click', () => { if (mapInstance) mapInstance.setView(activeStay().coords, 13); });
     renderMapList(places);
 
@@ -1197,7 +1203,9 @@
         const closedB = p.closed ? `<span class="closed-badge">Closed — don’t plan around this</span> ` : '';
         const html = `<div class="pop" style="--cat:${c.color}"><span class="pc">${esc(c.label)}</span><h3>${esc(p.name)}</h3><p>${closedB}${verify}${esc(p.blurb)}</p>${p.sub ? `<p class="pop-sub">${esc(p.sub)}</p>` : ''}${open} ${dir}</div>`;
         const m = L.marker(p.coords, { icon, title: p.name, alt: p.name, keyboard: true });
-        if (cluster) cluster.addLayer(m); else m.addTo(map);
+        if (mapState.active.has(p.cat)) {
+          if (cluster) cluster.addLayer(m); else m.addTo(map);
+        }
         m.bindPopup(html, { closeButton: true, maxWidth: 250, minWidth: 200 });
         mapMarkers[p.id] = { marker: m, cat: p.cat };
       });
