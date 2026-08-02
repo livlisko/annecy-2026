@@ -141,9 +141,13 @@
   }
 
   /* ---------- cover / media ----------------------------------------- */
+  function mediaImageAttrs(media, tint, label) {
+    const remote = media && /^https?:\/\//i.test(media.photo || '');
+    return ` data-media-img="1" data-media-tint="${esc(tint || 'alpine')}" data-media-label="${esc(label || (media && media.alt) || '')}"${remote ? ' referrerpolicy="no-referrer"' : ''}`;
+  }
   function cover(media, opts) {
     opts = opts || {}; const extra = opts.cls ? ' ' + opts.cls : '';
-    if (media && media.photo) return `<img class="cover-img${extra}" src="${esc(media.photo)}" alt="${esc(media.alt || opts.alt || '')}" width="1200" height="800" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />`;
+    if (media && media.photo) return `<img class="cover-img${extra}" src="${esc(media.photo)}" alt="${esc(media.alt || opts.alt || '')}" width="1200" height="800" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async"${mediaImageAttrs(media, media.tint || opts.tint, media.label || opts.label)} />`;
     const tint = (media && media.tint) || opts.tint || 'alpine';
     const label = (media && media.label) || opts.label || '';
     return `<div class="cover-ph${extra}" data-tint="${esc(tint)}" role="img" aria-label="${esc(label || opts.alt || 'illustration')}">${label ? `<span class="cover-label">${esc(label)}</span>` : ''}</div>`;
@@ -156,11 +160,42 @@
   }
   function catTint(c) { if (['road', 'gravel', 'mtb', 'easybike'].includes(c)) return 'pine'; if (['swim', 'paddle', 'boat'].includes(c)) return 'aqua'; if (['viaferrata', 'canyoning', 'paragliding'].includes(c)) return 'purple'; if (['food'].includes(c)) return 'sun'; return 'alpine'; }
 
+  // Official preview URLs can change. A failed image becomes the same
+  // intentional text-first card/placeholder used for activities with no photo.
+  document.addEventListener('error', (event) => {
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement) || !img.matches('[data-media-img]')) return;
+    const card = img.closest('.pin-card, .idea-card');
+    if (card) {
+      const wrap = img.closest('.pin-img');
+      if (wrap) wrap.remove(); else img.remove();
+      card.classList.add('no-photo');
+      return;
+    }
+    const placeholder = document.createElement('div');
+    placeholder.className = img.className.replace(/\bcover-img\b/, 'cover-ph');
+    placeholder.dataset.tint = img.dataset.mediaTint || 'alpine';
+    placeholder.setAttribute('role', 'img');
+    placeholder.setAttribute('aria-label', img.alt || img.dataset.mediaLabel || 'Photo unavailable');
+    if (img.dataset.mediaLabel) {
+      const label = document.createElement('span');
+      label.className = 'cover-label';
+      label.textContent = img.dataset.mediaLabel;
+      placeholder.appendChild(label);
+    }
+    img.replaceWith(placeholder);
+  }, true);
+
   /* ---------- provenance ------------------------------------------- */
   function sourceLine(a) {
-    const s = a.src ? D.SOURCES[a.src] : null; if (!s) return '';
+    const s = a.src ? D.SOURCES[a.src] : null;
+    const photo = a.media && a.media.source
+      ? `Photo: <a href="${esc(a.media.source)}" target="_blank" rel="noopener">${esc(a.media.credit || 'official activity page')} ↗</a>`
+      : '';
+    if (!s && !photo) return '';
     const verify = a.verifyBeforeGo ? `<span class="verify-badge" title="Not confirmed for our exact dates">Verify before going</span>` : '';
-    return `<p class="source-line">${verify} Source: <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.type)} ↗</a> · checked ${esc(s.on || D.VERIFIED)}</p>`;
+    const source = s ? `Source: <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.type)} ↗</a> · checked ${esc(s.on || D.VERIFIED)}` : '';
+    return `<p class="source-line">${verify} ${source}${source && photo ? ' · ' : ''}${photo}</p>`;
   }
 
   /* ---------- save / status controls (Save = idea for the active person) */
@@ -435,7 +470,7 @@
     const leg = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets</span>` : '';
     return `<article class="pin-card${hasPhoto ? '' : ' no-photo'}" data-tint="${esc(catTint(a.cat))}">
       <a class="pin-hit" href="#/plan/${esc(a.id)}">
-        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />${leg}</div>` : ''}
+        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async"${mediaImageAttrs(img, catTint(a.cat), a.title)} />${leg}</div>` : ''}
         <h3>${esc(a.title)}</h3>
         ${area ? `<p class="pin-place">${esc(area.name)}</p>` : ''}
         <p class="pin-meta">${esc(pinMeta(a))}${!hasPhoto && a.base === 'lesgets' ? ' · Les Gets leg' : ''}</p>
@@ -667,7 +702,7 @@
     const hasPhoto = !!(img && img.photo);
     return `<article class="idea-card${hasPhoto ? '' : ' no-photo'}" data-tint="${esc(catTint(a.cat))}">
       <a class="idea-hit" href="#/plan/${esc(a.id)}">
-        ${hasPhoto ? `<img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="lazy" decoding="async" />` : ''}
+        ${hasPhoto ? `<img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="lazy" decoding="async"${mediaImageAttrs(img, catTint(a.cat), a.title)} />` : ''}
         <span class="idea-copy"><strong>${esc(a.title)}</strong>${area ? `<span>${esc(area.name)}</span>` : ''}</span>
       </a>
       <div class="idea-save">${saveBtn(a.id)}</div>
@@ -762,7 +797,7 @@
   };
 
   /* ---------- credits ----------------------------------------------- */
-  function creditsBlock() { return `<details class="credits"><summary>Photo credits (Wikimedia Commons)</summary><p>${D.CREDITS.map((c) => `<a href="${esc(c.source)}" target="_blank" rel="noopener">${esc(c.subject)}</a> — ${esc(c.author)}, ${esc(c.license)}`).join(' · ')}</p></details>`; }
+  function creditsBlock() { return `<details class="credits"><summary>Photo sources &amp; credits</summary><p>Official activity previews link back to their provider or tourism page on each activity. Local images: ${D.CREDITS.map((c) => `<a href="${esc(c.source)}" target="_blank" rel="noopener">${esc(c.subject)}</a> — ${esc(c.author)}, ${esc(c.license)}`).join(' · ')}</p></details>`; }
 
   /* ---------- AREAS ------------------------------------------------- */
   Views.areas = function (route) {
