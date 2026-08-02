@@ -128,6 +128,7 @@
   function setChrome(route) {
     const isPrimary = PRIMARY.includes(route.name) && route.parts.length === 0;
     appbar.classList.toggle('has-back', !isPrimary);
+    document.body.dataset.route = route.name;
     document.body.classList.toggle('route-home', route.name === 'home');
     document.body.classList.toggle('route-map', route.name === 'map');
     let title = TITLES[route.name] || 'Annecy 2026';
@@ -485,13 +486,19 @@
       GUIDE_CATS.map((c) => `<button type="button" class="category-tab" data-actcat="${esc(c.id)}" aria-pressed="${actState.cat === c.id}">${esc(c.label)}</button>`).join('');
     const areas = D.AREAS.map((a) => `<option value="${esc(a.id)}"${actState.area === a.id ? ' selected' : ''}>${esc(a.name)}</option>`).join('');
     return `
-      <header class="page-head">
+      <header class="page-head activities-head">
         <p class="page-kicker">Explore</p>
         <h2>What could we do?</h2>
-        <p>${D.ACTIVITIES.length} ideas around Annecy, Les Gets, and the mountains in between. Nothing is hidden by day or trip leg.</p>
+        <p>${D.ACTIVITIES.length} ideas around the lake and mountains.</p>
       </header>
       <div class="category-tabs" role="group" aria-label="Activity category">${categories}</div>
-      <div class="activity-tools">
+      <button type="button" class="activity-filter-toggle" id="act-filter-toggle" aria-expanded="false" aria-controls="activity-tools">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M8 4v6M16 14v6"/></svg>
+        <strong>Filters</strong>
+        <span class="activity-mobile-count" id="act-mobile-count"></span>
+        <svg class="filter-chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>
+      </button>
+      <div class="activity-tools" id="activity-tools">
         <label class="filter-field"><span>Area</span><select id="act-area"><option value="all">Everywhere</option>${areas}</select></label>
         <label class="filter-field"><span>Effort</span><select id="act-effort">
           <option value="all">Any effort</option>
@@ -519,6 +526,9 @@
       grid.innerHTML = list.length ? list.map(pinCard).join('') : `<div class="empty">Nothing matches those filters. <button class="link-btn" id="act-clear">Clear filters</button></div>`;
       const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => { actState = { cat: 'all', area: 'all', effort: 'all', booking: 'all', rain: false, q: '' }; render(); });
       const cnt = document.getElementById('act-count'); if (cnt) cnt.textContent = list.length + ' of ' + D.ACTIVITIES.length;
+      const mobileCnt = document.getElementById('act-mobile-count'); if (mobileCnt) mobileCnt.textContent = list.length + ' ideas';
+      const toggle = document.getElementById('act-filter-toggle');
+      if (toggle) toggle.classList.toggle('has-active', actState.area !== 'all' || actState.effort !== 'all' || actState.booking !== 'all' || actState.rain || !!actState.q.trim());
     };
     const sync = () => {
       history.replaceState(null, '', '#/activities' + buildActQS());
@@ -534,6 +544,12 @@
     const rain = document.getElementById('act-rain'); if (rain) rain.addEventListener('click', () => { actState.rain = !actState.rain; sync(); });
     const inp = document.getElementById('act-q');
     if (inp) inp.addEventListener('input', () => { actState.q = inp.value; history.replaceState(null, '', '#/activities' + buildActQS()); redraw(); });
+    const filterToggle = document.getElementById('act-filter-toggle');
+    const tools = document.getElementById('activity-tools');
+    if (filterToggle && tools) filterToggle.addEventListener('click', () => {
+      const open = tools.classList.toggle('is-open');
+      filterToggle.setAttribute('aria-expanded', String(open));
+    });
     redraw();
   }
 
@@ -700,10 +716,11 @@
   function ideaCard(a) {
     const img = actCover(a); const area = D.AREA_BY_ID[a.areaId];
     const hasPhoto = !!(img && img.photo);
+    const status = Ideas.status(a.id);
     return `<article class="idea-card${hasPhoto ? '' : ' no-photo'}" data-tint="${esc(catTint(a.cat))}">
       <a class="idea-hit" href="#/plan/${esc(a.id)}">
         ${hasPhoto ? `<img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="lazy" decoding="async"${mediaImageAttrs(img, catTint(a.cat), a.title)} />` : ''}
-        <span class="idea-copy"><strong>${esc(a.title)}</strong>${area ? `<span>${esc(area.name)}</span>` : ''}</span>
+        <span class="idea-copy"><strong>${esc(a.title)}</strong>${area ? `<span>${esc(area.name)}</span>` : ''}${status ? `<span class="idea-status">${esc(STATUS_LABEL[status])}</span>` : ''}</span>
       </a>
       <div class="idea-save">${saveBtn(a.id)}</div>
       ${statusPicker(a.id)}
@@ -923,7 +940,7 @@
     D.AREAS.forEach((a) => out.push({ id: 'area-' + a.id, cat: 'place', name: a.name, coords: a.coords.slice(), blurb: a.zone, route: '#/areas/' + a.id, dir: a.coords }));
     return deoverlap(out);
   }
-  let mapInstance = null, mapMarkers = {}, mapState = null, mapGeneration = 0;
+  let mapInstance = null, mapMarkers = {}, mapState = null, mapGeneration = 0, markerCluster = null;
 
   const ALPINE_SPOTS = [
     {
@@ -1079,6 +1096,23 @@
     });
     return ensureLeaflet._p;
   }
+  function ensureMarkerCluster() {
+    if (window.L && window.L.markerClusterGroup) return Promise.resolve(true);
+    if (ensureMarkerCluster._p) return ensureMarkerCluster._p;
+    ensureMarkerCluster._p = new Promise((resolve) => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css';
+      document.head.appendChild(css);
+      const js = document.createElement('script');
+      js.src = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js';
+      const to = setTimeout(() => resolve(false), 8000);
+      js.onload = () => { clearTimeout(to); resolve(!!(window.L && window.L.markerClusterGroup)); };
+      js.onerror = () => { clearTimeout(to); resolve(false); };
+      document.head.appendChild(js);
+    });
+    return ensureMarkerCluster._p;
+  }
   function renderMapList(places) {
     const el = document.getElementById('map-list'); if (!el) return;
     const shown = places.filter((p) => mapState.active.has(p.cat));
@@ -1090,10 +1124,21 @@
   }
   function focusMarker(id) {
     const mk = mapMarkers[id]; if (!mk || !mapInstance) { const p = mapPlaces().find((x) => x.id === id); if (p && p.route) location.hash = p.route; else if (p && p.href) window.open(p.href, '_blank', 'noopener'); return; }
+    if (markerCluster && markerCluster.hasLayer(mk.marker)) {
+      markerCluster.zoomToShowLayer(mk.marker, () => mk.marker.openPopup());
+      return;
+    }
     mapInstance.setView(mk.marker.getLatLng(), 14); mk.marker.openPopup();
   }
   function applyMap(places) {
-    if (mapInstance) Object.values(mapMarkers).forEach(({ marker, cat }) => { const on = mapState.active.has(cat); if (on && !mapInstance.hasLayer(marker)) marker.addTo(mapInstance); else if (!on && mapInstance.hasLayer(marker)) mapInstance.removeLayer(marker); });
+    if (mapInstance) Object.values(mapMarkers).forEach(({ marker, cat }) => {
+      const on = mapState.active.has(cat);
+      if (markerCluster) {
+        if (on && !markerCluster.hasLayer(marker)) markerCluster.addLayer(marker);
+        else if (!on && markerCluster.hasLayer(marker)) markerCluster.removeLayer(marker);
+      } else if (on && !mapInstance.hasLayer(marker)) marker.addTo(mapInstance);
+      else if (!on && mapInstance.hasLayer(marker)) mapInstance.removeLayer(marker);
+    });
     document.querySelectorAll('#map-filters .map-chip').forEach((c) => { const id = c.dataset.cat; if (id === 'all') c.setAttribute('aria-pressed', String(mapState.active.size === MAP_CATS.length)); else c.setAttribute('aria-pressed', String(mapState.active.has(id))); });
     renderMapList(places);
   }
@@ -1121,13 +1166,27 @@
     document.getElementById('map-base').addEventListener('click', () => { if (mapInstance) mapInstance.setView(activeStay().coords, 13); });
     renderMapList(places);
 
-    ensureLeaflet().then((ok) => {
+    ensureLeaflet().then(async (ok) => {
       if (generation !== mapGeneration) return;
       const mapEl = document.getElementById('map'); if (!mapEl) return;
       if (!ok || !window.L) { mapEl.innerHTML = `<div class="map-offline"><p><strong>Map needs a connection.</strong> The place list on the right still works offline — tap any item for directions and details.</p></div>`; return; }
+      const clusterReady = await ensureMarkerCluster();
+      if (generation !== mapGeneration) return;
       const cat = Object.fromEntries(MAP_CATS.map((c) => [c.id, c]));
       const map = L.map('map', { scrollWheelZoom: true, zoomControl: true }).setView(activeStay().coords, 12);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
+      const cluster = clusterReady ? L.markerClusterGroup({
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        disableClusteringAtZoom: 15,
+        maxClusterRadius: window.matchMedia('(max-width: 560px)').matches ? 52 : 44,
+        iconCreateFunction: (group) => L.divIcon({
+          className: 'annecy-cluster',
+          html: `<span>${group.getChildCount()}</span>`,
+          iconSize: [42, 42]
+        })
+      }) : null;
+      if (cluster) cluster.addTo(map);
       mapMarkers = {};
       places.forEach((p) => {
         const c = cat[p.cat];
@@ -1137,12 +1196,14 @@
         const verify = p.verify && !p.closed ? `<span class="verify-badge">Verify before going</span> ` : '';
         const closedB = p.closed ? `<span class="closed-badge">Closed — don’t plan around this</span> ` : '';
         const html = `<div class="pop" style="--cat:${c.color}"><span class="pc">${esc(c.label)}</span><h3>${esc(p.name)}</h3><p>${closedB}${verify}${esc(p.blurb)}</p>${p.sub ? `<p class="pop-sub">${esc(p.sub)}</p>` : ''}${open} ${dir}</div>`;
-        const m = L.marker(p.coords, { icon, title: p.name, alt: p.name, keyboard: true }).addTo(map);
+        const m = L.marker(p.coords, { icon, title: p.name, alt: p.name, keyboard: true });
+        if (cluster) cluster.addLayer(m); else m.addTo(map);
         m.bindPopup(html, { closeButton: true, maxWidth: 250, minWidth: 200 });
         mapMarkers[p.id] = { marker: m, cat: p.cat };
       });
       map.on('popupopen', (e) => { const el = e.popup.getElement(); if (!el) return; el.querySelectorAll('a[data-nav-link]').forEach((a) => a.addEventListener('click', (ev) => { const h = a.getAttribute('href'); if (h && h[0] === '#') { ev.preventDefault(); location.hash = h; } })); });
       mapInstance = map;
+      markerCluster = cluster;
       applyMap(places);
       setTimeout(() => {
         if (generation === mapGeneration && mapInstance === map) map.invalidateSize();
@@ -1151,11 +1212,7 @@
         if (generation !== mapGeneration || mapInstance !== map) return;
         map.invalidateSize();
         if (mapState.focus && mapMarkers[mapState.focus]) {
-          const mk = mapMarkers[mapState.focus];
-          map.setView(mk.marker.getLatLng(), 14);
-          setTimeout(() => {
-            if (generation === mapGeneration && mapInstance === map) mk.marker.openPopup();
-          }, 150);
+          focusMarker(mapState.focus);
         }
         else fitLake(map, places);
       }, 320);
@@ -1176,6 +1233,7 @@
       mapInstance.remove();
       mapInstance = null;
       mapMarkers = {};
+      markerCluster = null;
     }
   }
 
@@ -1200,7 +1258,7 @@
     teardownMap();
     const view = Views[route.name] || Views.home;
     screenEl.innerHTML = view(route);
-    screenEl.className = 'screen' + (route.name === 'map' ? ' is-map' : '') + (route.name === 'map' && route.query.view === 'alpine' ? ' is-alpine-map' : '') + (route.name === 'home' ? ' is-home' : '');
+    screenEl.className = 'screen view-' + route.name + (route.name === 'map' ? ' is-map' : '') + (route.name === 'map' && route.query.view === 'alpine' ? ' is-alpine-map' : '') + (route.name === 'home' ? ' is-home' : '');
     setChrome(route);
     window.scrollTo(0, 0); screenEl.scrollTop = 0;
     // focus management for hash-route changes
