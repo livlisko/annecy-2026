@@ -1257,6 +1257,91 @@ window.DATA = (function () {
       status: 'open', availability: 'Daily 14:00–19:00 through summer 2026.', src: 'music-meca', travel: { lesgets: { min: 8, mode: 'walk' } }
     }
   ];
+  /* ---------- ACTIVITY MEDIA ----------------------------------------
+     Every rendered photo is assigned deliberately here. Activities that
+     are not listed stay text-only rather than borrowing a generic area
+     image that may show the wrong place or experience. */
+  const ACTIVITY_MEDIA = {
+    lakeSail: { photo: 'assets/wiki/lake-swim.jpg', alt: 'Sailboats on Lake Annecy' },
+    veyrier: { photo: 'assets/wiki/veyrier.jpg', alt: 'Lake Annecy at Veyrier-du-Lac' },
+    menthon: { photo: 'assets/wiki/menthon-chateau.jpg', alt: 'Chateau de Menthon-Saint-Bernard above Lake Annecy' },
+    angon: { photo: 'assets/wiki/angon.jpg', alt: 'Angon and the east shore of Lake Annecy' },
+    stJorioz: { photo: 'assets/wiki/st-jorioz.jpg', alt: 'Saint-Jorioz on the west shore of Lake Annecy' },
+    doussard: { photo: 'assets/wiki/doussard.jpg', alt: 'The south end of Lake Annecy at Doussard' },
+    voieVerte: { photo: 'assets/wiki/voie-verte.jpg', alt: 'Cyclists on the Lake Annecy greenway' },
+    forclaz: { photo: 'assets/wiki/forclaz.jpg', alt: 'Lake Annecy from the Col de la Forclaz' },
+    semnoz: { photo: 'assets/wiki/semnoz.jpg', alt: 'Lake Annecy and the Aravis from the Semnoz' },
+    glieres: { photo: 'assets/wiki/glieres.jpg', alt: 'Resistance monument on the Plateau des Glieres' },
+    roc: { photo: 'assets/wiki/roc-de-chere.jpg', alt: 'Forested cliffs of the Roc de Chere above Lake Annecy' },
+    annecyMarket: { photo: 'assets/wiki/annecy-market.jpg', alt: 'Market stalls beside the canals in old Annecy' },
+    annecyOldTown: { photo: 'assets/wiki/annecy-old-town.jpg', alt: 'Palais de l Ile and the canals of old Annecy' },
+    gorgesFier: { photo: 'assets/wiki/gorges-fier.jpg', alt: 'Walkway through the Gorges du Fier' },
+    chamonix: { photo: 'assets/wiki/chamonix.jpg', alt: 'Chamonix valley beneath the Mont Blanc massif' },
+    lesGetsVillage: { photo: 'assets/wiki/les-gets-village.jpg', alt: 'Les Gets village in summer' },
+    lesGetsMtb: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike trails in Les Gets Bike Park' },
+    lakeSunset: { photo: 'assets/wiki/lake-sunset.jpg', alt: 'Boats at sunset on Lake Annecy' },
+    lakeBoats: { photo: 'assets/activities/lake-boats.jpg', alt: 'Passenger boats moored in Annecy' },
+    lakeKayak: { photo: 'assets/activities/lake-kayak.jpg', alt: 'Kayakers on Lake Annecy at Saint-Jorioz' },
+    cascadeAngon: { photo: 'assets/activities/cascade-angon.jpg', alt: 'Cascade d Angon waterfall' },
+    montVeyrier: { photo: 'assets/activities/mont-veyrier.jpg', alt: 'Rocky trail on Mont Veyrier above Lake Annecy' },
+    semnozLuge: { photo: 'assets/activities/semnoz-luge.jpg', alt: 'Summer luge track on the Semnoz' },
+    haras: { photo: 'assets/activities/haras-annecy.jpg', alt: 'Historic Haras buildings in Annecy' },
+    reblochon: { photo: 'assets/activities/reblochon.jpg', alt: 'Reblochon cheeses ageing on wooden racks' },
+    tamie: { photo: 'assets/activities/tamie-cheese.jpg', alt: 'Cheese from the Abbaye de Tamie' },
+    jardins: { photo: 'assets/activities/jardins-secrets.jpg', alt: 'Carved wooden gallery inside the Jardins Secrets at Vaulx' },
+    montrottier: { photo: 'assets/activities/montrottier.jpg', alt: 'Stone towers of the Chateau de Montrottier' },
+    montChery: { photo: 'assets/activities/mont-chery.jpg', alt: 'Les Gets and the Chablais mountains from Mont Chery' },
+    esperance: { photo: 'assets/activities/esperance-iii.jpg', alt: 'The restored sailing barge Esperance III at Annecy' },
+    pontDiable: { photo: 'assets/activities/pont-diable.jpg', alt: 'Walkways inside the Gorges du Pont du Diable' },
+    vitam: { photo: 'assets/activities/vitam.jpg', alt: 'The Vitam aquatic centre at Neydens' },
+    montriond: { photo: 'assets/activities/montriond.jpg', alt: 'Beach and mountain lake at Lac de Montriond' }
+  };
+
+  const ACTIVITY_MEDIA_ASSIGNMENTS = [
+    [ACTIVITY_MEDIA.lakeSail, ['home-swim', 'sailing-sevrier']],
+    [ACTIVITY_MEDIA.veyrier, ['sup-veyrier', 'east-shore-ride', 'veyrier-market']],
+    [ACTIVITY_MEDIA.menthon, ['menthon-pontoons', 'menthon-chateau']],
+    [ACTIVITY_MEDIA.angon, ['angon-apero']],
+    [ACTIVITY_MEDIA.stJorioz, ['st-jorioz-beach', 'fonds-blancs-sup']],
+    [ACTIVITY_MEDIA.doussard, ['doussard-sup']],
+    [ACTIVITY_MEDIA.voieVerte, ['lake-loop-road', 'voie-verte-recovery']],
+    [ACTIVITY_MEDIA.forclaz, ['forclaz-climb-lake', 'forclaz-climb-south', 'paragliding-forclaz', 'forclaz-lunch']],
+    [ACTIVITY_MEDIA.semnoz, ['semnoz-climb', 'tour-semnoz', 'semnoz-bikepark', 'semnoz-trois-lacs', 'semnoz-picnic', 'emtb-guidon']],
+    [ACTIVITY_MEDIA.glieres, ['glieres-gravel', 'glieres-walk']],
+    [ACTIVITY_MEDIA.roc, ['roc-walk', 'blue-secret-packraft']],
+    [ACTIVITY_MEDIA.annecyMarket, ['annecy-market', 'mija-food-tour']],
+    [ACTIVITY_MEDIA.annecyOldTown, ['chateau-palais']],
+    [ACTIVITY_MEDIA.gorgesFier, ['gorges-fier']],
+    [ACTIVITY_MEDIA.chamonix, ['chamonix-day']],
+    [ACTIVITY_MEDIA.lesGetsVillage, ['lesgets-village', 'lesgets-grocery']],
+    [ACTIVITY_MEDIA.lesGetsMtb, ['lesgets-bikepark']],
+    [ACTIVITY_MEDIA.lakeSunset, ['vboat-electric']],
+    [ACTIVITY_MEDIA.lakeBoats, ['navibus-hop', 'libellule-dinner']],
+    [ACTIVITY_MEDIA.lakeKayak, ['essaonia-kayak']],
+    [ACTIVITY_MEDIA.cascadeAngon, ['cascade-angon', 'canyoning-angon']],
+    [ACTIVITY_MEDIA.montVeyrier, ['mont-veyrier-baron']],
+    [ACTIVITY_MEDIA.semnozLuge, ['semnoz-luge']],
+    [ACTIVITY_MEDIA.haras, ['halles-haras']],
+    [ACTIVITY_MEDIA.reblochon, ['pierre-gay', 'cave-tasting', 'savoyard-night', 'aravis-cheese']],
+    [ACTIVITY_MEDIA.tamie, ['tamie-abbey']],
+    [ACTIVITY_MEDIA.jardins, ['jardins-secrets']],
+    [ACTIVITY_MEDIA.montrottier, ['montrottier']],
+    [ACTIVITY_MEDIA.montChery, ['lesgets-lift-walk', 'lesgets-road-ride']],
+    [ACTIVITY_MEDIA.esperance, ['esperance-barge']],
+    [ACTIVITY_MEDIA.pontDiable, ['pont-du-diable']],
+    [ACTIVITY_MEDIA.vitam, ['vitam-aquapark']],
+    [ACTIVITY_MEDIA.montriond, ['nautichill-montriond']]
+  ];
+
+  // Remove legacy inline choices so this audited registry is authoritative.
+  ACTIVITIES.forEach((activity) => { delete activity.media; });
+  ACTIVITY_MEDIA_ASSIGNMENTS.forEach(([media, ids]) => {
+    ids.forEach((id) => {
+      const activity = ACTIVITIES.find((item) => item.id === id);
+      if (activity) activity.media = media;
+    });
+  });
+
   const ACT_BY_ID = Object.fromEntries(ACTIVITIES.map(a => [a.id, a]));
   // Back-compat alias so any older #/plan/:id deep links still resolve.
   const PLAN_BY_ID = ACT_BY_ID;
@@ -1504,7 +1589,22 @@ window.DATA = (function () {
     { subject: 'Roc de Chère cliffs', author: 'William Crochot', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Roc_de_Ch%C3%A8re_-_226.jpg' },
     { subject: 'Voie Verte', author: 'Nicolas Vigier', license: 'CC0', source: 'https://commons.wikimedia.org/wiki/File:Lac_d%27Annecy_-_005.jpg' },
     { subject: 'Clear water at Angon', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Lake_Annecy_@_Angon_@_Talloires_(15336193331).jpg' },
-    { subject: 'Sunset at Petit Port', author: 'Robin Férand', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:Sunset_On_Boats_(217507957).jpeg' }
+    { subject: 'Sunset at Petit Port', author: 'Robin Férand', license: 'CC BY 3.0', source: 'https://commons.wikimedia.org/wiki/File:Sunset_On_Boats_(217507957).jpeg' },
+    { subject: 'Annecy passenger boats', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Boat_Ride_on_Lake_Annecy_(15373121082).jpg' },
+    { subject: 'Kayaks at Saint-Jorioz', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Kayak_@_Sentier_des_Roseli%C3%A8res_@_Lake_Annecy_@_Saint-Jorioz_(50478764421).jpg' },
+    { subject: 'Cascade d\'Angon', author: 'Aupiano', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Cascade_d%27Angon_2.jpg' },
+    { subject: 'Mont Veyrier trail', author: 'Myrabella', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Chemin_mont_Veyrier_mont_Baron.jpg' },
+    { subject: 'Summer luge at Semnoz', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Summer_luge_@_Hike_to_Semnoz_(15368582992).jpg' },
+    { subject: 'Haras d\'Annecy', author: 'Guilhem Vellut', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Le_Haras_@_Annecy_(51377716376).jpg' },
+    { subject: 'Reblochon ageing racks', author: 'Myrabella', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Reblochons_fermiers_au_sechoir.jpg' },
+    { subject: 'Tamie cheese', author: 'Nicolas Vigier', license: 'CC BY 2.0', source: 'https://commons.wikimedia.org/wiki/File:Abbaye_de_Tami%C3%A9_et_tome_des_Bauges.jpg' },
+    { subject: 'Jardins Secrets at Vaulx', author: 'Zairon', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Vaulx_Jardins_secrets_The_Galleries_1.jpg' },
+    { subject: 'Chateau de Montrottier', author: 'Dmitry A. Mottl', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Montrottier.jpg' },
+    { subject: 'Les Gets from Mont Chery', author: 'Hesed', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Les_Gets_depuis_le_Mont_Chery.jpg' },
+    { subject: 'Esperance III', author: 'Semnoz-II', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:20210625_Esp%C3%A9rance_III_.2.jpg' },
+    { subject: 'Gorges du Pont du Diable', author: 'Krzysztof Golik', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Gorges_du_Pont_du_Diable_(3).jpg' },
+    { subject: 'Vitam aquatic centre', author: 'VitamMigros', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File:Vitam.jpg' },
+    { subject: 'Lac de Montriond', author: 'Krzysztof Golik', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File:Lac_de_Montriond_26.jpg' }
   ];
 
   return {

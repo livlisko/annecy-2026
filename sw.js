@@ -5,7 +5,7 @@
    needs network tiles and is NOT claimed to work offline — the Map
    screen falls back to an offline place list instead.
    ===================================================================== */
-const VERSION = 'a26-v23';
+const VERSION = 'a26-v24';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -13,9 +13,9 @@ const RUNTIME = 'runtime-' + VERSION;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './styles.css?v=21',
-  './data.js?v=21',
-  './app.js?v=23',
+  './styles.css?v=24',
+  './data.js?v=24',
+  './app.js?v=24',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
@@ -34,6 +34,21 @@ const CORE_ASSETS = [
   './assets/wiki/lake-sunset.jpg',
   './assets/wiki/les-gets-mtb.jpg',
   './assets/wiki/veyrier.jpg',
+  './assets/activities/lake-boats.jpg',
+  './assets/activities/lake-kayak.jpg',
+  './assets/activities/cascade-angon.jpg',
+  './assets/activities/mont-veyrier.jpg',
+  './assets/activities/semnoz-luge.jpg',
+  './assets/activities/haras-annecy.jpg',
+  './assets/activities/reblochon.jpg',
+  './assets/activities/tamie-cheese.jpg',
+  './assets/activities/jardins-secrets.jpg',
+  './assets/activities/montrottier.jpg',
+  './assets/activities/mont-chery.jpg',
+  './assets/activities/esperance-iii.jpg',
+  './assets/activities/pont-diable.jpg',
+  './assets/activities/vitam.jpg',
+  './assets/activities/montriond.jpg',
   './assets/art/annecy-twilight-v3.jpg',
   './assets/art/annecy-waterfront-v3.jpg',
   './assets/orientation/orientation_relief.jpg',

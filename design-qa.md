@@ -1,6 +1,6 @@
 # Design QA
 
-Date: 2026-07-29
+Date: 2026-08-02
 
 ## Visual Reference
 
@@ -43,7 +43,9 @@ Routes reviewed:
   activity category links, and three secondary paths to Ideas, Trip, and Map.
 - Both generated Annecy art assets load and the four homepage tasters use
   complete photographic activity records.
-- All 83 activity cards render with photographic media.
+- 57 activity cards render with deliberately assigned, place- or
+  activity-specific media; the remaining 26 render as designed text-first cards
+  instead of borrowing misleading area imagery.
 - Activities category, area, effort, booking, rain-safe, and search controls
   render without horizontal page overflow.
 - Rain-safe results contain only explicit `rain: good` or `rainy` data.

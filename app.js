@@ -143,7 +143,7 @@
   /* ---------- cover / media ----------------------------------------- */
   function cover(media, opts) {
     opts = opts || {}; const extra = opts.cls ? ' ' + opts.cls : '';
-    if (media && media.photo) return `<img class="cover-img${extra}" src="${esc(media.photo)}" alt="${esc(opts.alt || '')}" width="1200" height="800" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />`;
+    if (media && media.photo) return `<img class="cover-img${extra}" src="${esc(media.photo)}" alt="${esc(media.alt || opts.alt || '')}" width="1200" height="800" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />`;
     const tint = (media && media.tint) || opts.tint || 'alpine';
     const label = (media && media.label) || opts.label || '';
     return `<div class="cover-ph${extra}" data-tint="${esc(tint)}" role="img" aria-label="${esc(label || opts.alt || 'illustration')}">${label ? `<span class="cover-label">${esc(label)}</span>` : ''}</div>`;
@@ -152,8 +152,6 @@
   function actCover(a) {
     const own = coverOf(a);
     if (own && own.photo) return own;
-    const area = coverOf(D.AREA_BY_ID[a.areaId]);
-    if (area && area.photo) return area;
     return own || { label: a.title, tint: catTint(a.cat) };
   }
   function catTint(c) { if (['road', 'gravel', 'mtb', 'easybike'].includes(c)) return 'pine'; if (['swim', 'paddle', 'boat'].includes(c)) return 'aqua'; if (['viaferrata', 'canyoning', 'paragliding'].includes(c)) return 'purple'; if (['food'].includes(c)) return 'sun'; return 'alpine'; }
@@ -435,9 +433,9 @@
     const img = actCover(a); const hasPhoto = !!(img && img.photo);
     const area = D.AREA_BY_ID[a.areaId];
     const leg = a.base === 'lesgets' ? `<span class="pin-leg">Les Gets</span>` : '';
-    return `<article class="pin-card">
+    return `<article class="pin-card${hasPhoto ? '' : ' no-photo'}" data-tint="${esc(catTint(a.cat))}">
       <a class="pin-hit" href="#/plan/${esc(a.id)}">
-        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />${leg}</div>` : ''}
+        ${hasPhoto ? `<div class="pin-img"><img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="${opts.eager ? 'eager' : 'lazy'}" decoding="async" />${leg}</div>` : ''}
         <h3>${esc(a.title)}</h3>
         ${area ? `<p class="pin-place">${esc(area.name)}</p>` : ''}
         <p class="pin-meta">${esc(pinMeta(a))}${!hasPhoto && a.base === 'lesgets' ? ' · Les Gets leg' : ''}</p>
@@ -666,9 +664,10 @@
   };
   function ideaCard(a) {
     const img = actCover(a); const area = D.AREA_BY_ID[a.areaId];
-    return `<article class="idea-card">
+    const hasPhoto = !!(img && img.photo);
+    return `<article class="idea-card${hasPhoto ? '' : ' no-photo'}" data-tint="${esc(catTint(a.cat))}">
       <a class="idea-hit" href="#/plan/${esc(a.id)}">
-        ${img && img.photo ? `<img src="${esc(img.photo)}" alt="" loading="lazy" decoding="async" />` : ''}
+        ${hasPhoto ? `<img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="lazy" decoding="async" />` : ''}
         <span class="idea-copy"><strong>${esc(a.title)}</strong>${area ? `<span>${esc(area.name)}</span>` : ''}</span>
       </a>
       <div class="idea-save">${saveBtn(a.id)}</div>
