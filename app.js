@@ -381,7 +381,7 @@
     return `
       ${contextBar()}
       <section class="today-hero">
-        <div class="th-eyebrow">${esc(stay.legLabel)} · ${esc(D.TRIP.datesLabel)}</div>
+        <div class="th-eyebrow">${esc(stay.legLabel)} · ${esc(stay.dates)}</div>
         <h2 class="th-title">${base === 'lesgets' ? 'Bike-park days at Les Gets' : 'On the lake, from Veyrier-du-Lac'}</h2>
         <details class="stay-inline">
           <summary><span class="si-name">${esc(stay.name)}</span><span class="si-vil">${esc(stay.village)}</span></summary>
@@ -400,7 +400,7 @@
       <div class="action-row">
         <a class="action-tile" href="#/activities">Activities</a>
         <a class="action-tile" href="#/bike">Cycling</a>
-        <a class="action-tile" href="#/activities?f=book">Must book</a>
+        <a class="action-tile" href="#/activities?booking=required">Must book</a>
       </div>
 
       <div class="section-head"><h2>Today &amp; next up</h2></div>

@@ -75,6 +75,10 @@ Routes reviewed:
 - Trip leads with all three stays, followed by flights, van, and essentials.
 - Map tiles or the offline fallback render, all shared categories return places,
   clustered markers reduce density, and direct place links reveal their popup.
+- The Places map's intentional empty state explains the next action; `All`
+  populates the map and direct links automatically activate the relevant category.
+- Today shows the current stay's date range, and `Must book` applies the required
+  booking filter rather than returning the full activity list.
 - Desktop header and mobile bottom navigation stay visible in their intended
   positions; all five mobile labels and icons remain visibly legible on Home.
 - No page-level horizontal overflow at any tested viewport.

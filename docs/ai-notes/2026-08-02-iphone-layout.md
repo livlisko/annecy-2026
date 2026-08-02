@@ -19,8 +19,13 @@ does not introduce scheduling.
   visible early.
 - Added place-marker clustering and kept direct links able to reveal a selected
   marker and popup.
+- The Places map intentionally starts with no categories selected to avoid an
+  overwhelming first view. `All` or an individual category populates it, while
+  a direct place link automatically selects that place's category.
 - Added safe-area spacing and route-consistent twilight styling without changing
   the desktop information architecture.
+- Corrected Today to show the active stay's dates and to send `Must book` to the
+  required-booking activity filter.
 
 ## Verification
 
@@ -30,6 +35,8 @@ does not introduce scheduling.
   unnamed visible controls, and no browser warnings or errors.
 - Exercised the mobile filter drawer, person-board switcher, map category filter,
   clustered map, and direct place focus.
+- Confirmed `Must book` returns 17 required-booking ideas and a focused stay map
+  link selects Stays, renders its three rows, and opens the requested popup.
 - Loaded all 83 activity cards: 82 specific images succeeded and Casa Elisa
   remained intentionally photo-free.
 - Native iOS Simulator testing could not run because full Xcode and `simctl` are
