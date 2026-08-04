@@ -941,6 +941,7 @@
     return deoverlap(out);
   }
   let mapInstance = null, mapMarkers = {}, mapState = null, mapGeneration = 0, markerCluster = null;
+  let alpineMapInstance = null, alpineMapMarkers = {}, alpineReadyTimer = null;
 
   const ALPINE_SPOTS = [
     {
@@ -950,32 +951,65 @@
       coords: [45.8992, 6.1294], route: '#/areas/annecy'
     },
     {
-      id: 'veyrier', label: 'Our lake base', x: 66, y: 54, kind: 'home',
-      eyebrow: 'East shore', title: 'Veyrier-du-Lac',
-      text: 'Home for the lake weeks, below Mont Veyrier and opposite the long wooded ridge of the Semnoz.',
-      coords: [45.8758, 6.1852], route: '#/areas/veyrier'
+      id: 'lake', label: 'Lake Annecy', x: 66, y: 54, kind: 'water', elevation: 447,
+      eyebrow: 'The heart of the trip', title: 'Lake Annecy',
+      text: 'The turquoise basin between the Semnoz and La Tournette, with our east-shore base tucked just above the water.',
+      coords: [45.8504, 6.1696], route: '#/activities?cat=water'
     },
     { id: 'semnoz', label: 'Semnoz', x: 35, y: 55, kind: 'col', colId: 'semnoz' },
     { id: 'forclaz', label: 'Forclaz', x: 89.5, y: 49, kind: 'col', colId: 'forclaz', edge: true },
     { id: 'aravis', label: 'Col des Aravis', x: 59, y: 23, kind: 'col', colId: 'aravis' },
     { id: 'colombiere', label: 'Colombière', x: 18, y: 22, kind: 'col', colId: 'colombiere' },
     {
-      id: 'glieres', label: 'Glières', x: 21, y: 33, kind: 'place',
+      id: 'glieres', label: 'Glières', x: 21, y: 33, kind: 'place', elevation: 1440,
       eyebrow: 'Bornes plateau', title: 'Plateau des Glières',
       text: 'The high Resistance plateau between Annecy and the Aravis: monument, open walking country and the Tour’s famous gravel crossing.',
       coords: [45.9630, 6.3260], route: '#/plan/glieres-walk'
     },
     {
-      id: 'mont-blanc', label: 'Mont Blanc', x: 61, y: 7, kind: 'peak',
+      id: 'mont-blanc', label: 'Mont Blanc', x: 61, y: 7, kind: 'peak', elevation: 4807,
       eyebrow: 'Beyond the Aravis', title: 'Mont Blanc & Chamonix',
       text: 'The white massif on the horizon is real orientation, not scenery: Chamonix sits in the valley directly beneath it.',
-      coords: [45.9237, 6.8694], route: '#/plan/chamonix-day'
+      coords: [45.9237, 6.8694], mapCoords: [45.8326, 6.8652], route: '#/plan/chamonix-day'
     }
   ];
+  function alpineMapPoints() {
+    const cols = D.TOUR_COLS || [];
+    const seen = new Set();
+    const points = ALPINE_SPOTS.map((spot) => {
+      const col = spot.colId ? cols.find((c) => c.id === spot.colId) : null;
+      const id = spot.colId || spot.id;
+      seen.add(id);
+      return {
+        id,
+        label: spot.label,
+        kind: spot.kind,
+        coords: spot.mapCoords || spot.coords || (col && col.coords),
+        elevation: spot.elevation || (col && col.elevation),
+        featured: true
+      };
+    }).filter((point) => point.coords);
+    cols.forEach((col) => {
+      if (seen.has(col.id)) return;
+      points.push({
+        id: col.id,
+        label: col.name.replace('Col de la ', '').replace('Col des ', ''),
+        kind: 'col',
+        coords: col.coords,
+        elevation: col.elevation,
+        featured: false
+      });
+    });
+    return points;
+  }
+  function alpineSelected(route) {
+    const valid = new Set(alpineMapPoints().map((point) => point.id));
+    return valid.has(route.query.spot) ? route.query.spot : 'forclaz';
+  }
   function mapViewTabs(view) {
     return `<nav class="map-view-tabs" role="tablist" aria-label="Map view">
       <a role="tab" aria-selected="${view === 'places'}" class="map-view-tab" href="#/map">Places</a>
-      <a role="tab" aria-selected="${view === 'alpine'}" class="map-view-tab" href="#/map?view=alpine">Alpine view</a>
+      <a role="tab" aria-selected="${view === 'alpine'}" class="map-view-tab" href="#/map?view=alpine">Alpine relief</a>
     </nav>`;
   }
   function alpinePlacePanel(spot) {
@@ -994,9 +1028,37 @@
     const spot = ALPINE_SPOTS.find((s) => s.id === id);
     return spot ? alpinePlacePanel(spot) : alpinePlacePanel(ALPINE_SPOTS[0]);
   }
+  function alpineInspectorDetail(id) {
+    const col = (D.TOUR_COLS || []).find((c) => c.id === id);
+    const spot = ALPINE_SPOTS.find((s) => s.id === id);
+    const point = alpineMapPoints().find((p) => p.id === id);
+    const coords = col ? col.coords : spot ? spot.coords : point ? point.coords : null;
+    const title = col ? col.name : spot ? spot.title : point ? point.label : 'The Alps';
+    const elevation = col ? col.elevation : point ? point.elevation : null;
+    const eyebrow = col ? col.region : spot ? spot.eyebrow : 'Haute-Savoie';
+    const summary = col ? col.iconic : spot ? spot.text : '';
+    const guideHref = col && col.ideaId && D.ACT_BY_ID[col.ideaId]
+      ? `#/plan/${esc(col.ideaId)}`
+      : spot && spot.route ? spot.route
+        : col && D.SOURCES[col.summitSrc] ? D.SOURCES[col.summitSrc].url
+          : '';
+    const guideExternal = guideHref && guideHref[0] !== '#';
+    const directions = coords ? `https://www.google.com/maps/dir/?api=1&destination=${coords.join(',')}` : '';
+    const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>';
+    return `
+      <div class="alpine-inspector-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m3 19 6-10 3 5 2-3 7 8z"/><path d="m8 11 2 1 2-3"/></svg>
+      </div>
+      <div class="alpine-detail-head"><p>${esc(eyebrow)}${elevation ? ` · ${elevation.toLocaleString('en-US')} m` : ''}</p><h3>${esc(title)}</h3></div>
+      <p class="alpine-inspector-summary">${esc(summary)}</p>
+      <div class="alpine-primary-actions">
+        ${guideHref ? `<a href="${esc(guideHref)}"${guideExternal ? ' target="_blank" rel="noopener"' : ''}>Details${chevron}</a>` : ''}
+        ${directions ? `<a class="is-primary" href="${directions}" target="_blank" rel="noopener">Directions${chevron}</a>` : ''}
+      </div>
+      ${col ? `<div class="alpine-inspector-more">${tourColFacts(col)}${tourColLinks(col, true)}</div>` : ''}`;
+  }
   function alpineView(route) {
-    const valid = new Set([...ALPINE_SPOTS.map((s) => s.id), ...(D.TOUR_COLS || []).map((c) => c.id)]);
-    const selected = valid.has(route.query.spot) ? route.query.spot : 'forclaz';
+    const selected = alpineSelected(route);
     const pins = ALPINE_SPOTS.map((s) => `
       <button type="button" class="alpine-pin is-${esc(s.kind)}${s.edge ? ' edge' : ''}" style="--x:${s.x}%;--y:${s.y}%" data-alpine="${esc(s.colId || s.id)}" aria-pressed="${selected === (s.colId || s.id)}" aria-label="Open ${esc(s.label)}">
         <span class="alpine-pin-dot" aria-hidden="true"></span><span class="alpine-pin-label">${esc(s.label)}</span>
@@ -1009,16 +1071,31 @@
       </button>`;
     }).join('');
     return `
-      <div class="alpine-layout">
-        <figure class="alpine-map-wrap">
-          <div class="alpine-map-canvas">
-            <img src="assets/orientation/orientation_relief.jpg" alt="Oblique relief map from Annecy across the Aravis to Mont Blanc" width="900" height="900" />
-            ${pins}
+      <div class="alpine-layout" id="alpine-layout">
+        <section class="alpine-map-wrap" aria-label="Interactive Alpine relief map">
+          <div class="alpine-relief-stage" id="alpine-relief-stage">
+            <div id="alpine-relief-map" role="application" aria-label="Interactive 3D relief map from Lake Annecy to Mont Blanc"></div>
+            <div class="alpine-map-loading" id="alpine-map-loading" role="status"><span aria-hidden="true"></span>Loading relief</div>
+            <button class="alpine-reset-view" id="alpine-reset-view" type="button" aria-label="Reset Alpine map view" title="Reset view">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            </button>
+            <button class="alpine-guide-open" id="alpine-guide-open" type="button" hidden>Open selected guide</button>
+            <div class="alpine-fallback" id="alpine-fallback" hidden>
+              <figure class="alpine-fallback-figure">
+                <div class="alpine-map-canvas">
+                  <img src="assets/orientation/orientation_relief.jpg" alt="Oblique relief map from Annecy across the Aravis to Mont Blanc" width="900" height="900" />
+                  ${pins}
+                </div>
+                <figcaption>Lake Annecy in the foreground, the Aravis across the middle, Mont Blanc on the horizon.</figcaption>
+              </figure>
+            </div>
           </div>
-          <figcaption>Lake Annecy in the foreground, the Aravis across the middle, Mont Blanc on the horizon.</figcaption>
-        </figure>
-        <aside class="alpine-side" aria-label="Alpine map guide">
-          <div class="alpine-detail" id="alpine-detail" aria-live="polite">${alpineDetail(selected)}</div>
+        </section>
+        <aside class="alpine-side" id="alpine-side" aria-label="Alpine map guide">
+          <button class="alpine-side-close" id="alpine-side-close" type="button" aria-label="Hide Alpine guide" title="Hide guide">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+          <div class="alpine-detail" id="alpine-detail" aria-live="polite">${alpineInspectorDetail(selected)}</div>
           <div class="alpine-index">
             <div class="alpine-index-head"><h3>Tour cols worth knowing</h3><a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">All 113 ↗</a></div>
             <div class="alpine-col-buttons">${index}</div>
@@ -1031,11 +1108,11 @@
     const view = route.query.view === 'alpine' ? 'alpine' : 'places';
     const intro = `
       <div class="map-intro">
-        <div><h2>Map</h2><p>${view === 'alpine' ? 'The lake, passes and high Alps in one view.' : 'Activities, stays, and useful places around the lake and mountains.'}</p></div>
+        <div><h2>Map</h2><p>${view === 'alpine' ? 'Interactive topography from Lake Annecy to Mont Blanc.' : 'Activities, stays, and useful places around the lake and mountains.'}</p></div>
         ${mapViewTabs(view)}
       </div>`;
     if (view === 'alpine') {
-      mapState = { view: 'alpine', focus: route.query.spot || 'forclaz' };
+      mapState = { view: 'alpine', focus: alpineSelected(route) };
       return intro + alpineView(route);
     }
     const places = mapPlaces();
@@ -1099,6 +1176,27 @@
     });
     return ensureLeaflet._p;
   }
+  function ensureMapLibre() {
+    if (window.maplibregl) return Promise.resolve(true);
+    if (ensureMapLibre._p) return ensureMapLibre._p;
+    ensureMapLibre._p = new Promise((resolve) => {
+      let css = document.getElementById('maplibre-css');
+      if (!css) {
+        css = document.createElement('link');
+        css.id = 'maplibre-css';
+        css.rel = 'stylesheet';
+        css.href = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css';
+        document.head.appendChild(css);
+      }
+      const js = document.createElement('script');
+      js.src = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js';
+      const to = setTimeout(() => resolve(false), 12000);
+      js.onload = () => { clearTimeout(to); resolve(!!window.maplibregl); };
+      js.onerror = () => { clearTimeout(to); resolve(false); };
+      document.head.appendChild(js);
+    });
+    return ensureMapLibre._p;
+  }
   function ensureMarkerCluster() {
     if (window.L && window.L.markerClusterGroup) return Promise.resolve(true);
     if (ensureMarkerCluster._p) return ensureMarkerCluster._p;
@@ -1148,18 +1246,259 @@
     document.querySelectorAll('#map-filters .map-chip').forEach((c) => { const id = c.dataset.cat; if (id === 'all') c.setAttribute('aria-pressed', String(mapState.active.size === MAP_CATS.length)); else c.setAttribute('aria-pressed', String(mapState.active.has(id))); });
     renderMapList(places);
   }
+  function alpineHomeCamera() {
+    const mobile = window.matchMedia('(max-width: 700px)').matches;
+    return mobile
+      ? { center: [6.20, 45.84], zoom: 10.2, pitch: 40, bearing: 48 }
+      : { center: [6.31, 45.84], zoom: 10.35, pitch: 70, bearing: 70 };
+  }
+  function alpineCameraPadding() {
+    const mobile = window.matchMedia('(max-width: 700px)').matches;
+    const compact = window.matchMedia('(max-width: 560px)').matches;
+    const side = document.getElementById('alpine-side');
+    if (!mobile || compact || !side || side.hidden) return { top: 0, right: 0, bottom: 0, left: 0 };
+    return { top: 0, right: 0, bottom: Math.round(Math.min(390, window.innerHeight * 0.43)), left: 0 };
+  }
+  function resetAlpineCamera() {
+    if (!alpineMapInstance) return;
+    const camera = alpineHomeCamera();
+    alpineMapInstance.easeTo({
+      ...camera,
+      padding: alpineCameraPadding(),
+      duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1100
+    });
+  }
+  function flyToAlpinePoint(id) {
+    if (!alpineMapInstance) return;
+    const point = alpineMapPoints().find((item) => item.id === id);
+    if (!point) return;
+    const mobile = window.matchMedia('(max-width: 700px)').matches;
+    const far = ['joux-plane', 'ramaz', 'mont-blanc'].includes(id);
+    alpineMapInstance.flyTo({
+      center: [point.coords[1], point.coords[0]],
+      zoom: far ? (mobile ? 9.7 : 10.3) : (mobile ? 10.3 : 11.1),
+      pitch: mobile ? 56 : 66,
+      bearing: id === 'mont-blanc' ? 78 : 58,
+      offset: mobile ? [0, 0] : [-120, 0],
+      padding: alpineCameraPadding(),
+      duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1400,
+      essential: true
+    });
+  }
+  function showAlpineFallback() {
+    const stage = document.getElementById('alpine-relief-stage');
+    const fallback = document.getElementById('alpine-fallback');
+    const loading = document.getElementById('alpine-map-loading');
+    const reset = document.getElementById('alpine-reset-view');
+    if (!stage || !fallback) return;
+    stage.classList.add('is-fallback');
+    fallback.hidden = false;
+    if (loading) loading.hidden = true;
+    if (reset) reset.hidden = true;
+  }
+  function restyleAlpineBase(map) {
+    const layers = (map.getStyle() && map.getStyle().layers) || [];
+    layers.forEach((layer) => {
+      const sourceLayer = layer['source-layer'];
+      try {
+        if (layer.type === 'background') map.setPaintProperty(layer.id, 'background-color', '#dce9e7');
+        if (layer.type === 'fill' && sourceLayer === 'water') {
+          map.setPaintProperty(layer.id, 'fill-color', '#078ea6');
+          map.setPaintProperty(layer.id, 'fill-opacity', 0.92);
+        }
+        if (layer.type === 'line' && (sourceLayer === 'waterway' || sourceLayer === 'water_name')) {
+          map.setPaintProperty(layer.id, 'line-color', '#3ec9c2');
+        }
+        if (layer.type === 'fill' && sourceLayer === 'park') {
+          map.setPaintProperty(layer.id, 'fill-color', '#4c8b68');
+          map.setPaintProperty(layer.id, 'fill-opacity', 0.38);
+        }
+        if (layer.type === 'fill' && sourceLayer === 'landcover' && /wood|forest/i.test(layer.id)) {
+          map.setPaintProperty(layer.id, 'fill-color', '#2c7658');
+          map.setPaintProperty(layer.id, 'fill-opacity', 0.48);
+        }
+      } catch (_) {}
+    });
+  }
+  function addAlpineMarker(map, point, choose) {
+    const shell = document.createElement('button');
+    shell.type = 'button';
+    shell.className = `relief-marker-shell relief-marker is-${point.kind}${point.featured ? ' is-featured' : ''}${mapState.focus === point.id ? ' is-selected' : ''}`;
+    shell.dataset.alpine = point.id;
+    shell.setAttribute('aria-pressed', String(mapState.focus === point.id));
+    shell.setAttribute('aria-label', `Open ${point.label}${point.elevation ? `, ${point.elevation.toLocaleString('en-US')} metres` : ''}`);
+    shell.title = point.label;
+    const card = document.createElement('span');
+    card.className = 'relief-marker-card';
+    const swatch = document.createElement('span');
+    swatch.className = 'relief-marker-swatch';
+    swatch.setAttribute('aria-hidden', 'true');
+    const copy = document.createElement('span');
+    copy.className = 'relief-marker-copy';
+    const strong = document.createElement('strong');
+    strong.textContent = point.label;
+    copy.appendChild(strong);
+    if (point.elevation) {
+      const small = document.createElement('small');
+      small.textContent = `${point.elevation.toLocaleString('en-US')} m`;
+      copy.appendChild(small);
+    }
+    card.append(swatch, copy);
+    const stem = document.createElement('span');
+    stem.className = 'relief-marker-stem';
+    stem.setAttribute('aria-hidden', 'true');
+    const dot = document.createElement('span');
+    dot.className = 'relief-marker-anchor';
+    dot.setAttribute('aria-hidden', 'true');
+    shell.append(card, stem, dot);
+    shell.addEventListener('click', () => choose(point.id, true));
+    const marker = new maplibregl.Marker({ element: shell, anchor: 'bottom', opacityWhenCovered: '0.18' })
+      .setLngLat([point.coords[1], point.coords[0]])
+      .addTo(map);
+    alpineMapMarkers[point.id] = { marker, button: shell };
+  }
+  function initAlpineRelief(choose) {
+    const generation = ++mapGeneration;
+    const mapEl = document.getElementById('alpine-relief-map');
+    if (!mapEl) return;
+    ensureMapLibre().then((ok) => {
+      if (generation !== mapGeneration) return;
+      if (!ok || !window.maplibregl || (maplibregl.supported && !maplibregl.supported())) {
+        showAlpineFallback();
+        return;
+      }
+      const mobile = window.matchMedia('(max-width: 700px)').matches;
+      let map;
+      try {
+        map = new maplibregl.Map({
+          container: mapEl,
+          style: 'https://tiles.openfreemap.org/styles/liberty',
+          ...alpineHomeCamera(),
+          padding: alpineCameraPadding(),
+          minZoom: 7.4,
+          maxZoom: 15.5,
+          maxPitch: 80,
+          maxBounds: [[5.72, 45.50], [7.18, 46.43]],
+          attributionControl: false,
+          cooperativeGestures: mobile,
+          antialias: true,
+          fadeDuration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300
+        });
+      } catch (_) {
+        showAlpineFallback();
+        return;
+      }
+      alpineMapInstance = map;
+      map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true }), mobile ? 'top-right' : 'bottom-right');
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+      if (!mobile) map.addControl(new maplibregl.ScaleControl({ maxWidth: 90, unit: 'metric' }), 'bottom-right');
+      alpineReadyTimer = setTimeout(() => {
+        if (generation === mapGeneration && !map.loaded()) showAlpineFallback();
+      }, 18000);
+      map.on('load', () => {
+        if (generation !== mapGeneration) return;
+        clearTimeout(alpineReadyTimer);
+        alpineReadyTimer = null;
+        restyleAlpineBase(map);
+        try {
+          map.addSource('annecy-terrain', {
+            type: 'raster-dem',
+            url: 'https://tiles.mapterhorn.com/tilejson.json',
+            tileSize: 512,
+            attribution: '<a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener">© Mapterhorn</a>'
+          });
+          map.addSource('annecy-hillshade', {
+            type: 'raster-dem',
+            tiles: ['https://tiles.mapterhorn.com/{z}/{x}/{y}.webp'],
+            encoding: 'terrarium',
+            tileSize: 512,
+            maxzoom: 17
+          });
+          const firstLabel = (map.getStyle().layers || []).find((layer) => layer.type === 'symbol');
+          map.addLayer({
+            id: 'annecy-relief-shade',
+            type: 'hillshade',
+            source: 'annecy-hillshade',
+            paint: {
+              'hillshade-shadow-color': '#173f46',
+              'hillshade-highlight-color': '#e6fff8',
+              'hillshade-accent-color': '#6f73ca',
+              'hillshade-exaggeration': 0.48
+            }
+          }, firstLabel && firstLabel.id);
+          map.setTerrain({ source: 'annecy-terrain', exaggeration: 1.14 });
+          map.setSky({
+            'sky-color': '#5664bd',
+            'sky-horizon-blend': 0.48,
+            'horizon-color': '#e9c7dd',
+            'horizon-fog-blend': 0.56,
+            'fog-color': '#d9dcf5',
+            'fog-ground-blend': 0.16
+          });
+        } catch (_) {}
+        alpineMapMarkers = {};
+        alpineMapPoints().forEach((point) => addAlpineMarker(map, point, choose));
+        const loading = document.getElementById('alpine-map-loading');
+        if (loading) loading.hidden = true;
+        const reset = document.getElementById('alpine-reset-view');
+        if (reset) reset.hidden = false;
+        if (mapState.focus && mapState.focus !== 'forclaz') {
+          setTimeout(() => {
+            if (generation === mapGeneration) flyToAlpinePoint(mapState.focus);
+          }, 350);
+        }
+      });
+    });
+  }
   function wireAlpineView(route) {
-    const choose = (id) => {
-      const detail = document.getElementById('alpine-detail');
-      if (!detail) return;
-      detail.innerHTML = alpineDetail(id);
-      screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.alpine === id)));
-      history.replaceState(null, '', '#/map?view=alpine&spot=' + encodeURIComponent(id));
-      const col = (D.TOUR_COLS || []).find((c) => c.id === id);
-      const spot = ALPINE_SPOTS.find((s) => s.id === id);
-      announce('Showing ' + (col ? col.name : spot ? spot.title : 'Alpine place'));
+    const layout = document.getElementById('alpine-layout');
+    const side = document.getElementById('alpine-side');
+    const open = document.getElementById('alpine-guide-open');
+    const detail = document.getElementById('alpine-detail');
+    const showGuide = () => {
+      if (!layout || !side || !open) return;
+      side.hidden = false;
+      open.hidden = true;
+      layout.classList.remove('is-guide-hidden');
+      setTimeout(() => {
+        if (!alpineMapInstance) return;
+        alpineMapInstance.resize();
+        alpineMapInstance.setPadding(alpineCameraPadding());
+      }, 40);
     };
-    screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.addEventListener('click', () => choose(b.dataset.alpine)));
+    const choose = (id, moveCamera) => {
+      if (!detail) return;
+      mapState.focus = id;
+      detail.innerHTML = alpineInspectorDetail(id);
+      screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.alpine === id)));
+      screenEl.querySelectorAll('.relief-marker-shell').forEach((marker) => marker.classList.toggle('is-selected', marker.dataset.alpine === id));
+      showGuide();
+      history.replaceState(null, '', '#/map?view=alpine&spot=' + encodeURIComponent(id));
+      if (moveCamera) flyToAlpinePoint(id);
+      const point = alpineMapPoints().find((item) => item.id === id);
+      announce('Showing ' + (point ? point.label : 'Alpine place'));
+    };
+    screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.addEventListener('click', () => choose(b.dataset.alpine, true)));
+    const close = document.getElementById('alpine-side-close');
+    if (close && side && layout && open) close.addEventListener('click', () => {
+      side.hidden = true;
+      open.hidden = false;
+      layout.classList.add('is-guide-hidden');
+      setTimeout(() => {
+        if (!alpineMapInstance) return;
+        alpineMapInstance.resize();
+        alpineMapInstance.setPadding(alpineCameraPadding());
+      }, 40);
+      open.focus({ preventScroll: true });
+    });
+    if (open) open.addEventListener('click', () => {
+      showGuide();
+      const again = document.getElementById('alpine-side-close');
+      if (again) again.focus({ preventScroll: true });
+    });
+    const reset = document.getElementById('alpine-reset-view');
+    if (reset) reset.addEventListener('click', resetAlpineCamera);
+    initAlpineRelief(choose);
   }
   function initMapView(route) {
     if (route.query.view === 'alpine') { wireAlpineView(route); return; }
@@ -1237,6 +1576,15 @@
   }
   function teardownMap() {
     mapGeneration += 1;
+    if (alpineReadyTimer) {
+      clearTimeout(alpineReadyTimer);
+      alpineReadyTimer = null;
+    }
+    if (alpineMapInstance) {
+      alpineMapInstance.remove();
+      alpineMapInstance = null;
+      alpineMapMarkers = {};
+    }
     if (mapInstance) {
       mapInstance.remove();
       mapInstance = null;
@@ -1292,7 +1640,8 @@
   window.addEventListener('online', setOffline); window.addEventListener('offline', setOffline); setOffline();
 
   /* ---------- service worker + update toast ------------------------- */
-  if ('serviceWorker' in navigator) {
+  const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
+  if ('serviceWorker' in navigator && !localPreview) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').then((reg) => {
         reg.addEventListener('updatefound', () => {

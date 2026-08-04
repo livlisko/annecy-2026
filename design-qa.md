@@ -1,6 +1,6 @@
 # Design QA
 
-Date: 2026-08-02
+Date: 2026-08-04
 
 ## Visual Reference
 
@@ -54,9 +54,29 @@ Routes reviewed:
 - Trip: stays lead with dates, check-in/out, directions, and map actions in a
   dense reference layout rather than a daily agenda.
 - Map: the place view uses clustered markers and a readable list/sheet; the
-  Alpine view keeps the illustrated regional map and selected-col detail.
+  Alpine relief view uses live 3D terrain with a selected-col field guide and
+  retains the illustrated regional map as its connection/WebGL fallback.
 - Navigation: the same five destinations remain fixed and legible at all tested
   iPhone widths, including the safe-area allowance.
+
+## Alpine Relief Fidelity Ledger
+
+- Reference: the approved Relief Explorer concept from 2 August 2026.
+- Composition: Lake Annecy anchors the foreground, the Aravis form the middle
+  distance, and Mont Blanc holds the horizon, matching the reference's regional
+  reading order rather than showing a generic mountain panorama.
+- Controls: Places and Alpine relief are equal map modes; the latter has direct
+  zoom, pitch/bearing, reset, marker selection, and a collapsible field guide.
+- Markers: featured places use restrained teal, alpine green, violet, and flower
+  pink labels that remain attached to geographic coordinates while the map moves.
+- Inspector: the dark lake-green panel, pink dividing rule, Fraunces headings,
+  compact facts, and two direct actions carry the approved concept into the live
+  app without introducing dashboard-style cards.
+- Mobile: the same experience becomes a map over a scrollable field guide rather
+  than shrinking the desktop side panel or covering the terrain with a modal.
+- Necessary deviation: live vector cartography and elevation shading replace the
+  concept's photoreal terrain texture. This makes the selected direction genuinely
+  interactive while preserving its Annecy-specific geography and visual hierarchy.
 
 ## Checks
 
@@ -75,6 +95,9 @@ Routes reviewed:
 - Trip leads with all three stays, followed by flights, van, and essentials.
 - Map tiles or the offline fallback render, all shared categories return places,
   clustered markers reduce density, and direct place links reveal their popup.
+- Alpine relief renders a nonblank WebGL canvas, exposes ten accessible markers,
+  updates its URL and field guide on selection, and falls back to the illustrated
+  orientation map when MapLibre or WebGL is unavailable.
 - The Places map's intentional empty state explains the next action; `All`
   populates the map and direct links automatically activate the relevant category.
 - Today shows the current stay's date range, and `Must book` applies the required
@@ -90,4 +113,4 @@ Full iOS Simulator verification was unavailable on this machine because only
 the Xcode command-line tools are installed and `simctl` is absent. The three
 responsive iPhone browser sizes above are the current device-layout evidence.
 
-Result: pass.
+final result: passed

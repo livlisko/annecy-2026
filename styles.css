@@ -2469,30 +2469,159 @@ body:not(.route-home) .dh-inner {
 
 .alpine-layout {
   display: grid;
+  position: relative;
   flex: 1;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr) 390px;
-  background:
-    linear-gradient(145deg, rgba(205, 238, 229, 0.9), rgba(211, 231, 243, 0.92)),
-    var(--surface);
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 25vw, 370px);
+  background: #cfdde0;
+  transition: grid-template-columns 220ms ease;
+}
+
+.alpine-layout.is-guide-hidden {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .alpine-map-wrap {
-  display: flex;
+  position: relative;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.alpine-relief-stage,
+#alpine-relief-map {
+  position: absolute;
+  inset: 0;
+}
+
+.alpine-relief-stage {
+  overflow: hidden;
+  background: #244f58;
+  isolation: isolate;
+}
+
+#alpine-relief-map {
+  z-index: 1;
+}
+
+.alpine-relief-stage::after {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 48px rgba(19, 40, 50, 0.18);
+  content: "";
+  pointer-events: none;
+}
+
+.alpine-map-loading {
+  position: absolute;
+  z-index: 7;
+  top: 22px;
+  left: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 9px;
+  background: rgba(18, 56, 63, 0.82);
+  box-shadow: 0 8px 24px rgba(17, 42, 48, 0.2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 650;
+  backdrop-filter: blur(10px);
+}
+
+.alpine-map-loading > span {
+  width: 9px;
+  height: 9px;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: relief-loading 850ms linear infinite;
+}
+
+@keyframes relief-loading {
+  to { transform: rotate(360deg); }
+}
+
+.alpine-reset-view {
+  position: absolute;
+  z-index: 8;
+  right: 18px;
+  bottom: 132px;
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31, 73, 79, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 18px rgba(22, 52, 59, 0.2);
+  color: var(--ink);
+  backdrop-filter: blur(10px);
+}
+
+.alpine-reset-view svg,
+.alpine-side-close svg,
+.alpine-inspector-mark svg,
+.alpine-primary-actions svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.alpine-reset-view svg {
+  width: 19px;
+  height: 19px;
+}
+
+.alpine-guide-open {
+  position: absolute;
+  z-index: 8;
+  right: 18px;
+  top: 18px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9px;
+  background: rgba(18, 56, 63, 0.88);
+  box-shadow: 0 8px 24px rgba(17, 42, 48, 0.2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 650;
+  backdrop-filter: blur(10px);
+}
+
+.alpine-fallback {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  padding: 16px;
+  background: linear-gradient(145deg, #d9dcf5, #dff7f4);
+}
+
+.alpine-relief-stage.is-fallback #alpine-relief-map {
+  display: none;
+}
+
+.alpine-fallback-figure {
+  display: flex;
+  height: 100%;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 8px;
-  overflow: hidden;
-  padding: 16px 18px 10px;
 }
 
 .alpine-map-canvas {
   position: relative;
-  width: min(100%, calc(100dvh - var(--header-h) - 148px));
-  max-height: 100%;
+  width: min(100%, 850px);
+  max-height: calc(100% - 28px);
   aspect-ratio: 1;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.82);
@@ -2518,7 +2647,7 @@ body:not(.route-home) .dh-inner {
   object-fit: cover;
 }
 
-.alpine-map-wrap figcaption {
+.alpine-fallback-figure figcaption {
   color: var(--muted);
   font-size: 10px;
   text-align: center;
@@ -2568,7 +2697,8 @@ body:not(.route-home) .dh-inner {
   background: var(--lake);
 }
 
-.alpine-pin.is-home .alpine-pin-dot {
+.alpine-pin.is-home .alpine-pin-dot,
+.alpine-pin.is-water .alpine-pin-dot {
   background: var(--flower);
 }
 
@@ -2587,21 +2717,276 @@ body:not(.route-home) .dh-inner {
   color: var(--lake);
 }
 
+.relief-marker-shell {
+  --marker-color: var(--alpine);
+  z-index: 2;
+}
+
+.relief-marker-shell:not(.is-featured):not(.is-selected) {
+  display: none;
+}
+
+.relief-marker-shell.is-place {
+  --marker-color: var(--lake);
+}
+
+.relief-marker-shell.is-water {
+  --marker-color: var(--lake-bright);
+}
+
+.relief-marker-shell.is-home {
+  --marker-color: var(--flower);
+}
+
+.relief-marker-shell.is-peak {
+  --marker-color: var(--twilight);
+}
+
+.relief-marker {
+  position: absolute;
+  display: block;
+  width: max-content;
+  min-width: 44px;
+  min-height: 66px;
+  padding: 0 0 27px;
+  color: #fff;
+  text-align: left;
+}
+
+.relief-marker-card {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 39px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--marker-color) 82%, rgba(12, 47, 55, 0.92));
+  box-shadow: 0 6px 18px rgba(16, 42, 49, 0.24);
+  backdrop-filter: blur(11px);
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.relief-marker-swatch {
+  display: block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  background: var(--marker-color);
+}
+
+.relief-marker-copy,
+.relief-marker-copy strong,
+.relief-marker-copy small {
+  display: block;
+}
+
+.relief-marker-copy strong {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.relief-marker-copy small {
+  margin-top: 1px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.relief-marker-stem {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(-50%);
+}
+
+.relief-marker-anchor {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--marker-color);
+  box-shadow: 0 2px 7px rgba(15, 41, 48, 0.34);
+  transform: translateX(-50%);
+}
+
+.relief-marker:hover .relief-marker-card,
+.relief-marker[aria-pressed="true"] .relief-marker-card {
+  background: var(--flower);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 8px 22px rgba(20, 46, 54, 0.32);
+  transform: translateY(-2px);
+}
+
+.relief-marker[aria-pressed="true"] .relief-marker-anchor {
+  background: var(--flower);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.32), 0 2px 7px rgba(15, 41, 48, 0.34);
+}
+
+.relief-marker:focus-visible {
+  outline-color: #fff;
+  outline-offset: 3px;
+}
+
+.maplibregl-marker-covered .relief-marker {
+  opacity: 0.18;
+}
+
+.alpine-relief-stage .maplibregl-ctrl-bottom-right {
+  right: 8px;
+  bottom: 12px;
+}
+
+.alpine-relief-stage .maplibregl-ctrl-bottom-left {
+  left: 10px;
+  bottom: 8px;
+}
+
+.alpine-relief-stage .maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(31, 73, 79, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 18px rgba(22, 52, 59, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.alpine-relief-stage .maplibregl-ctrl-group button {
+  width: 38px;
+  height: 38px;
+}
+
+.alpine-relief-stage .maplibregl-ctrl-scale {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(18, 56, 63, 0.68);
+  color: #fff;
+  font-size: 9px;
+}
+
+.alpine-relief-stage .maplibregl-ctrl-attrib {
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 9px;
+}
+
 .alpine-side {
+  position: relative;
+  z-index: 10;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px 24px 30px;
-  border-left: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.95);
+  padding: 32px 28px 34px;
+  border-left: 3px solid var(--flower);
+  background: linear-gradient(160deg, #12383f, #164f58 58%, #12383f);
+  box-shadow: -18px 0 42px rgba(13, 47, 54, 0.18);
+  color: #fff;
+}
+
+body:not(.route-home) .alpine-layout > .alpine-side {
+  background: linear-gradient(160deg, #12383f, #164f58 58%, #12383f);
 }
 
 .alpine-detail {
-  padding-bottom: 26px;
+  padding-bottom: 28px;
+}
+
+.alpine-side-close {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.alpine-side-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.alpine-inspector-mark {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  background: var(--flower);
+  color: #fff;
+}
+
+.alpine-inspector-mark svg {
+  width: 22px;
+  height: 22px;
 }
 
 .alpine-detail-head h3 {
-  margin: 5px 0 18px;
-  font-size: 34px;
+  margin: 7px 0 17px;
+  color: #fff;
+  font-size: clamp(32px, 3vw, 45px);
+  line-height: 0.98;
+}
+
+.alpine-side .alpine-detail-head > p {
+  color: #9be1dc;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.alpine-inspector-summary {
+  padding: 18px 0 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.alpine-primary-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.alpine-primary-actions a {
+  display: flex;
+  min-height: 47px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 9px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.alpine-primary-actions a.is-primary {
+  border-color: #4aaebb;
+  background: #278b99;
+}
+
+.alpine-primary-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
+.alpine-inspector-more {
+  margin-top: 26px;
 }
 
 .alpine-detail .tour-col-facts {
@@ -2610,18 +2995,36 @@ body:not(.route-home) .dh-inner {
 
 .alpine-detail .tour-col-facts > div {
   padding: 12px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
   border-left: 0;
 }
 
+.alpine-side .tour-col-facts dt {
+  color: #9be1dc;
+}
+
+.alpine-side .tour-col-facts dd {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.alpine-side .tour-col-links {
+  gap: 8px 14px;
+  margin-top: 9px;
+}
+
+.alpine-side .tour-col-links a {
+  color: #9be1dc;
+}
+
 .alpine-place-copy {
+  color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
   line-height: 1.65;
 }
 
 .alpine-index {
   padding-top: 22px;
-  border-top: 1px solid var(--border-strong);
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
 }
 
 .alpine-index-head {
@@ -2633,17 +3036,19 @@ body:not(.route-home) .dh-inner {
 }
 
 .alpine-index-head h3 {
+  color: #fff;
   font-size: 21px;
 }
 
 .alpine-index-head a {
+  color: #9be1dc;
   font-size: 11px;
   font-weight: 650;
   white-space: nowrap;
 }
 
 .alpine-col-buttons {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .alpine-col-button {
@@ -2653,7 +3058,8 @@ body:not(.route-home) .dh-inner {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
   text-align: left;
 }
 
@@ -2672,17 +3078,17 @@ body:not(.route-home) .dh-inner {
 
 .alpine-col-button small {
   margin-top: 1px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.58);
   font-size: 9px;
 }
 
 .alpine-col-button[aria-pressed="true"] strong {
-  color: var(--lake);
+  color: #f28ab0;
 }
 
 .beyond-view {
   flex: 0 0 auto;
-  color: var(--twilight) !important;
+  color: #9be1dc !important;
   font-weight: 650;
 }
 
@@ -3077,15 +3483,18 @@ body:not(.route-home) .dh-inner {
 
   .alpine-layout {
     display: block;
+    position: relative;
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .alpine-map-wrap {
-    min-height: auto;
-    padding: 10px 10px 8px;
-    overflow: visible;
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
   }
 
   .alpine-map-canvas {
@@ -3094,10 +3503,18 @@ body:not(.route-home) .dh-inner {
   }
 
   .alpine-side {
-    overflow: visible;
-    padding: 22px 20px calc(30px + var(--safe-b));
-    border-top: 1px solid var(--border);
+    position: absolute;
+    z-index: 12;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    max-height: 58%;
+    overflow-y: auto;
+    padding: 30px 22px calc(28px + var(--safe-b));
+    border-top: 2px solid var(--flower);
     border-left: 0;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -18px 42px rgba(13, 47, 54, 0.24);
   }
 
   .hm-world,
@@ -4072,68 +4489,99 @@ body:not(.route-home) .dh-inner {
   }
 
   .screen.is-alpine-map .alpine-map-wrap {
-    padding: 8px 8px 6px;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    height: 42%;
+    padding: 0;
   }
 
-  .screen.is-alpine-map .alpine-map-canvas {
-    border-radius: 15px;
+  .screen.is-alpine-map .alpine-layout.is-guide-hidden .alpine-map-wrap {
+    height: 100%;
+  }
+
+  .screen.is-alpine-map .alpine-relief-stage,
+  .screen.is-alpine-map #alpine-relief-map {
+    border-radius: 0;
   }
 
   .screen.is-alpine-map .alpine-side {
-    position: relative;
-    margin-top: -8px;
-    padding: 28px 20px calc(30px + var(--safe-b));
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 -12px 30px rgba(38, 50, 90, 0.13);
-  }
-
-  .screen.is-alpine-map .alpine-side::before {
     position: absolute;
-    top: 10px;
-    left: 50%;
-    width: 42px;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(79, 91, 111, 0.28);
-    content: "";
-    transform: translateX(-50%);
+    height: 58%;
+    max-height: none;
+    margin-top: 0;
+    padding: 30px 20px calc(26px + var(--safe-b));
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -14px 34px rgba(13, 47, 54, 0.25);
   }
 
   .screen.is-alpine-map .alpine-detail-head h3 {
-    font-size: 30px;
+    font-size: clamp(28px, 9vw, 36px);
     line-height: 1.05;
   }
 
-  .screen.is-alpine-map .alpine-detail > .tour-col-links,
-  .screen.is-alpine-map .alpine-place-copy + .tour-col-links {
-    display: grid;
+  .screen.is-alpine-map .alpine-inspector-mark {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 12px;
+  }
+
+  .screen.is-alpine-map .alpine-inspector-summary {
+    padding: 14px 0 16px;
+    font-size: 13px;
+  }
+
+  .screen.is-alpine-map .alpine-primary-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 16px;
   }
 
-  .screen.is-alpine-map .alpine-detail > .tour-col-links a,
-  .screen.is-alpine-map .alpine-place-copy + .tour-col-links a {
-    display: flex;
-    min-height: 42px;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border: 1px solid var(--lake);
-    border-radius: 12px;
-    text-align: center;
+  .screen.is-alpine-map .alpine-primary-actions a {
+    min-height: 44px;
   }
 
-  .screen.is-alpine-map .alpine-detail > .tour-col-links a:first-child,
-  .screen.is-alpine-map .alpine-place-copy + .tour-col-links a:first-child {
-    background: var(--lake);
-    color: #fff;
+  .screen.is-alpine-map .alpine-inspector-more {
+    margin-top: 20px;
   }
 
-  .screen.is-alpine-map .alpine-detail > .tour-col-links a:nth-child(n + 3) {
-    grid-column: 1 / -1;
-    min-height: 32px;
-    border: 0;
+  .screen.is-alpine-map .relief-marker-shell:not(.is-featured):not(.is-selected) {
+    display: none;
+  }
+
+  .screen.is-alpine-map .relief-marker:not([aria-pressed="true"]) .relief-marker-card {
+    width: 18px;
+    min-height: 18px;
+    padding: 0;
+    overflow: hidden;
+    border-width: 2px;
+    border-radius: 50%;
+  }
+
+  .screen.is-alpine-map .relief-marker:not([aria-pressed="true"]) .relief-marker-card > * {
+    visibility: hidden;
+  }
+
+  .screen.is-alpine-map .relief-marker:not([aria-pressed="true"]) {
+    min-width: 44px;
+    min-height: 60px;
+    padding-left: 13px;
+  }
+
+  .screen.is-alpine-map .relief-marker:not([aria-pressed="true"]) .relief-marker-stem,
+  .screen.is-alpine-map .relief-marker:not([aria-pressed="true"]) .relief-marker-anchor {
+    left: 22px;
+  }
+
+  .screen.is-alpine-map .alpine-reset-view {
+    top: 132px;
+    right: 10px;
+    bottom: auto;
+  }
+
+  .screen.is-alpine-map .alpine-guide-open {
+    top: auto;
+    right: 12px;
+    bottom: 14px;
   }
 
   .view-plan .detail-hero,

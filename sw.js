@@ -1,11 +1,12 @@
 /* =====================================================================
    Annecy 2026 — service worker.
    Precaches the app shell + all trip data so the itinerary, lodging,
-   flights and activity list work with no signal. The live Leaflet map
-   needs network tiles and is NOT claimed to work offline — the Map
-   screen falls back to an offline place list instead.
+   flights and activity list work with no signal. The live Leaflet and
+   MapLibre maps need network tiles and are NOT claimed to work offline —
+   the practical map keeps its place list and Alpine relief keeps its
+   illustrated orientation map as fallbacks.
    ===================================================================== */
-const VERSION = 'a26-v30';
+const VERSION = 'a26-v33';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -13,10 +14,10 @@ const RUNTIME = 'runtime-' + VERSION;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './styles.css?v=30',
-  './data.js?v=30',
-  './activity-media.js?v=30',
-  './app.js?v=30',
+  './styles.css?v=33',
+  './data.js?v=33',
+  './activity-media.js?v=33',
+  './app.js?v=33',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',
@@ -102,8 +103,9 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Self-hosted fonts are same-origin; Leaflet CDN is stale-while-revalidate
-  // so a repeat map visit is quick. Map TILES are deliberately not cached.
+  // Self-hosted fonts are same-origin; Leaflet and MapLibre CDN assets are
+  // stale-while-revalidate so repeat visits are quick. Map tiles are
+  // deliberately not cached.
   if (/unpkg\.com/.test(url.host)) {
     e.respondWith(
       caches.match(req).then((hit) => {
