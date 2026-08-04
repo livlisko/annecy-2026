@@ -521,10 +521,15 @@
   };
   function wireActivities() {
     const grid = document.getElementById('act-grid'); if (!grid) return;
+    let searchAnnounceTimer = null;
     const redraw = () => {
       const list = D.ACTIVITIES.filter(actMatches);
       grid.innerHTML = list.length ? list.map(pinCard).join('') : `<div class="empty">Nothing matches those filters. <button class="link-btn" id="act-clear">Clear filters</button></div>`;
-      const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => { actState = { cat: 'all', area: 'all', effort: 'all', booking: 'all', rain: false, q: '' }; render(); });
+      const clr = document.getElementById('act-clear'); if (clr) clr.addEventListener('click', () => {
+        actState = { cat: 'all', area: 'all', effort: 'all', booking: 'all', rain: false, q: '' };
+        history.replaceState(null, '', '#/activities');
+        render();
+      });
       const cnt = document.getElementById('act-count'); if (cnt) cnt.textContent = list.length + ' of ' + D.ACTIVITIES.length;
       const mobileCnt = document.getElementById('act-mobile-count'); if (mobileCnt) mobileCnt.textContent = list.length + ' ideas';
       const toggle = document.getElementById('act-filter-toggle');
@@ -543,7 +548,15 @@
     });
     const rain = document.getElementById('act-rain'); if (rain) rain.addEventListener('click', () => { actState.rain = !actState.rain; sync(); });
     const inp = document.getElementById('act-q');
-    if (inp) inp.addEventListener('input', () => { actState.q = inp.value; history.replaceState(null, '', '#/activities' + buildActQS()); redraw(); });
+    if (inp) inp.addEventListener('input', () => {
+      actState.q = inp.value;
+      history.replaceState(null, '', '#/activities' + buildActQS());
+      redraw();
+      clearTimeout(searchAnnounceTimer);
+      searchAnnounceTimer = setTimeout(() => {
+        if (document.getElementById('act-q') === inp) announce(D.ACTIVITIES.filter(actMatches).length + ' activities shown');
+      }, 250);
+    });
     const filterToggle = document.getElementById('act-filter-toggle');
     const tools = document.getElementById('activity-tools');
     if (filterToggle && tools) filterToggle.addEventListener('click', () => {
@@ -634,7 +647,19 @@
   function wireActivity() {
     wireStatusButtons();
     const ta = screenEl.querySelector('[data-note]');
-    if (ta) ta.addEventListener('change', () => { Ideas.note(ta.dataset.note, ta.value); announce('Note saved'); });
+    if (ta) {
+      let noteAnnounceTimer = null;
+      const saveNote = (announceNow) => {
+        Ideas.note(ta.dataset.note, ta.value);
+        clearTimeout(noteAnnounceTimer);
+        if (announceNow) announce('Note saved');
+        else noteAnnounceTimer = setTimeout(() => {
+          if (document.contains(ta)) announce('Note saved');
+        }, 500);
+      };
+      ta.addEventListener('input', () => saveNote(false));
+      ta.addEventListener('change', () => saveNote(true));
+    }
   }
 
   /* ---------- #/plan/:id detail links keep working ------------------ */
@@ -1603,6 +1628,7 @@
   }
   // Old routes keep working: every retired screen forwards to its new home.
   const ALIAS = { day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip', events: 'trip' };
+  const ROUTES = new Set(['home', 'today', 'activities', 'ideas', 'trip', 'map', 'plan', 'bike', 'event', 'areas', 'archive']);
   function render() {
     let route = parse();
     if (ALIAS[route.name]) route.name = ALIAS[route.name];
@@ -1611,8 +1637,12 @@
       route = { name: 'activities', parts: [], query: { cat: legacy[route.parts[0]] || route.parts[0] } };
     }
     if (route.name === 'plan' && !route.parts[0]) route = { name: 'activities', parts: [], query: route.query.must ? { booking: 'required' } : route.query };
+    if (!ROUTES.has(route.name)) {
+      route = { name: 'home', parts: [], query: {} };
+      history.replaceState(null, '', '#/');
+    }
     teardownMap();
-    const view = Views[route.name] || Views.home;
+    const view = Views[route.name];
     screenEl.innerHTML = view(route);
     screenEl.className = 'screen view-' + route.name + (route.name === 'map' ? ' is-map' : '') + (route.name === 'map' && route.query.view === 'alpine' ? ' is-alpine-map' : '') + (route.name === 'home' ? ' is-home' : '');
     setChrome(route);
@@ -1643,18 +1673,19 @@
   const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
   if ('serviceWorker' in navigator && !localPreview) {
     window.addEventListener('load', () => {
+      const offerUpdate = (worker) => {
+        const toast = document.getElementById('sw-toast'); if (!toast || !worker) return;
+        toast.hidden = false;
+        const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { worker.postMessage('skip-waiting'); toast.hidden = true; };
+        const x = document.getElementById('sw-dismiss'); if (x) x.onclick = () => { toast.hidden = true; };
+        setTimeout(() => { toast.hidden = true; }, 12000);
+      };
       navigator.serviceWorker.register('sw.js').then((reg) => {
+        if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing; if (!nw) return;
           nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              const toast = document.getElementById('sw-toast'); if (toast) {
-                toast.hidden = false;
-                const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { nw.postMessage('skip-waiting'); toast.hidden = true; };
-                const x = document.getElementById('sw-dismiss'); if (x) x.onclick = () => { toast.hidden = true; };
-                setTimeout(() => { toast.hidden = true; }, 12000); // never nags for long
-              }
-            }
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(nw);
           });
         });
       }).catch(() => {});

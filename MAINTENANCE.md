@@ -6,6 +6,9 @@ details, closures) is verified against an **official source** and carries a
 **2026-07-23**. Re-check the items below in the **days before departure** —
 seasons, prices and schedules move.
 
+A departure-week spot check was completed **2026-08-04** for Mobil’été,
+Navibus, Les Gets Bike Park, the Les Gets World Cup, and La Tournette.
+
 ## Where the facts live
 
 - **`data.js` → `SOURCES`** — the registry of official URLs, keyed by id.
@@ -21,7 +24,7 @@ seasons, prices and schedules move.
 | What | Source id | Why re-check |
 |---|---|---|
 | Navibus schedule & fares | `navibus` | 3/day ends **28 Aug**; verify times per port + the bike supplement |
-| Free summer buses (lines 15/20) | `mobilite` | Confirm the **July–Aug free-fare** policy is renewed for 2026 |
+| Sibra summer buses (lines 15/20) | `mobilite` | Confirm the day’s timetable; these use normal Sibra fares in 2026, not a free-summer network |
 | Semnoz / La Clusaz / Grand-Bornand bike-park dates & passes | `semnoz-bikepark`, `laclusaz-bikepark`, `gb-mtb` | Lift calendars and prices |
 | Les Gets bike-park passes | `lesgets-bikepark` | Web vs desk pricing |
 | Canyoning / paragliding / diving / SUP | `canyon-angon`, `canyon-montmin`, `parapente`, `diving`, `ledeck` | Operator season + day-by-day weather; **book ahead** |
@@ -31,14 +34,17 @@ seasons, prices and schedules move.
 | Morillon Enduro World Cup | `morillon-uci` | `ucimtbworldseries.com` didn’t resolve during research — confirm 14–16 Aug + race times |
 | Veyrier Express fast boat | `mobilite` | Dates/fares unverified — check operator or the mairie |
 | Parmelan access road | `parmelan` | **Closures** — re-check the official trail/status page |
-| La Tournette snow flag | `la-tournette` | Flagged **closed 26 Jul 2026** (névés above 1,700 m, after two 2025 deaths) — likely reopens post-snowmelt; check lac-annecy.com + talloires-montmin.fr in early Aug. RD909 Balmettes–Glière road closure + park at Prés Ronds |
+| La Tournette conditions | `la-tournette` | Officially in season on 4 Aug, but inaccessible with persistent snowfields and only suitable in favorable weather; check conditions before attempting it |
 | Via Ferrata de Thônes | `thones-vf` | **Open in 2026** — the landing-page “closed” line is a stale 2023 banner. Phone the Thônes tourist office (+33 4 50 02 00 26) to confirm before going |
 
 ## Known corrections already applied (do not re-introduce)
 
-- **La Tournette from Montmin** is temporarily closed → omitted (not recommended).
-- **Thônes via ferrata** is closed until further notice → removed; **Tour du
-  Jallouvre** (AD–D+, open 2026) is the researched alternative.
+- **La Tournette from the Col de l’Aulp** is a very difficult 12.5 km / 1,188 m
+  ascent with handrails and ladders near the summit; it is listed in season but
+  remains condition-dependent.
+- **Thônes via ferrata** still carries a stale closure banner on one official
+  page; keep it marked verify-first. **Tour du Jallouvre** (AD–D+, open 2026)
+  is the researched alternative.
 - **Lake loop** = ~40 km / 300 m, ride **clockwise**; the west shore is the
   traffic-free greenway, the east shore is **road riding** (care Menthon→Talloires).
 - **Traversée des Glières gravel** = 81 km / 1 750 m / very hard.
@@ -52,6 +58,6 @@ seasons, prices and schedules move.
 1. Open the official page (`SOURCES[id].url`).
 2. Edit the value in `data.js` and bump that source’s `on:` date (or the
    activity/event field). Set `verifyBeforeGo` back to `false` once confirmed.
-3. Bump `VERSION` in `sw.js` (e.g. `a26-v18`) and update the query versions in
+3. Bump `VERSION` in `sw.js` (e.g. `a26-v34`) and update the query versions in
    `index.html` / `CORE_ASSETS` so the offline cache refreshes.
 4. No build step — commit and it deploys via GitHub Pages.
