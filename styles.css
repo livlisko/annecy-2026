@@ -317,6 +317,10 @@ main[tabindex="-1"]:focus {
   stroke-linejoin: round;
 }
 
+.nav-label-short {
+  display: none;
+}
+
 .ab-today {
   display: inline-flex;
   align-items: center;
@@ -1106,7 +1110,7 @@ body:not(.route-home) .dh-inner {
 
 .hm-event-row {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr) minmax(120px, auto) 24px;
+  grid-template-columns: 74px 116px minmax(0, 1fr) minmax(120px, auto) 24px;
   align-items: center;
   gap: 18px;
   min-height: 104px;
@@ -1115,6 +1119,22 @@ body:not(.route-home) .dh-inner {
   color: var(--ink);
   text-decoration: none;
   transition: color 160ms ease, background 160ms ease;
+}
+
+.hm-event-media {
+  display: block;
+  width: 116px;
+  height: 76px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--surface-strong);
+}
+
+.hm-event-media img,
+.hm-event-media .cover-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hm-event-row:hover {
@@ -1186,6 +1206,23 @@ body:not(.route-home) .dh-inner {
 .hm-event-go {
   color: var(--flower);
   font-size: 20px;
+}
+
+.event-hero {
+  width: 100%;
+  max-height: 430px;
+  margin: 0 0 28px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.event-hero img {
+  display: block;
+  width: 100%;
+  max-height: 430px;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
 }
 
 .hm-place {
@@ -2685,6 +2722,45 @@ body:not(.route-home) .dh-inner {
   color: #12383f;
 }
 
+.alpine-map-legend {
+  position: absolute;
+  z-index: 8;
+  bottom: 34px;
+  left: 18px;
+  display: flex;
+  gap: 12px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  border-radius: 8px;
+  background: rgba(18, 56, 63, 0.84);
+  box-shadow: 0 8px 24px rgba(17, 42, 48, 0.2);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 650;
+  backdrop-filter: blur(10px);
+}
+
+.alpine-map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.alpine-map-legend i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #1f91a0;
+}
+
+.alpine-map-legend i.is-tour {
+  border-color: #5b4500;
+  background: #f4c84a;
+}
+
 .alpine-map-loading > span {
   width: 9px;
   height: 9px;
@@ -2891,6 +2967,20 @@ body:not(.route-home) .dh-inner {
 
 .relief-marker-shell.is-peak {
   --marker-color: var(--twilight);
+}
+
+.relief-marker-shell.is-tour {
+  --marker-color: #f4c84a;
+}
+
+.relief-marker-shell.is-tour .relief-marker-card {
+  border-color: rgba(255, 255, 255, 0.86);
+  background: rgba(244, 200, 74, 0.94);
+  color: #26343a;
+}
+
+.relief-marker-shell.is-tour .relief-marker-copy small {
+  color: rgba(38, 52, 58, 0.72);
 }
 
 .relief-marker {
@@ -3106,6 +3196,27 @@ body:not(.route-home) .alpine-layout > .alpine-side {
   line-height: 1.55;
 }
 
+.tour-map-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: -5px 0 15px;
+  padding: 6px 9px;
+  border: 1px solid rgba(244, 200, 74, 0.62);
+  border-radius: 999px;
+  background: rgba(244, 200, 74, 0.13);
+  color: #ffe182;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tour-map-badge span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f4c84a;
+}
+
 .alpine-primary-actions {
   display: grid;
   gap: 10px;
@@ -3313,6 +3424,17 @@ body:not(.route-home) .alpine-layout > .alpine-side {
   flex: 0 0 auto;
   color: #9be1dc !important;
   font-weight: 650;
+}
+
+.tour-list-badge {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  padding: 4px 6px;
+  border: 1px solid rgba(244, 200, 74, 0.52);
+  border-radius: 999px;
+  background: rgba(244, 200, 74, 0.12);
+  color: #ffe182 !important;
+  font-weight: 700;
 }
 
 .ml-item {
@@ -3607,7 +3729,7 @@ body.route-map.has-sw-update .map-intro {
     z-index: 100;
     display: grid;
     height: calc(var(--mobile-nav-h) + var(--safe-b));
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0;
     margin: 0;
     padding-bottom: var(--safe-b);
@@ -3623,7 +3745,15 @@ body.route-map.has-sw-update .map-intro {
     height: var(--mobile-nav-h);
     padding: 0;
     border-radius: 0;
-    font-size: 10px;
+    font-size: 9.5px;
+  }
+
+  .nav-label-full {
+    display: none;
+  }
+
+  .nav-label-short {
+    display: inline;
   }
 
   .bottomnav a::after {
@@ -4049,10 +4179,15 @@ body.route-map.has-sw-update .map-intro {
   }
 
   .hm-event-row {
-    grid-template-columns: 58px minmax(0, 1fr) 20px;
-    gap: 12px;
+    grid-template-columns: 54px 72px minmax(0, 1fr);
+    gap: 10px;
     min-height: 118px;
     padding: 13px 0;
+  }
+
+  .hm-event-media {
+    width: 72px;
+    height: 72px;
   }
 
   .hm-event-date {
@@ -4073,14 +4208,13 @@ body.route-map.has-sw-update .map-intro {
   }
 
   .hm-event-meta {
-    grid-column: 2;
+    grid-column: 3;
     font-size: 10px;
     text-align: left;
   }
 
   .hm-event-go {
-    grid-column: 3;
-    grid-row: 1 / span 2;
+    display: none;
   }
 
   .hm-ix {

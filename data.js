@@ -111,6 +111,35 @@ window.DATA = (function () {
     'aquariaz':        { url: 'https://www.avoriaz.com/en/fiche/aquariaz-tropical-paradise/', type: 'Tourism office', on: '2026-07-26' },
     'an-rafting':      { url: 'https://an-rafting.com/prestation/rafting-haute-savoie/', type: 'Operator', on: '2026-07-26' },
     'music-meca':      { url: 'https://musicmecalesgets.org/horaires-tarifs/', type: 'Operator', on: '2026-07-26' },
+    // August 2026 non-cycling expansion (official pages checked 5 Aug)
+    'eclipse-thonon':  { url: 'https://eclipse-solaire.fr/eclipse-solaire-2026/thonon-les-bains/', type: 'Eclipse forecast', on: '2026-08-05' },
+    'obirun':          { url: 'https://www.samoens.com/en/biathlon-shooting-and-running/', type: 'Samoëns Tourism', on: '2026-08-05' },
+    'evo-hydrospeed':  { url: 'https://evolution2.com/en/thonon-geneva-lake/shared-hydrospeed-session', type: 'Operator', on: '2026-08-05' },
+    'balme-aquarando': { url: 'https://www.bureaumontagnesaleve.com/activites-montagne/canyoning-randonnee-aquatique', type: 'Mountain guides', on: '2026-08-05' },
+    'back-to-bones':   { url: 'https://www.back-to-bones.com/', type: 'Operator', on: '2026-08-05' },
+    'balme-caving':    { url: 'https://www.samoens.com/en/caving-trip-in-haute-savoie-nunayak/', type: 'Samoëns Tourism', on: '2026-08-05' },
+    'tractor-farm':    { url: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/temps-forts/la-fete-du-15-aout/', type: 'Le Grand-Bornand Tourism', on: '2026-08-05' },
+    'utmb-agenda':     { url: 'https://montblanc.utmb.world/discover/the-event/agenda', type: 'Event organizer', on: '2026-08-05' },
+    'giffre-airyak':   { url: 'https://www.samoens.com/en/airyak-outing-the-thrills-of-inflatable-kayaking-ecolorado/', type: 'Samoëns Tourism', on: '2026-08-05' },
+    'lesgets-moto':    { url: 'https://www.lesgets.com/en/fun/things-to-do-in-les-gets/motocross-100-electric-les-gets-en-6300653/', type: 'Les Gets Tourism', on: '2026-08-05' },
+    'lesgets-cani':    { url: 'https://www.lesgets.com/commercants/cani-balade-les-gets-fr-6300473/', type: 'Les Gets Tourism', on: '2026-08-05' },
+    'samoens-survival':{ url: 'https://www.samoens.com/en/men-vs-wild-mountain-survival-samoens-guides-company/', type: 'Samoëns Tourism', on: '2026-08-05' },
+    'medievaleries':   { url: 'https://www.abbayedaulps.fr/les-medievaleries.html', type: 'Aulps Abbey', on: '2026-08-05' },
+    'fer-cheval':      { url: 'https://www.grand-massif.com/en/hiking-and-mountain-huts/hiking-in-sixt-fer-a-cheval/', type: 'Grand Massif', on: '2026-08-05' },
+    'giant-paddle':    { url: 'https://en.lac-annecy.com/activite-bookable/giant-paddle-rental-xl/', type: 'Lake Annecy Tourism', on: '2026-08-05' },
+    'menthon-catamaran': { url: 'https://www.cnlmenthon.com/initiation', type: 'Club nautique de Menthon', on: '2026-08-05' },
+    'evo-packraft':    { url: 'https://evolution2.com/en/thonon-geneva-lake/packraft', type: 'Operator', on: '2026-08-05' },
+    'planete-apnee':   { url: 'https://www.planeteapnee.fr/decouvrir/', type: 'Freediving school', on: '2026-08-05' },
+    'glisscool-kayak': { url: 'https://glisscoolannecy.com/activites/kayak-transparent/', type: 'Operator', on: '2026-08-05' },
+    'goboat':          { url: 'https://www.ledeck-veyrier.com/en/', type: 'Le Deck Veyrier', on: '2026-08-05' },
+    'esperance-agenda':{ url: 'https://en.lac-annecy.com/activity/sailing-on-esperance-iii-doussard/', type: 'Lake Annecy Tourism', on: '2026-08-05' },
+    'alta-lumina':     { url: 'https://www.lesgets.com/en/alta-lumina/', type: 'Les Gets Tourism', on: '2026-08-05' },
+    'chamonix-rink':   { url: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/ice-hockey-games', type: 'Chamonix Tourism', on: '2026-08-05' },
+    'paccard-casting': { url: 'https://musee-paccard.com/horaires-acces-musee-paccard/', type: 'Musée Paccard', on: '2026-08-05' },
+    'lorette-alpage':  { url: 'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/', type: 'La Clusaz Tourism', on: '2026-08-05' },
+    'fete-guides':     { url: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/fete-des-guides-aux-gaillands', type: 'Chamonix Tourism', on: '2026-08-05' },
+    'tdf-alpine-list': { url: 'https://fr.wikipedia.org/wiki/Liste_des_ascensions_du_Tour_de_France_dans_les_Alpes', type: 'Tour ascent index', on: '2026-08-05' },
+    'tdf-croisette-2026': { url: 'https://www.letour.fr/en/heritage/stage-15/on-the-road', type: 'Tour de France', on: '2026-08-05' },
     // Iconic-col guide (official Tour and local tourism sources, checked 30 Jul)
     'tdf-joux-plane':  { url: 'https://www.letour.fr/en/news/2023/carlos-rodriguez-the-birth-of-a-champion/1314125', type: 'Tour de France', on: '2026-07-30' },
     'tdf-ramaz':       { url: 'https://www.letour.fr/en/news/2010/andy-the-winner-while-evans-is-the-leader/1044994', type: 'Tour de France', on: '2026-07-30' },
@@ -291,6 +320,10 @@ window.DATA = (function () {
       why: 'A high pasture with 50 km of marked trails, the Resistance monument, and the Morette museum on the Thônes road.' },
     { id: 'aravis', name: 'Aravis · La Clusaz & Le Grand-Bornand', zone: 'East over the passes · ~30–50 min', region: 'beyond', coords: [45.9040, 6.4230], supports: ['bikes','food','views','adrenaline'], photo: 'assets/wiki/aravis-village.jpg', official: 'https://www.laclusaz.com/en/',
       why: 'Reblochon country: two lift-served bike parks, the Jallouvre via ferrata, cheese from the farm and the famous cols.' },
+    { id: 'giffre', name: 'Giffre valley · Samoëns & Sixt', zone: 'North-east · ~50–80 min', region: 'beyond', coords: [46.0790, 6.7350], supports: ['water','walk','adrenaline'], photo: 'https://www.grand-massif.com/content/uploads/2025/11/Grand-Massif-sixt-510x710.jpg', official: 'https://www.samoens.com/en/',
+      why: 'A broad mountain valley for whitewater, caves and the extraordinary Cirque du Fer-à-Cheval — dramatic without needing an exposed summit hike.' },
+    { id: 'chablais', name: 'Chablais & Dranse', zone: 'North toward Lake Geneva · ~45–80 min', region: 'beyond', coords: [46.3440, 6.4890], supports: ['water','adrenaline','views'], photo: 'https://evolution2.com/media/cache/og_filter/2023/06/5735-photo-2.jpg', official: 'https://www.thononlesbains.com/',
+      why: 'The Dranse gorge and Lake Geneva shore: the region’s strongest whitewater options, plus wide sunset horizons from Thonon.' },
     { id: 'chamonix', name: 'Chamonix', zone: 'Mont-Blanc valley · ~1h20', region: 'beyond', coords: [45.9237, 6.8694], supports: ['views'], photo: 'assets/wiki/chamonix.jpg', official: 'https://www.chamonix.com/',
       why: 'The big one — glaciers, the Aiguilles, an alpine town that means business. A clear-weather day trip.' },
     { id: 'les-gets', name: 'Les Gets', zone: 'Portes du Soleil · Leg 1', region: 'beyond', coords: [46.1558, 6.6697], supports: ['bikes','views','food'], photo: 'assets/wiki/les-gets-village.jpg', official: 'https://www.lesgets.com/en/',
@@ -985,10 +1018,10 @@ window.DATA = (function () {
       summary: 'Two hours under huge lateen sails on a faithful rebuild of the barque that hauled wine from Veyrier’s own vineyards.',
       why: 'Zero effort, maximum story — and the Thursday 20 Aug combo pairs the sail with a guided Bout-du-Lac reserve walk.',
       duration: '2h', effort: 'recovery', transport: ['car','busboat','bike'], themes: ['water','views','recovery'],
-      booking: 'required', bookingUrl: 'https://esperance3.org/6-sorties-grand-public/', price: '€30 adult',
+      booking: 'required', bookingUrl: 'https://esperance3.org/6-sorties-grand-public/', price: 'Standard public sailings from €30; Aug 20 reserve-walk combo price not yet published',
       scenic: 3, novelty: 3, group: 'all',
       weather: { rain: 'poor', wind: 'depends', best: 'clear', note: 'Sailings are weather-dependent — they confirm by email.' },
-      status: 'open', availability: 'Public sailings all summer from the Thiou canal; Doussard combo runs Thu 20 Aug 2026.', src: 'esperance3'
+      status: 'open', availability: 'Public sailings all summer from the Thiou canal; the Doussard reserve-walk combo runs Thu 20 Aug, 09:00–12:00.', verifyBeforeGo: true, src: 'esperance3'
     },
     {
       id: 'vboat-electric', title: 'Skipper your own electric boat (Petit Port)', base: 'lake', cat: 'boat', subtype: 'No-licence 6-seater',
@@ -1117,10 +1150,10 @@ window.DATA = (function () {
       areaId: 'annecy', where: 'Rumilly', coords: [45.8467, 5.9686],
       summary: 'A proper 1,150 m outdoor circuit 35 minutes west — 10-minute sessions, two kart classes, four riders, one championship.',
       duration: '2h', effort: 'easy', transport: ['car'], themes: ['adrenaline'],
-      booking: 'recommended', bookingUrl: 'https://www.kartingrumilly.fr/tarifs-location-karting-rumilly/', price: '€27–30 per 10-min session',
+      booking: 'recommended', bookingUrl: 'https://www.kartingrumilly.fr/tarifs-location-karting-rumilly/', price: '€30 standard session · €69 sprint-race format',
       scenic: 1, novelty: 2, group: 'all',
       weather: { rain: 'poor', best: 'dry' },
-      status: 'open', availability: 'Open 7/7, 9:00–19:00.', src: 'karting-rumilly'
+      status: 'open', availability: 'Open daily in summer; reserve the sprint-race format if all four want a proper competition.', src: 'karting-rumilly'
     },
     {
       id: 'escape-grande-evasion', title: 'Escape rooms: La Grande Évasion', base: 'lake', cat: 'family', subtype: 'Escape game · 1 h',
@@ -1141,7 +1174,7 @@ window.DATA = (function () {
       booking: 'recommended', bookingUrl: 'https://www.chateau-de-menthon.com/evenements/visites-nocturnes-theatralisees/', price: 'Day €12; nocturne €18 (limited places — presale on Billetweb)',
       scenic: 3, novelty: 2, group: 'all',
       weather: { rain: 'good' },
-      status: 'open', availability: 'Daily 10:00–19:00 in Jul–Aug 2026; nocturnes Wednesdays.', src: 'menthon-chateau'
+      status: 'open', availability: 'Daily 10:00–19:00 in Jul–Aug 2026; theatrical nocturnes Wed 19 or 26 Aug, entries every 30 min from 19:00–22:00 (doors 18:30).', src: 'menthon-chateau'
     },
     {
       id: 'tamie-abbey', title: 'Abbaye de Tamié — Trappist cheese at the source', base: 'lake', cat: 'food', subtype: 'Working abbey + farm shop',
@@ -1261,10 +1294,211 @@ window.DATA = (function () {
       areaId: 'les-gets', coords: [46.1609, 6.6728],
       summary: 'Les Gets’ own oddity: France’s best collection of self-playing organs, orchestrions and musical automata, demonstrated live on the guided tour.',
       duration: '2h', effort: 'recovery', transport: ['walk'], themes: ['rainy'],
-      booking: 'no', bookingUrl: 'https://musicmecalesgets.org/horaires-tarifs/', price: '€10 guided tour',
+      booking: 'no', bookingUrl: 'https://musicmecalesgets.org/horaires-tarifs/', price: 'About €14 adult; check current guided-tour tariff',
       scenic: 1, novelty: 3, group: 'all',
       weather: { rain: 'good' },
       status: 'open', availability: 'Daily 14:00–19:00 through summer 2026.', src: 'music-meca', travel: { lesgets: { min: 8, mode: 'walk' } }
+    },
+
+    /* ===== AUGUST 2026 NON-CYCLING SHORTLIST (checked 2026-08-05) ===== */
+    {
+      id: 'obirun-biathlon', title: 'O’BIRUN running + laser biathlon', base: 'both', cat: 'sport', subtype: 'Run-and-shoot challenge',
+      areaId: 'giffre', where: 'Samoëns', coords: [46.0770, 6.7310],
+      summary: 'A playful biathlon session without skis: short running loops, standing laser-rifle shooting and enough competition to make it interesting.',
+      why: 'A very French mountain-resort afternoon and an easy four-person rivalry.',
+      duration: '2h', effort: 'moderate', transport: ['car'], themes: ['adrenaline'],
+      booking: 'recommended', bookingUrl: 'https://www.samoens.com/en/biathlon-shooting-and-running/', price: '€5 per person',
+      scenic: 1, novelty: 3, group: 'all', weather: { rain: 'ok', best: 'dry' },
+      status: 'open', availability: 'Wed 19 or 26 Aug, 15:30–17:30; confirm the session before driving.', verifyBeforeGo: true, src: 'obirun',
+      travel: { lesgets: { min: 50, mode: 'car', approx: true }, lake: { min: 75, mode: 'car', approx: true } }
+    },
+    {
+      id: 'dranse-hydrospeed', title: 'Hydrospeed through the Dranse', base: 'both', cat: 'whitewater', subtype: 'Whitewater swimming',
+      areaId: 'chablais', where: 'Dranse valley near Thonon', coords: [46.3440, 6.4890],
+      summary: 'Ride the river itself with a foam board, fins and a wetsuit — more immediate than rafting and one of the Dranse’s signature summer outings.',
+      why: 'The highest-adrenaline water option that still stays guided and equipment-led.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://evolution2.com/en/thonon-geneva-lake/shared-hydrospeed-session', price: '€60; listed at €55 after roughly 16 Aug',
+      scenic: 2, novelty: 3, group: 'some', groupNote: 'Strong swimmers who are comfortable in moving water.',
+      safety: 'Guided only. Tell the operator about swimming confidence and medical issues; river level controls the route.',
+      weather: { rain: 'ok', storm: 'operator call' }, status: 'open', src: 'evo-hydrospeed',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 70, mode: 'car', approx: true } }
+    },
+    {
+      id: 'balme-aquarando', title: 'Rope-free aquatic canyon at Balme', base: 'both', cat: 'canyoning', subtype: 'Aquatic canyon walk',
+      areaId: 'giffre', where: 'Balme / Magland', coords: [46.0380, 6.5890],
+      summary: 'A half-day river descent built around walking, scrambling, floating and optional small jumps — no rappels and no exposed heights.',
+      why: 'Canyon atmosphere without the rope work that makes the classic canyons a bigger commitment.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.bureaumontagnesaleve.com/activites-montagne/canyoning-randonnee-aquatique', price: 'From €260 for a private group; confirm the four-person quote',
+      scenic: 2, novelty: 3, group: 'all', safety: 'Confirm the rope-free Balme itinerary, water level and swimming prerequisites when booking.',
+      weather: { rain: 'poor', storm: 'avoid' }, status: 'open', verifyBeforeGo: true, src: 'balme-aquarando',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 55, mode: 'car', approx: true } }
+    },
+    {
+      id: 'back-to-bones', title: 'Private wakesurf or wakeboard session', base: 'lake', cat: 'paddle', subtype: 'Private tow-sports boat',
+      areaId: 'veyrier', coords: [45.8770, 6.1840],
+      summary: 'A private boat and coach on the Veyrier side of Lake Annecy, with wakesurfing or wakeboarding chosen to suit the group.',
+      why: 'The cleanest way to try the lake’s fastest toy without committing everyone to a full day.',
+      duration: '2h', effort: 'moderate', transport: ['walk','car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.back-to-bones.com/', price: '€55 for 15 min riding or €270 for a private boat hour',
+      scenic: 3, novelty: 3, group: 'all', safety: 'Swimming confidence required; follow the coach and wear the supplied buoyancy gear.',
+      weather: { rain: 'poor', wind: 'best early', best: 'calm morning' }, status: 'open', src: 'back-to-bones', travel: { lake: { min: 5, mode: 'car/walk' } }
+    },
+    {
+      id: 'balme-caving', title: 'Beginner caving beneath Balme', base: 'both', cat: 'caving', subtype: 'Horizontal cave exploration',
+      areaId: 'giffre', where: 'Balme / Arâches-la-Frasse', coords: [46.0380, 6.5890],
+      summary: 'A guided introduction to the underground limestone network: helmets, headlamps and mostly horizontal passages rather than pits or rappels.',
+      why: 'A genuinely different mountain experience and a good weather-proof adventure.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['adrenaline','rainy'],
+      booking: 'required', bookingUrl: 'https://www.samoens.com/en/caving-trip-in-haute-savoie-nunayak/', price: 'From €55 per person',
+      scenic: 1, novelty: 3, group: 'some', groupNote: 'Skip if tight underground spaces are not fun.',
+      safety: 'Ask specifically for the beginner horizontal route with no chasm, rappel or very narrow squeeze.',
+      weather: { rain: 'good', note: 'Heavy rain can still affect cave access.' }, status: 'open', verifyBeforeGo: true, src: 'balme-caving',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 55, mode: 'car', approx: true } }
+    },
+    {
+      id: 'giffre-airyak', title: 'Airyak the Giffre', base: 'both', cat: 'whitewater', subtype: 'Inflatable whitewater kayak',
+      areaId: 'giffre', where: 'Samoëns', coords: [46.0730, 6.7370],
+      summary: 'Paddle your own small inflatable kayak down the Giffre with a guide nearby — more control and more chaos than a shared raft.',
+      why: 'A good middle ground between rafting and full-body hydrospeed.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.samoens.com/en/airyak-outing-the-thrills-of-inflatable-kayaking-ecolorado/', price: '€50 per person',
+      scenic: 2, novelty: 3, group: 'some', safety: 'Guided whitewater; swimming confidence required and route depends on river level.',
+      weather: { rain: 'ok', storm: 'operator call' }, status: 'open', src: 'giffre-airyak',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 75, mode: 'car', approx: true } }
+    },
+    {
+      id: 'lesgets-moto-trial', title: 'Electric moto-trial in Les Gets', base: 'lesgets', cat: 'sport', subtype: 'Electric off-road motorcycle',
+      areaId: 'les-gets', coords: [46.1510, 6.6800],
+      summary: 'Ninety minutes learning balance and line choice on quiet electric trial bikes, with an instructor and a purpose-built practice area.',
+      why: 'Motorbike energy without engine noise — and no previous moto experience required.',
+      duration: '2h', effort: 'moderate', transport: ['walk','car'], themes: ['adrenaline'],
+      booking: 'required', bookingUrl: 'https://www.lesgets.com/en/fun/things-to-do-in-les-gets/motocross-100-electric-les-gets-en-6300653/', price: '€70 for 1.5 h',
+      scenic: 1, novelty: 3, group: 'all', safety: 'Protective equipment and instruction included; confirm licence, age and footwear requirements.',
+      weather: { rain: 'ok', best: 'dry' }, status: 'open', verifyBeforeGo: true, src: 'lesgets-moto', travel: { lesgets: { min: 8, mode: 'walk/car' } }
+    },
+    {
+      id: 'lesgets-cani-hike', title: 'Cani-hike with Nordic dogs', base: 'lesgets', cat: 'walk', subtype: 'Harnessed dog walk',
+      areaId: 'les-gets', where: 'Mont Caly', coords: [46.1460, 6.6160],
+      summary: 'Walk the Mont Caly trails clipped to a Nordic dog in a waist belt, with the musher teaching you how to work together.',
+      why: 'Silly, scenic and memorable — a mountain walk with considerably more horsepower.',
+      duration: '2h', effort: 'moderate', transport: ['car'], themes: ['views'],
+      booking: 'required', bookingUrl: 'https://www.lesgets.com/commercants/cani-balade-les-gets-fr-6300473/', price: '€30 for about 1 h',
+      scenic: 3, novelty: 3, group: 'all', safety: 'Wear trail shoes and tell the musher about knee or back concerns; the dogs pull.',
+      weather: { rain: 'ok', heat: 'operator call' }, status: 'open', src: 'lesgets-cani', travel: { lesgets: { min: 15, mode: 'car', approx: true } }
+    },
+    {
+      id: 'samoens-survival', title: '“Men VS Wild” mountain survival session', base: 'both', cat: 'sport', subtype: 'Guided survival skills',
+      areaId: 'giffre', where: 'Samoëns', coords: [46.0830, 6.7270],
+      summary: 'A private half-day learning fire, shelter, orientation and practical mountain survival skills with the Samoëns guides.',
+      why: 'Team challenge, useful skills and a story your brothers will absolutely keep retelling.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['adrenaline','views'],
+      booking: 'required', bookingUrl: 'https://www.samoens.com/en/men-vs-wild-mountain-survival-samoens-guides-company/', price: 'About €200 for a private group; request the current quote',
+      scenic: 2, novelty: 3, group: 'all', weather: { rain: 'ok', storm: 'avoid' },
+      status: 'open', verifyBeforeGo: true, src: 'samoens-survival', travel: { lesgets: { min: 50, mode: 'car', approx: true }, lake: { min: 75, mode: 'car', approx: true } }
+    },
+    {
+      id: 'fer-cheval-floor', title: 'Walk the floor of the Cirque du Fer-à-Cheval', base: 'both', cat: 'walk', subtype: 'Easy valley-floor walk',
+      areaId: 'giffre', where: 'Sixt-Fer-à-Cheval', coords: [46.0750, 6.8360],
+      summary: 'A broad, mostly level walk beneath a giant horseshoe of limestone cliffs and summer waterfalls — the scenery is huge without an exposed trail.',
+      why: 'One of the region’s defining landscapes, accessible to the whole group.',
+      duration: 'half', effort: 'easy', transport: ['car'], themes: ['views','recovery'],
+      booking: 'no', bookingUrl: 'https://www.grand-massif.com/en/hiking-and-mountain-huts/hiking-in-sixt-fer-a-cheval/', price: 'Free; parking may be paid',
+      scenic: 3, novelty: 2, group: 'all', safety: 'Stay on the signed valley-floor route and away from waterfall runout zones.',
+      weather: { rain: 'ok', storm: 'avoid', best: 'clear' }, status: 'open', src: 'fer-cheval',
+      travel: { lesgets: { min: 60, mode: 'car', approx: true }, lake: { min: 85, mode: 'car', approx: true } }
+    },
+    {
+      id: 'giant-paddle-xl', title: 'Put all four of us on one giant paddleboard', base: 'lake', cat: 'paddle', subtype: 'Six-person XL paddle',
+      areaId: 'sevrier', coords: [45.8580, 6.1380],
+      summary: 'One enormous stand-up paddleboard for the whole group from Sévrier — collaboration in theory, immediate sabotage in practice.',
+      why: 'Cheap, low-commitment and almost guaranteed to be funny.',
+      duration: '2h', effort: 'easy', transport: ['car','bike'], themes: ['water','recovery'],
+      booking: 'recommended', bookingUrl: 'https://en.lac-annecy.com/activite-bookable/giant-paddle-rental-xl/', price: 'From €55 per board for 1 h; capacity up to 6',
+      scenic: 3, novelty: 2, group: 'all', safety: 'Wear buoyancy aids and stay within the operator’s navigation area.',
+      weather: { rain: 'poor', wind: 'best early', best: 'calm morning' }, status: 'open', src: 'giant-paddle', travel: { lake: { min: 20, mode: 'car/bike' } }
+    },
+    {
+      id: 'menthon-catamaran', title: 'Private catamaran initiation at Menthon', base: 'lake', cat: 'paddle', subtype: 'Small-cat sailing lesson',
+      areaId: 'menthon', coords: [45.8590, 6.2010],
+      summary: 'Learn the basics on a small catamaran with an instructor from the Menthon sailing club, right below the château.',
+      why: 'More hands-on than a cruise, but still a compact lake session close to home.',
+      duration: '2h', effort: 'moderate', transport: ['car','bike'], themes: ['water','views'],
+      booking: 'required', bookingUrl: 'https://www.cnlmenthon.com/initiation', price: '€116 for two people / 1.5 h; ask for a four-person format',
+      scenic: 3, novelty: 2, group: 'all', safety: 'Club provides instruction and buoyancy gear; session depends on wind.',
+      weather: { rain: 'poor', wind: 'depends', best: 'steady breeze' }, status: 'open', verifyBeforeGo: true, src: 'menthon-catamaran', travel: { lake: { min: 8, mode: 'car/bike' } }
+    },
+    {
+      id: 'dranse-packraft', title: 'Packraft the Dranse', base: 'both', cat: 'whitewater', subtype: 'Inflatable-kayak river journey',
+      areaId: 'chablais', where: 'Dranse valley near Thonon', coords: [46.3440, 6.4890],
+      summary: 'Carry a compact inflatable boat into the valley, then paddle a guided stretch of the Dranse — part exploration, part whitewater lesson.',
+      why: 'The region’s most expedition-like river option without turning it into an overnight trip.',
+      duration: 'half', effort: 'moderate', transport: ['car'], themes: ['water','adrenaline'],
+      booking: 'required', bookingUrl: 'https://evolution2.com/en/thonon-geneva-lake/packraft', price: '€85 half day / €160 full day',
+      scenic: 2, novelty: 3, group: 'some', safety: 'Confirm the exact route, river level and swimming requirements before booking.',
+      weather: { rain: 'ok', storm: 'operator call' }, status: 'open', verifyBeforeGo: true, src: 'evo-packraft',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 70, mode: 'car', approx: true } }
+    },
+    {
+      id: 'veyrier-freediving', title: 'Discover freediving in Lake Annecy', base: 'lake', cat: 'swim', subtype: 'Guided breath-hold introduction',
+      areaId: 'veyrier', where: 'Plage du Plant', coords: [45.8770, 6.1840],
+      summary: 'A calm two-hour introduction to breathing, equalisation and underwater movement in the clear water off Veyrier.',
+      why: 'Less about depth than learning how quiet the lake feels beneath the surface.',
+      duration: '2h', effort: 'moderate', transport: ['walk','car'], themes: ['water','recovery'],
+      booking: 'required', bookingUrl: 'https://www.planeteapnee.fr/decouvrir/', price: '€80 per person',
+      scenic: 3, novelty: 3, group: 'some', safety: 'Never freedive alone; disclose medical conditions and follow the instructor’s limits.',
+      weather: { rain: 'ok', wind: 'best calm' }, status: 'open', src: 'planete-apnee', travel: { lake: { min: 5, mode: 'car/walk' } }
+    },
+    {
+      id: 'transparent-kayak', title: 'Transparent kayak toward Roc de Chère', base: 'lake', cat: 'paddle', subtype: 'Clear-hull kayak rental',
+      areaId: 'angon', where: 'Talloires / Angon', coords: [45.8290, 6.2180],
+      summary: 'Paddle a clear kayak over the turquoise shallows between Angon, Talloires and the edge of the Roc de Chère reserve.',
+      why: 'A simple lake outing whose whole point is seeing the water beneath you.',
+      duration: '2h', effort: 'easy', transport: ['car','bike'], themes: ['water','views','recovery'],
+      booking: 'recommended', bookingUrl: 'https://glisscoolannecy.com/activites/kayak-transparent/', price: 'From €15; choose 1–1.5 h',
+      scenic: 3, novelty: 2, group: 'all', safety: 'Stay outside protected shoreline zones and follow the rental boundary.',
+      weather: { rain: 'poor', wind: 'best early', best: 'calm morning' }, status: 'open', src: 'glisscool-kayak', travel: { lake: { min: 15, mode: 'car/bike' } }
+    },
+    {
+      id: 'veyrier-goboat', title: 'Electric GoBoat picnic from Veyrier', base: 'lake', cat: 'boat', subtype: 'No-licence picnic boat',
+      areaId: 'veyrier', coords: [45.8865, 6.1782],
+      summary: 'A round electric picnic boat for up to eight: pack lunch, take the helm and drift out from the home shore without a licence.',
+      why: 'The easiest whole-group boat day because nobody has to sit out or do much.',
+      duration: 'half', effort: 'recovery', transport: ['walk'], themes: ['water','views','recovery'],
+      booking: 'required', bookingUrl: 'https://www.ledeck-veyrier.com/en/', price: '€130 / 1.5 h · €180 / 2 h · €240 / 3 h',
+      scenic: 3, novelty: 2, group: 'all', safety: 'No licence required; follow the briefing and lake navigation rules.',
+      weather: { rain: 'poor', wind: 'depends', best: 'calm' }, status: 'open', src: 'goboat', travel: { lake: { min: 6, mode: 'walk' } }
+    },
+    {
+      id: 'alta-lumina', title: 'Alta Lumina night walk', base: 'lesgets', cat: 'walk', subtype: 'Immersive forest light trail',
+      areaId: 'les-gets', coords: [46.1520, 6.6760],
+      summary: 'A one-kilometre nighttime forest trail transformed with light, sound and projections — polished, atmospheric and entirely unlike the daytime resort.',
+      why: 'A ready-made evening after dinner that asks almost no planning from anyone.',
+      duration: '2h', effort: 'easy', transport: ['walk','car'], themes: ['rainy','recovery'],
+      booking: 'recommended', bookingUrl: 'https://www.lesgets.com/en/alta-lumina/', price: '€19.50 adult',
+      scenic: 2, novelty: 3, group: 'all', access: 'About 1 km on an uneven forest path in darkness; allow 45–60 minutes.',
+      weather: { rain: 'ok', storm: 'avoid' }, status: 'open', availability: 'Nightly summer departures; reserve a time slot.', src: 'alta-lumina', travel: { lesgets: { min: 8, mode: 'walk/car' } }
+    },
+    {
+      id: 'paccard-casting', title: 'Musée Paccard + the bell foundry workshops', base: 'lake', cat: 'culture', subtype: 'Living bell-making museum',
+      areaId: 'sevrier', coords: [45.8440, 6.1490],
+      summary: 'Tour the museum and working foundry workshops of the family that has made Savoyard bells since 1796, then hear what the finished instruments can do.',
+      why: 'A living piece of regional craft rather than a generic museum stop.',
+      duration: '2h', effort: 'recovery', transport: ['car','bike'], themes: ['culture','rainy'],
+      booking: 'recommended', bookingUrl: 'https://musee-paccard.com/horaires-acces-musee-paccard/', price: 'About €18 for the discovery visit; confirm the current workshop format',
+      scenic: 1, novelty: 3, group: 'all', access: 'Allow about 1.5 h. Thursday visits require a reservation.',
+      weather: { rain: 'good' }, status: 'open', availability: 'Museum and guided workshop visits run in August. The foundry explicitly pauses live bell casting in August because of the heat.', src: 'paccard-casting', travel: { lake: { min: 22, mode: 'car/bike' } }
+    },
+    {
+      id: 'lorette-alpage', title: 'Visit the working Ferme de Lorette', base: 'lake', cat: 'food', subtype: 'Working Reblochon alpage',
+      areaId: 'aravis', where: 'La Clusaz', coords: [45.8980, 6.3730],
+      summary: 'Meet the herd and see how Reblochon fermier is made on a working summer alpage above La Clusaz.',
+      why: 'The cheese story becomes much more interesting when you meet the cows and the people doing the second milking.',
+      duration: '2h', effort: 'easy', transport: ['car'], themes: ['food','culture','views'],
+      booking: 'recommended', bookingUrl: 'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/', price: '€7.70 per person',
+      scenic: 3, novelty: 2, group: 'all', access: 'Working farm terrain; closed shoes strongly preferred.',
+      weather: { rain: 'ok', best: 'clear' }, status: 'open', availability: 'Weekday visits at 14:30; confirm the August schedule.', verifyBeforeGo: true, src: 'lorette-alpage', travel: { lake: { min: 45, mode: 'car', approx: true } }
     }
   ];
   /* ---------- ACTIVITY MEDIA ----------------------------------------
@@ -1362,14 +1596,66 @@ window.DATA = (function () {
      (15 & 22 Aug) are flagged honestly. */
   const EVENTS = [
     {
+      id: 'thonon-eclipse', name: 'Sunset solar eclipse from Thonon', kind: 'natural event',
+      start: '2026-08-12', end: '2026-08-12', datesLabel: 'Wed 12 Aug, 19:26 start · 20:20 maximum',
+      base: 'lesgets', where: 'Thonon-les-Bains lakefront, with a clear western horizon over Lake Geneva',
+      coords: [46.3710, 6.4790],
+      why: 'A partial solar eclipse reaches maximum just before sunset over Lake Geneva — an unusually beautiful first-night option if the sky is clear.',
+      booking: 'no', price: 'Free; certified eclipse glasses required.',
+      impact: 'This is arrival day. Treat it as a weather-dependent bonus, not an obligation; never look at the Sun without certified eclipse glasses.',
+      confidence: 'confirmed', src: 'eclipse-thonon', travel: { lesgets: { min: 55, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'A partial eclipse sinking toward Lake Geneva on the first evening.',
+      homeMeta: '19:26 · Free',
+      media: { photo: 'https://eclipse-solaire.fr/og-image.jpg', alt: 'Solar eclipse over a dark horizon', sourceUrl: 'https://eclipse-solaire.fr/eclipse-solaire-2026/thonon-les-bains/', credit: 'eclipse-solaire.fr' }
+    },
+    {
+      id: 'fete-guides-chamonix', name: 'Fête des Guides at Les Gaillands', kind: 'festival',
+      start: '2026-08-14', end: '2026-08-14', datesLabel: 'Fri 14 Aug, 10:00–01:00',
+      base: 'lesgets', where: 'Les Gaillands, Chamonix', coords: [45.9131, 6.8504],
+      why: 'Chamonix’s guides take over Les Gaillands for climbing activities, competitions, music, dinner and a long evening beside the lake and crag.',
+      booking: 'no', price: 'Free entry; food and some activities extra.',
+      impact: 'Activities run 10:00–17:00, DJ from 14:30, dinner from 18:30, then competitions and concerts. Pick the part that sounds fun rather than trying to do the whole programme.',
+      confidence: 'confirmed', src: 'fete-guides', travel: { lesgets: { min: 75, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'Climbing, guide culture, music and a big Chamonix evening at Les Gaillands.',
+      homeMeta: '10:00–late · Free entry',
+      media: { photo: 'https://en.chamonix.com/sites/default/files/styles/ogimage/public/sit/images/6996174/32949108.jpg?itok=PxDA6LMq', alt: 'Fête des Guides gathering at Les Gaillands in Chamonix', sourceUrl: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/fete-des-guides-aux-gaillands', credit: 'Chamonix Tourism' }
+    },
+    {
       id: 'traversee-lac', name: 'Traversée du Lac swim race — starts on our beach', kind: 'race',
       start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug',
       base: 'lake', where: '5 km start: Plage de la Brune, Veyrier-du-Lac (9:30) · 1 km at l’Impérial · 2.4/10 km from old Annecy',
       coords: [45.8788, 6.1752],
       why: 'The lake’s legendary open-water race, 94th edition — and the 5 km start line is literally the beach below the house, the morning we arrive at the lake.',
-      booking: 'yes', price: '1 km €25 → 10 km €50 (+€15 day licence); entries close 8 Aug, +30% after 5 Aug',
+      booking: 'yes', price: '1 km €25 · 2.4 km €30 · 5 km €40, plus any required day licence; confirm the registration cutoff',
       impact: 'It’s changeover morning: out of Les Gets by 10:00, Andrew lands at GVA, check-in 16:00. Racing it would take heroic logistics — watching the swimmers come into La Brune with coffee is the realistic (and great) plan.',
-      conflict: true, confidence: 'confirmed', src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }
+      conflict: true, confidence: 'confirmed', verifyBeforeGo: true, src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }, homepageEvent: true,
+      homeSummary: 'Annecy’s open-water classic, with the 5 km start on the beach below our house.',
+      homeMeta: '1 / 2.4 / 5 km · €25–40',
+      media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy', sourceUrl: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/traversee-du-lac-dannecy/', credit: 'Dauphins d’Annecy' }
+    },
+    {
+      id: 'tractor-farm-academy', name: 'Tractor Farm Academy', kind: 'festival',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug, 10:30–late',
+      base: 'lake', where: 'Le Grand-Bornand village', coords: [45.9420, 6.4260],
+      why: 'A gloriously local August 15 festival built around tractor handling: practice, qualifying, a final, communal dinner and a dance.',
+      booking: 'no', price: 'Free access; dinner sold separately.',
+      impact: 'Practice starts 10:30, qualifying at noon, final at 18:30 and dancing at 21:00. This is also changeover day, so the evening final is the plausible part.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'tractor-farm', travel: { lake: { min: 50, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'Tractor skills, a village final, dinner and dancing. Extremely Haute-Savoie.',
+      homeMeta: 'Final 18:30 · Free access',
+      media: { photo: 'https://woody.cloudly.space/app/uploads/legrandbornand/2025/06/thumbs/15aout-132-32-1920x960-crop-1750683770.webp', alt: 'Tractor competition at Le Grand-Bornand’s August 15 festival', sourceUrl: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/temps-forts/la-fete-du-15-aout/', credit: 'Le Grand-Bornand Tourism' }
+    },
+    {
+      id: 'medievaleries-aulps', name: 'Les Médiévaleries at Aulps Abbey', kind: 'festival',
+      start: '2026-08-15', end: '2026-08-16', datesLabel: 'Sat 15 – Sun 16 Aug, 10:00–19:00',
+      base: 'both', where: 'Aulps Abbey, Saint-Jean-d’Aulps', coords: [46.2326, 6.6536],
+      why: 'The ruined Cistercian abbey fills with medieval crafts, demonstrations, performers and encampments for the weekend.',
+      booking: 'no', price: '€7–10 depending on ticket; confirm current admission.',
+      impact: 'Sunday 16 is the cleanest fit after the house move. Expect a busy abbey car park and family crowds.',
+      conflict: 'changeover-15', confidence: 'confirmed', verifyBeforeGo: true, src: 'medievaleries', travel: { lesgets: { min: 25, mode: 'car', approx: true }, lake: { min: 75, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'A medieval weekend inside the ruins of Aulps Abbey.',
+      homeMeta: '10:00–19:00 · €7–10',
+      media: { photo: 'https://www.abbayedaulps.fr/medias/images/prestations/5215-a0_841x1189_abbaye_medievales_web_page_0001.jpg', alt: 'Poster for Les Médiévaleries at Aulps Abbey', sourceUrl: 'https://www.abbayedaulps.fr/les-medievaleries.html', credit: 'Aulps Abbey' }
     },
     {
       id: 'morillon-enduro', name: 'UCI Enduro World Cup Final — Morillon', kind: 'race',
@@ -1393,7 +1679,8 @@ window.DATA = (function () {
       conflict: 'changeover-15', confidence: 'confirmed', src: 'bouquetin',
       travel: { lake: { min: 45, mode: 'car' } }, homepageRide: true,
       homeSummary: 'A group-start race up the Colombière: 12 km and 660 m of climbing.',
-      homeMeta: '08:30 · €15 online'
+      homeMeta: '08:30 · €15 online',
+      media: { photo: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/images/51/164/41591859.jpeg', alt: 'Cyclists racing uphill in Le Bouquetin at Le Grand-Bornand', sourceUrl: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/agenda/27eme-grimpee-cycliste-le-bouquetin-le-grand-bornand-fr-4806997/', credit: 'Le Grand-Bornand Tourism' }
     },
     {
       id: 'col-cou-car-free', name: 'Col de Cou car-free morning', kind: 'ride',
@@ -1406,7 +1693,32 @@ window.DATA = (function () {
       confidence: 'confirmed', src: 'haute-savoie-sommet',
       travel: { lake: { min: 75, mode: 'car' } }, homepageRide: true,
       homeSummary: 'A no-pressure, traffic-free climb with two approaches to choose from.',
-      homeMeta: '09:00–12:00 · Free'
+      homeMeta: '09:00–12:00 · Free',
+      media: { photo: 'https://hautesavoie.fr/wp-content/uploads/2024/06/affiche-HS-Au-Sommet-format-A0_P4-scaled.jpg', alt: 'Haute-Savoie au Sommet car-free cycling event poster', sourceUrl: 'https://hautesavoie.fr/evenement/haute-savoie-au-sommet/', credit: 'Département de la Haute-Savoie' }
+    },
+    {
+      id: 'chamonix-ice-hockey', name: 'Public skating + summer hockey in Chamonix', kind: 'sport',
+      start: '2026-08-18', end: '2026-08-26', occurrences: ['2026-08-18', '2026-08-26'], datesLabel: 'Tue 18 Aug vs Sierre · Wed 26 Aug vs Aosta, 20:00',
+      base: 'lake', where: 'Patinoire Richard Bozon, Chamonix', coords: [45.9250, 6.8720],
+      why: 'Turn a Chamonix day into something unexpected: public skating, then a summer exhibition hockey game beneath the Aiguilles.',
+      booking: 'recommended', price: 'Public skate €6.80 + €4.50 skate hire; match ticket price to be confirmed.',
+      impact: 'Check the day’s public-skate session and match ticketing before driving; the two game dates are separate options, not a week-long event.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'Public skating and an evening exhibition match under Mont Blanc.',
+      homeMeta: '18 or 26 Aug · 20:00',
+      media: { photo: 'https://en.chamonix.com/sites/default/files/styles/ogimage/public/sit/images/7440413/35912870.jpg?itok=22lFbtJc', alt: 'Ice hockey inside Chamonix’s Richard Bozon rink', sourceUrl: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/ice-hockey-games', credit: 'Chamonix Tourism' }
+    },
+    {
+      id: 'esperance-reserve-sail', name: 'Espérance III sail + Bout-du-Lac reserve walk', kind: 'heritage',
+      start: '2026-08-20', end: '2026-08-20', datesLabel: 'Thu 20 Aug, 09:00–12:00',
+      base: 'lake', where: 'Doussard / Bout-du-Lac nature reserve', coords: [45.7826, 6.2197],
+      why: 'A special morning pairing the restored lateen-sail barge with a guided walk through the south-lake nature reserve.',
+      booking: 'yes', price: 'Price not yet published; reserve with Espérance III.',
+      impact: 'Weather-dependent sailing. Confirm the meeting point, price and whether the walk or sail comes first.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'esperance-agenda', travel: { lake: { min: 35, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'Historic sailing and the Bout-du-Lac reserve in one easy morning.',
+      homeMeta: '09:00–12:00 · Book',
+      media: { photo: 'assets/activities/esperance-iii.jpg', alt: 'The restored sailing barge Espérance III on Lake Annecy' }
     },
     {
       id: 'bassachaux-climb', name: 'Timed climb of the Col de Bassachaux', kind: 'race',
@@ -1419,7 +1731,8 @@ window.DATA = (function () {
       conflict: 'changeover-22', confidence: 'confirmed', src: 'bassachaux-race',
       travel: { lake: { min: 105, mode: 'car' } }, homepageRide: true,
       homeSummary: 'An evening individual time trial from Pré-la-Joux to the col.',
-      homeMeta: '18:00 · €20'
+      homeMeta: '18:00 · €20',
+      media: { photo: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/images/67/83/42029891.jpg', alt: 'Cyclist climbing the road toward Col de Bassachaux', sourceUrl: 'https://hautesavoiemontblanc-tourisme.com/offres/montee-du-col-du-bassachaux-chatel-fr-5865084/', credit: 'Châtel Tourism' }
     },
     {
       id: 'megeve-mont-blanc', name: 'Megève Mont-Blanc sportive', kind: 'race',
@@ -1432,7 +1745,8 @@ window.DATA = (function () {
       confidence: 'confirmed', verifyBeforeGo: true, src: 'megeve-mont-blanc',
       travel: { lake: { min: 70, mode: 'car' } }, homepageRide: true,
       homeSummary: 'Pick your loop on the road through the Arpettaz, Saisies and Beaufortain.',
-      homeMeta: 'From 88 km · €75'
+      homeMeta: 'From 88 km · €75',
+      media: { photo: 'https://megeve-montblanc.com/wp-content/uploads/2026/07/Bache-batiment-CSM-MMB-2-scaled.jpg', alt: 'Megève Mont-Blanc cycling event artwork', sourceUrl: 'https://megeve-montblanc.com/', credit: 'Megève Mont-Blanc' }
     },
     {
       id: 'solaison-car-free', name: 'Plateau de Solaison car-free morning', kind: 'ride',
@@ -1445,7 +1759,20 @@ window.DATA = (function () {
       confidence: 'confirmed', src: 'haute-savoie-sommet',
       travel: { lake: { min: 55, mode: 'car' } }, homepageRide: true,
       homeSummary: 'A free, traffic-free morning on the steep road to Solaison.',
-      homeMeta: '09:00–12:00 · Free'
+      homeMeta: '09:00–12:00 · Free',
+      media: { photo: 'https://hautesavoie.fr/wp-content/uploads/2024/06/affiche-HS-Au-Sommet-format-A0_P4-scaled.jpg', alt: 'Haute-Savoie au Sommet car-free cycling event poster', sourceUrl: 'https://hautesavoie.fr/evenement/haute-savoie-au-sommet/', credit: 'Département de la Haute-Savoie' }
+    },
+    {
+      id: 'utmb-spectator', name: 'UTMB start afternoon in Chamonix', kind: 'race',
+      start: '2026-08-28', end: '2026-08-28', datesLabel: 'Fri 28 Aug, village from 10:00 · UTMB start 17:45',
+      base: 'lake', where: 'Chamonix town centre', coords: [45.9237, 6.8694],
+      why: 'See Chamonix at full mountain-sport intensity as the UTMB field leaves town for the lap around Mont Blanc.',
+      booking: 'no', price: 'Free spectator access.',
+      impact: 'This will be one of the busiest days of the year in Chamonix. Use the whole afternoon, arrive early and expect traffic, packed trains and road controls.',
+      confidence: 'confirmed', src: 'utmb-agenda', travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'The UTMB start turns central Chamonix into one enormous send-off.',
+      homeMeta: 'Start 17:45 · Free',
+      media: { photo: 'https://res.cloudinary.com/utmb-world/image/upload/q_auto/f_auto/c_fill,g_auto/if_w_gt_1920/c_scale,w_1920/if_end/v1/montblanc/Pages/Headbands/utmb22_utmb_pt_00_0320_10dc56232b?_a=ATADJd80', alt: 'UTMB runners and spectators in Chamonix', sourceUrl: 'https://montblanc.utmb.world/discover/the-event/agenda', credit: 'UTMB Mont-Blanc' }
     },
     {
       id: 'veyrier-createurs', name: 'Marché des créateurs — Veyrier-du-Lac', kind: 'market',

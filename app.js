@@ -21,13 +21,13 @@
   const announce = (m) => { if (liveEl) { liveEl.textContent = ''; setTimeout(() => { liveEl.textContent = m; }, 30); } };
   const EFFORT_LABEL = { recovery: 'Recovery', easy: 'Easy', moderate: 'Moderate', big: 'Big' };
   const DUR_LABEL = { evening: 'Evening', '2h': '~2 h', half: 'Half day', full: 'Full day' };
-  const CAT_LABEL = { road: 'Road', gravel: 'Gravel', mtb: 'MTB', easybike: 'Easy ride', hike: 'Hike', walk: 'Walk', viaferrata: 'Via ferrata', canyoning: 'Canyoning', paragliding: 'Paragliding', swim: 'Swim', paddle: 'Water sport', boat: 'Boat', food: 'Food', culture: 'Culture', village: 'Day trip', family: 'Easy day', recovery: 'Rest' };
+  const CAT_LABEL = { road: 'Road', gravel: 'Gravel', mtb: 'MTB', easybike: 'Easy ride', hike: 'Hike', walk: 'Walk', sport: 'Outdoor sport', whitewater: 'Whitewater', caving: 'Caving', viaferrata: 'Via ferrata', canyoning: 'Canyoning', paragliding: 'Paragliding', swim: 'Swim', paddle: 'Water sport', boat: 'Boat', food: 'Food', culture: 'Culture', village: 'Day trip', family: 'Easy day', recovery: 'Rest' };
   const GUIDE_CATS = [
-    { id: 'water', label: 'Lake & water', test: (a) => ['swim', 'paddle', 'boat'].includes(a.cat) || (a.themes || []).includes('water') },
+    { id: 'water', label: 'Lake & water', test: (a) => ['swim', 'paddle', 'boat', 'whitewater'].includes(a.cat) || (a.themes || []).includes('water') },
     { id: 'cycling', label: 'Cycling', test: (a) => ['road', 'gravel', 'mtb', 'easybike'].includes(a.cat) || (a.themes || []).includes('bikes') },
     { id: 'mountains', label: 'Hikes & views', test: (a) => ['hike', 'walk'].includes(a.cat) || (a.themes || []).includes('views') },
     { id: 'food', label: 'Food & history', test: (a) => ['food', 'culture', 'village'].includes(a.cat) || (a.themes || []).some((t) => t === 'food' || t === 'culture') },
-    { id: 'adrenaline', label: 'Adrenaline', test: (a) => ['viaferrata', 'canyoning', 'paragliding'].includes(a.cat) || (a.themes || []).includes('adrenaline') },
+    { id: 'adrenaline', label: 'Adrenaline', test: (a) => ['sport', 'whitewater', 'caving', 'viaferrata', 'canyoning', 'paragliding'].includes(a.cat) || (a.themes || []).includes('adrenaline') },
     { id: 'easy', label: 'Easy days', test: (a) => ['family', 'recovery'].includes(a.cat) || ['recovery', 'easy'].includes(a.effort) || a.group === 'all' }
   ];
   const GUIDE_BY_ID = Object.fromEntries(GUIDE_CATS.map((c) => [c.id, c]));
@@ -117,8 +117,10 @@
     if (a.stayOnly) { const st = stayForDate(dt); if (!st || st.id !== a.stayOnly) return false; }
     return true;
   }
-  function eventsOn(dt) { return D.EVENTS.filter((e) => dt >= e.start && dt <= e.end); }
-  function upcomingEvents(dt, baseId) { return D.EVENTS.filter((e) => e.end >= dt && (e.base === baseId || e.base === 'both')).sort((a, b) => a.start.localeCompare(b.start)); }
+  function eventOccursOn(e, dt) { return e.occurrences ? e.occurrences.includes(dt) : dt >= e.start && dt <= e.end; }
+  function eventLastDate(e) { return e.occurrences ? e.occurrences[e.occurrences.length - 1] : e.end; }
+  function eventsOn(dt) { return D.EVENTS.filter((e) => eventOccursOn(e, dt)); }
+  function upcomingEvents(dt, baseId) { return D.EVENTS.filter((e) => eventLastDate(e) >= dt && (e.base === baseId || e.base === 'both')).sort((a, b) => a.start.localeCompare(b.start)); }
 
   /* =========================== chrome =============================== */
   const PRIMARY = ['home', 'activities', 'ideas', 'trip', 'map'];
@@ -132,11 +134,12 @@
     document.body.classList.toggle('route-home', route.name === 'home');
     document.body.classList.toggle('route-map', route.name === 'map');
     let title = TITLES[route.name] || 'Annecy 2026';
+    if (route.name === 'map' && route.query.view === 'alpine') title = 'Alpine Relief Map';
     if (route.name === 'areas' && route.parts[0]) { const a = D.AREA_BY_ID[route.parts[0]]; title = a ? a.name : 'Area'; }
     if (route.name === 'plan' && route.parts[0]) { const a = D.ACT_BY_ID[route.parts[0]]; title = a ? a.title : 'Plan'; }
     if (route.name === 'event' && route.parts[0]) { const e = D.EVENTS.find((x) => x.id === route.parts[0]); title = e ? e.name : 'Event'; }
     titleEl.textContent = title;
-    const navFor = NAV_FOR[route.name] || '';
+    const navFor = route.name === 'map' && route.query.view === 'alpine' ? 'alpine' : (NAV_FOR[route.name] || '');
     navEl.querySelectorAll('a').forEach((a) => { if (a.dataset.nav === navFor) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (actionEl) actionEl.hidden = true; // hearts on cards are the one way to save
   }
@@ -159,7 +162,7 @@
     if (own && own.photo) return own;
     return own || { label: a.title, tint: catTint(a.cat) };
   }
-  function catTint(c) { if (['road', 'gravel', 'mtb', 'easybike'].includes(c)) return 'pine'; if (['swim', 'paddle', 'boat'].includes(c)) return 'aqua'; if (['viaferrata', 'canyoning', 'paragliding'].includes(c)) return 'purple'; if (['food'].includes(c)) return 'sun'; return 'alpine'; }
+  function catTint(c) { if (['road', 'gravel', 'mtb', 'easybike'].includes(c)) return 'pine'; if (['swim', 'paddle', 'boat', 'whitewater'].includes(c)) return 'aqua'; if (['sport', 'caving', 'viaferrata', 'canyoning', 'paragliding'].includes(c)) return 'purple'; if (['food'].includes(c)) return 'sun'; return 'alpine'; }
 
   // Official preview URLs can change. A failed image becomes the same
   // intentional text-first card/placeholder used for activities with no photo.
@@ -287,12 +290,13 @@
         <span><strong>${esc(cat.label)}</strong><small>${esc(regionCopy[cat.id])}</small></span>
         <span class="hm-region-go" aria-hidden="true">→</span>
       </a>`).join('');
-    const homeEvents = D.EVENTS.filter((event) => event.homepageRide)
+    const homeEvents = D.EVENTS.filter((event) => event.homepageRide || event.homepageEvent)
       .sort((a, b) => a.start.localeCompare(b.start));
     const homeEventRows = homeEvents.map((event) => {
       const [dow, day, month] = prettyDay(event.start).split(' ');
       return `<a class="hm-event-row" href="#/event/${esc(event.id)}">
         <time class="hm-event-date" datetime="${esc(event.start)}"><span>${esc(dow)}</span><strong>${esc(day)}</strong><small>${esc(month)}</small></time>
+        <span class="hm-event-media">${cover(coverOf(event), { cls: 'hm-event-image', alt: event.name })}</span>
         <span class="hm-event-copy"><strong>${esc(event.name)}</strong><span>${esc(event.homeSummary || event.why)}</span></span>
         <span class="hm-event-meta">${esc(event.homeMeta || event.datesLabel)}</span>
         <span class="hm-event-go" aria-hidden="true">→</span>
@@ -344,7 +348,7 @@
       <section class="hm-events" aria-labelledby="hm-events-title">
         <div class="hm-events-head">
           <div><p class="hm-events-kicker">While we’re there</p><h3 id="hm-events-title">Nearby events coming up</h3></div>
-          <p>Five rides worth knowing about, from traffic-free mornings to a proper mountain sportive.</p>
+        <p>The races, festivals, lake oddities and one very local tractor competition that land during the trip.</p>
         </div>
         <div class="hm-event-list">${homeEventRows}</div>
       </section>
@@ -693,7 +697,7 @@
     return days.map((dt) => {
       const stay = stayForDate(dt); const co = changeoverOn(dt);
       // show each event once, on its first day inside the trip window
-      const evs = D.EVENTS.filter((e) => firstInWindow(e) === dt);
+      const evs = D.EVENTS.filter((e) => e.occurrences ? e.occurrences.includes(dt) : firstInWindow(e) === dt);
       const isNow = dt === today;
       const flags = [];
       if (co) flags.push(`<span class="tl-flag change">Base change → ${esc(co.inn.village)}</span>`);
@@ -716,7 +720,9 @@
     const base = activeBase(); const dd = travelFromBase(e, base);
     const conf = e.confidence === 'confirmed' ? '<span class="lg confirmed">Confirmed</span>' : e.confidence === 'likely' ? '<span class="lg likely">Likely</span>' : '';
     const s = e.src ? D.SOURCES[e.src] : null;
+    const eventMedia = coverOf(e);
     return `
+      ${eventMedia && eventMedia.photo ? `<figure class="event-hero">${cover(eventMedia, { eager: true, alt: e.name })}</figure>` : ''}
       <div class="section-head" style="margin-top:.4rem"><h2>${esc(e.name)}</h2><p>${conf} ${esc(e.datesLabel)}</p></div>
       <dl class="spec">
         <dt>When</dt><dd>${esc(e.datesLabel)}</dd>
@@ -771,7 +777,8 @@
     </article>`;
   }
   function ideaEventCard(id, e) {
-    return `<article class="idea-card idea-event"><a class="idea-hit" href="#/event/${esc(id)}"><span class="idea-event-date">${esc(e.datesLabel || '')}</span><span class="idea-copy"><strong>${esc(e.name)}</strong><span>${esc(e.where || '')}</span></span></a><div class="idea-save">${saveBtn(id)}</div>${statusPicker(id)}</article>`;
+    const img = coverOf(e);
+    return `<article class="idea-card idea-event${img && img.photo ? '' : ' no-photo'}"><a class="idea-hit" href="#/event/${esc(id)}">${img && img.photo ? `<img src="${esc(img.photo)}" alt="${esc(img.alt || '')}" loading="lazy" decoding="async"${mediaImageAttrs(img, 'purple', e.name)} />` : ''}<span class="idea-event-date">${esc(e.datesLabel || '')}</span><span class="idea-copy"><strong>${esc(e.name)}</strong><span>${esc(e.where || '')}</span></span></a><div class="idea-save">${saveBtn(id)}</div>${statusPicker(id)}</article>`;
   }
   function wireIdeas() {
     screenEl.querySelectorAll('[data-person]').forEach((b) => b.addEventListener('click', () => { const who = b.dataset.person; setPerson(who); render(); const again = screenEl.querySelector(`[data-person="${who}"]`); if (again) again.focus({ preventScroll: true }); announce('Showing ' + who + '’s ideas'); }));
@@ -949,9 +956,9 @@
   ];
   function mapCatOf(a) {
     if (['road', 'gravel', 'mtb', 'easybike'].includes(a.cat)) return 'cycling';
-    if (['swim', 'paddle', 'boat'].includes(a.cat)) return 'water';
+    if (['swim', 'paddle', 'boat', 'whitewater'].includes(a.cat)) return 'water';
     if (['hike', 'walk'].includes(a.cat)) return 'mountains';
-    if (['viaferrata', 'canyoning', 'paragliding'].includes(a.cat)) return 'adrenaline';
+    if (['sport', 'caving', 'viaferrata', 'canyoning', 'paragliding'].includes(a.cat)) return 'adrenaline';
     if (['food', 'culture', 'village'].includes(a.cat)) return 'food';
     if (['family', 'recovery'].includes(a.cat)) return 'easy';
     return 'place';
@@ -1022,6 +1029,7 @@
     const seen = new Set();
     const points = ALPINE_SPOTS.map((spot) => {
       const col = spot.colId ? cols.find((c) => c.id === spot.colId) : null;
+      const trackedCol = spot.colId ? (D.CENT_COLS || []).find((c) => c.tourId === spot.colId) : null;
       const id = spot.colId || spot.id;
       seen.add(id);
       return {
@@ -1030,7 +1038,9 @@
         kind: spot.kind,
         coords: spot.mapCoords || spot.coords || (col && col.coords),
         elevation: spot.elevation || (col && col.elevation),
-        featured: true
+        featured: true,
+        tourFeatured: !!(trackedCol && trackedCol.tourFeatured),
+        tourPassages: trackedCol ? trackedCol.tourPassages : 0
       };
     }).filter((point) => point.coords);
     cols.forEach((col) => {
@@ -1041,7 +1051,8 @@
         kind: 'col',
         coords: col.coords,
         elevation: col.elevation,
-        featured: false
+        featured: false,
+        tourFeatured: !!((D.CENT_COLS || []).find((tracked) => tracked.tourId === col.id) || {}).tourFeatured
       });
     });
     return points;
@@ -1053,7 +1064,7 @@
     const point = alpineMapPoints().find((item) => item.id === id);
     if (point) return point;
     const col = centColById(id);
-    return col ? { id: col.id, label: col.name, kind: 'col', coords: col.coords, elevation: col.elevation } : null;
+    return col ? { id: col.id, label: col.name, kind: 'col', coords: col.coords, elevation: col.elevation, tourFeatured: col.tourFeatured, tourPassages: col.tourPassages } : null;
   }
   function alpineColMode(route) {
     return route.query.cols === 'all' ? 'all' : 'highlights';
@@ -1069,7 +1080,9 @@
           name: col.name,
           region: col.region,
           elevation: col.elevation,
-          tourId: col.tourId || ''
+          tourId: col.tourId || '',
+          tourFeatured: col.tourFeatured ? 1 : 0,
+          tourPassages: col.tourPassages || 0
         }
       }))
     };
@@ -1160,6 +1173,7 @@
         <svg viewBox="0 0 24 24"><path d="m3 19 6-10 3 5 2-3 7 8z"/><path d="m8 11 2 1 2-3"/></svg>
       </div>
       <div class="alpine-detail-head"><p>${esc(eyebrow)}${elevation ? ` · ${elevation.toLocaleString('en-US')} m` : ''}</p><h3>${esc(title)}</h3></div>
+      ${tracked && tracked.tourFeatured ? `<p class="tour-map-badge"><span aria-hidden="true"></span>Tour de France · ${tracked.tourPassages} ${tracked.tourPassages === 1 ? 'passage' : 'passages'}</p>` : ''}
       <p class="alpine-inspector-summary">${esc(summary)}</p>
       <div class="alpine-primary-actions">
         ${guideHref ? `<a href="${esc(guideHref)}"${guideExternal ? ' target="_blank" rel="noopener"' : ''}>${guideLabel}${chevron}</a>` : ''}
@@ -1184,7 +1198,7 @@
     const trackedIndex = (D.CENT_COLS || []).map((col) => `
       <button type="button" class="alpine-col-button alpine-tracked-row" data-alpine="${esc(col.id)}" data-col-filter="${esc(`${col.name} ${col.region} ${col.elevation}`.toLowerCase())}" aria-pressed="${selected === col.id}">
         <span><strong>${esc(col.name)}</strong><small>${esc(col.region)} · ${col.elevation.toLocaleString('en-US')} m</small></span>
-        ${col.tourId ? '<small class="beyond-view">Tour story</small>' : ''}
+        ${col.tourFeatured ? `<small class="tour-list-badge">Tour ×${col.tourPassages}</small>` : ''}
       </button>`).join('');
     const index = mode === 'all' ? `
       <div class="alpine-index-head"><h3>All ${D.CENT_COLS.length} tracked cols</h3><a href="${esc(D.SOURCES['french-cols-tracker'].url)}" target="_blank" rel="noopener">Full tracker ↗</a></div>
@@ -1208,6 +1222,7 @@
               <a href="${alpineHref(null, 'highlights')}" aria-current="${mode === 'highlights' ? 'page' : 'false'}">Highlights</a>
               <a href="${alpineHref(null, 'all')}" aria-current="${mode === 'all' ? 'page' : 'false'}">All ${D.CENT_COLS.length} cols</a>
             </nav>
+            ${mode === 'all' ? '<div class="alpine-map-legend" aria-label="Map legend"><span><i class="is-tour" aria-hidden="true"></i>Tour de France</span><span><i aria-hidden="true"></i>Other tracked col</span></div>' : ''}
             <button class="alpine-reset-view" id="alpine-reset-view" type="button" aria-label="Reset Alpine map view" title="Reset view">
               <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
             </button>
@@ -1485,6 +1500,7 @@
       cluster: true,
       clusterMaxZoom: 10,
       clusterRadius: 46,
+      clusterProperties: { tour_count: ['+', ['get', 'tourFeatured']] },
       attribution: 'Cols: <a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">French Cols Tracker</a>'
     });
     map.addLayer({
@@ -1496,7 +1512,7 @@
         'circle-color': ['step', ['get', 'point_count'], '#6170c9', 10, '#4e65b5', 25, '#354986'],
         'circle-radius': ['step', ['get', 'point_count'], 18, 10, 23, 25, 29],
         'circle-stroke-width': 2.5,
-        'circle-stroke-color': 'rgba(255,255,255,0.92)',
+        'circle-stroke-color': ['case', ['>', ['get', 'tour_count'], 0], '#f4c84a', 'rgba(255,255,255,0.92)'],
         'circle-opacity': 0.92
       }
     });
@@ -1522,9 +1538,9 @@
       filter: ['==', ['get', 'id'], mapState.focus || ''],
       paint: {
         'circle-radius': 13,
-        'circle-color': 'rgba(242,138,176,0.24)',
+        'circle-color': ['case', ['==', ['get', 'tourFeatured'], 1], 'rgba(244,200,74,0.34)', 'rgba(31,145,160,0.24)'],
         'circle-stroke-width': 3,
-        'circle-stroke-color': '#ffffff'
+        'circle-stroke-color': ['case', ['==', ['get', 'tourFeatured'], 1], '#f4c84a', '#ffffff']
       }
     });
     map.addLayer({
@@ -1534,9 +1550,9 @@
       filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 4.5, 12, 7],
-        'circle-color': ['case', ['!=', ['get', 'tourId'], ''], '#f28ab0', '#1f91a0'],
+        'circle-color': ['case', ['==', ['get', 'tourFeatured'], 1], '#f4c84a', '#1f91a0'],
         'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff',
+        'circle-stroke-color': ['case', ['==', ['get', 'tourFeatured'], 1], '#5b4500', '#ffffff'],
         'circle-opacity': 0.96
       }
     });
@@ -1582,10 +1598,10 @@
   function addAlpineMarker(map, point, choose) {
     const shell = document.createElement('button');
     shell.type = 'button';
-    shell.className = `relief-marker-shell relief-marker is-${point.kind}${point.featured ? ' is-featured' : ''}${mapState.focus === point.id ? ' is-selected' : ''}`;
+    shell.className = `relief-marker-shell relief-marker is-${point.kind}${point.featured ? ' is-featured' : ''}${point.tourFeatured ? ' is-tour' : ''}${mapState.focus === point.id ? ' is-selected' : ''}`;
     shell.dataset.alpine = point.id;
     shell.setAttribute('aria-pressed', String(mapState.focus === point.id));
-    shell.setAttribute('aria-label', `Open ${point.label}${point.elevation ? `, ${point.elevation.toLocaleString('en-US')} metres` : ''}`);
+    shell.setAttribute('aria-label', `Open ${point.label}${point.elevation ? `, ${point.elevation.toLocaleString('en-US')} metres` : ''}${point.tourFeatured ? ', featured in the Tour de France' : ''}`);
     shell.title = point.label;
     const card = document.createElement('span');
     card.className = 'relief-marker-card';

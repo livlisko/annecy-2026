@@ -473,6 +473,120 @@
       'The Aeolian organ inside the Musee de la Musique Mecanique',
       'https://musicmecalesgets.org/orgue-aeolian/',
       'Musee de la Musique Mecanique'
+    ),
+    'obirun-biathlon': official(
+      'https://www.samoens.com/wp-content/plugins/yatadata/public/multimedias/7930313/42167112-diaporama.jpg',
+      'Participants running and laser shooting in the O’BIRUN biathlon session',
+      'https://www.samoens.com/en/biathlon-shooting-and-running/',
+      'Samoëns Tourism'
+    ),
+    'dranse-hydrospeed': official(
+      'https://evolution2.com/media/cache/og_filter/2023/06/5735-photo-2.jpg',
+      'A hydrospeed swimmer riding whitewater on the Dranse',
+      'https://evolution2.com/en/thonon-geneva-lake/shared-hydrospeed-session',
+      'Evolution 2 Thonon'
+    ),
+    'balme-aquarando': official(
+      'https://www.bureaumontagnesaleve.com/images/pages/10/thumbnail/Ca_Balme_H_Courtial_14_.webp',
+      'Participants floating through the rope-free Balme aquatic canyon',
+      'https://www.bureaumontagnesaleve.com/activites-montagne/canyoning-randonnee-aquatique',
+      'Bureau Montagne Salève'
+    ),
+    'back-to-bones': official(
+      'https://www.back-to-bones.com/b2b/wp-content/uploads/2018/06/BTB-2018-09460-1.jpg',
+      'A wakesurfer behind the Back to Bones boat on Lake Annecy',
+      'https://www.back-to-bones.com/',
+      'Back to Bones'
+    ),
+    'balme-caving': official(
+      'https://www.samoens.com/wp-content/plugins/yatadata/public/multimedias/872434/1769826-diaporama.jpg',
+      'A guided beginner caving group exploring the Balme cave system',
+      'https://www.samoens.com/en/caving-trip-in-haute-savoie-nunayak/',
+      'Samoëns Tourism'
+    ),
+    'giffre-airyak': official(
+      'https://www.samoens.com/wp-content/plugins/yatadata/public/multimedias/124569/23934237-diaporama.jpg',
+      'An inflatable Airyak paddler descending the Giffre',
+      'https://www.samoens.com/en/airyak-outing-the-thrills-of-inflatable-kayaking-ecolorado/',
+      'Samoëns Tourism'
+    ),
+    'lesgets-moto-trial': official(
+      'https://static.apidae-tourisme.com/filestore/objets-touristiques/images/19/205/13028627.jpg',
+      'A rider learning electric moto-trial in Les Gets',
+      'https://www.lesgets.com/en/fun/things-to-do-in-les-gets/motocross-100-electric-les-gets-en-6300653/',
+      'Les Gets Tourism'
+    ),
+    'lesgets-cani-hike': official(
+      'https://static.apidae-tourisme.com/filestore/objets-touristiques/images/1/131/23233281.jpg',
+      'A cani-hiker walking with a Nordic dog near Les Gets',
+      'https://www.lesgets.com/commercants/cani-balade-les-gets-fr-6300473/',
+      'Les Gets Tourism'
+    ),
+    'samoens-survival': official(
+      'https://www.samoens.com/wp-content/plugins/yatadata/public/multimedias/5730903/9351738-diaporama.jpg',
+      'A mountain survival group building a woodland shelter near Samoëns',
+      'https://www.samoens.com/en/men-vs-wild-mountain-survival-samoens-guides-company/',
+      'Samoëns Tourism'
+    ),
+    'fer-cheval-floor': official(
+      'https://www.grand-massif.com/content/uploads/2025/11/Grand-Massif-sixt-510x710.jpg',
+      'Walkers beneath the cliffs and waterfalls of the Cirque du Fer-à-Cheval',
+      'https://www.grand-massif.com/en/hiking-and-mountain-huts/hiking-in-sixt-fer-a-cheval/',
+      'Grand Massif'
+    ),
+    'giant-paddle-xl': official(
+      'https://en.lac-annecy.com/cache/images-alliance/dc60245d0bee3005d2de5503cbf0f8d9_alliance-sheet-gallery-full.jpg',
+      'A group balancing together on a giant XL paddleboard on Lake Annecy',
+      'https://en.lac-annecy.com/activite-bookable/giant-paddle-rental-xl/',
+      'Lake Annecy Tourism'
+    ),
+    'menthon-catamaran': official(
+      'https://static.wixstatic.com/media/c1783d_2c0fc5e364a7436ead9b3657e0d5d6df~mv2.jpg/v1/crop/x_384,y_270,w_830,h_790/fill/w_410,h_395,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG-20240422-WA0009.jpg',
+      'A small catamaran sailing from the Menthon nautical club',
+      'https://www.cnlmenthon.com/initiation',
+      'Club nautique de Menthon'
+    ),
+    'dranse-packraft': official(
+      'https://evolution2.com/media/cache/og_filter/2023/06/3380-20210907-122136.jpg',
+      'Packrafters paddling a guided stretch of the Dranse',
+      'https://evolution2.com/en/thonon-geneva-lake/packraft',
+      'Evolution 2 Thonon'
+    ),
+    'veyrier-freediving': official(
+      'https://www.planeteapnee.fr/wp-content/uploads/2024/06/Planete_Apnee_Ecole_Decouverte_Bapteme_Zen_Detente_2000x800px.jpg',
+      'A freediving introduction with Planète Apnée in Lake Annecy',
+      'https://www.planeteapnee.fr/decouvrir/',
+      'Planète Apnée'
+    ),
+    'transparent-kayak': official(
+      'https://www.glisscoolannecy.com/wp-content/uploads/2023/06/0V1A0146-1.jpg',
+      'A transparent kayak over the clear water of Lake Annecy',
+      'https://glisscoolannecy.com/activites/kayak-transparent/',
+      'Gliss’Cool Annecy'
+    ),
+    'veyrier-goboat': official(
+      'https://static.apidae-tourisme.com//filestore//objets-touristiques//images//104//105//39217512-liste.jpg',
+      'A round electric GoBoat picnic boat on Lake Annecy',
+      'https://www.ledeck-veyrier.com/en/',
+      'Le Deck Veyrier'
+    ),
+    'alta-lumina': official(
+      'https://woody.cloudly.space/app/uploads/lesgets/2026/05/thumbs/15068/ratio_2_1/2020-07-30-alta-lumina-musique-spot-selfie-lesgets-moment-factory-25-1920x960.webp',
+      'The illuminated Alta Lumina forest trail in Les Gets',
+      'https://www.lesgets.com/en/alta-lumina/',
+      'Les Gets Tourism'
+    ),
+    'paccard-casting': official(
+      'https://musee-paccard.com/wp-content/uploads/2021/01/musee-cloche-paccard-visite-2.jpg',
+      'Visitors among the bells inside Musée Paccard in Sévrier',
+      'https://musee-paccard.com/horaires-acces-musee-paccard/',
+      'Musée Paccard'
+    ),
+    'lorette-alpage': official(
+      'https://www.laclusaz.com/app/uploads/apidae/741009-diaporama-890x500.jpg',
+      'A visit with cows at the working Ferme de Lorette alpage',
+      'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/',
+      'La Clusaz Tourism'
     )
   };
 

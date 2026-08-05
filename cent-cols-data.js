@@ -23,6 +23,19 @@
     113: 'forclaz'
   };
 
+  // Recorded Tour de France passages for every matching summit in this
+  // tracker. Historic counts come from the consolidated Alpine ascents list;
+  // Croisette includes the fifth passage scheduled for the 2026 Tour.
+  // https://fr.wikipedia.org/wiki/Liste_des_ascensions_du_Tour_de_France_dans_les_Alpes
+  // https://www.letour.fr/en/heritage/stage-15/on-the-road
+  const tourPassagesByTrackerId = {
+    1: 8, 3: 7, 6: 1, 8: 6, 11: 1, 12: 1, 16: 5, 19: 13, 20: 1,
+    23: 5, 33: 23, 42: 6, 43: 42, 47: 3, 49: 1, 52: 7, 53: 5,
+    56: 15, 59: 3, 61: 16, 62: 2, 63: 5, 64: 6, 65: 2, 67: 5,
+    71: 2, 72: 15, 95: 28, 96: 5, 97: 1, 98: 1, 100: 23, 101: 21,
+    102: 3, 103: 43, 105: 63, 108: 8, 109: 4, 110: 5, 113: 5
+  };
+
   const rows = [
   [1, "Pas de Morgins", "Chablais & Portes du Soleil", 46.2439, 6.8502, 1374],
   [2, "Col de Bassachaux", "Chablais & Portes du Soleil", 46.2225, 6.7722, 1778],
@@ -139,13 +152,18 @@
   [112, "Collet de Plan Nicolas", "Maurienne, Tarentaise & South", 45.0759, 6.4117, 2406],
   ];
 
-  window.CENT_COLS_DATA = rows.map(([trackerId, name, region, lat, lng, elevation]) => ({
-    id: `cent-${trackerId}`,
-    trackerId,
-    name,
-    region,
-    coords: [lat, lng],
-    elevation,
-    tourId: tourByTrackerId[trackerId] || null
-  }));
+  window.CENT_COLS_DATA = rows.map(([trackerId, name, region, lat, lng, elevation]) => {
+    const tourPassages = tourPassagesByTrackerId[trackerId] || 0;
+    return {
+      id: `cent-${trackerId}`,
+      trackerId,
+      name,
+      region,
+      coords: [lat, lng],
+      elevation,
+      tourId: tourByTrackerId[trackerId] || null,
+      tourFeatured: tourPassages > 0,
+      tourPassages
+    };
+  });
 })();
