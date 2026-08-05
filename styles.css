@@ -3509,6 +3509,10 @@ body:not(.route-home) .alpine-layout > .alpine-side {
   height: 16px;
 }
 
+body.route-map.has-sw-update .map-intro {
+  padding-right: 260px;
+}
+
 /* Responsive */
 
 @media (max-width: 1120px) {
@@ -4252,6 +4256,10 @@ body:not(.route-home) .alpine-layout > .alpine-side {
 
   .sw-toast > span {
     margin-right: auto;
+  }
+
+  body.route-map.has-sw-update .screen.is-map .map-intro {
+    padding: 62px 12px 10px;
   }
 }
 

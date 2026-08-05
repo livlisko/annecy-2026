@@ -1950,10 +1950,15 @@
     window.addEventListener('load', () => {
       const offerUpdate = (worker) => {
         const toast = document.getElementById('sw-toast'); if (!toast || !worker) return;
+        const hideUpdate = () => {
+          toast.hidden = true;
+          document.body.classList.remove('has-sw-update');
+        };
         toast.hidden = false;
-        const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { worker.postMessage('skip-waiting'); toast.hidden = true; };
-        const x = document.getElementById('sw-dismiss'); if (x) x.onclick = () => { toast.hidden = true; };
-        setTimeout(() => { toast.hidden = true; }, 12000);
+        document.body.classList.add('has-sw-update');
+        const btn = document.getElementById('sw-reload'); if (btn) btn.onclick = () => { worker.postMessage('skip-waiting'); hideUpdate(); };
+        const x = document.getElementById('sw-dismiss'); if (x) x.onclick = hideUpdate;
+        setTimeout(hideUpdate, 12000);
       };
       navigator.serviceWorker.register('sw.js').then((reg) => {
         if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
