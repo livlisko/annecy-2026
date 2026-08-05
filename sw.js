@@ -6,7 +6,7 @@
    the practical map keeps its place list and Alpine relief keeps its
    illustrated orientation map as fallbacks.
    ===================================================================== */
-const VERSION = 'a26-v34';
+const VERSION = 'a26-v39';
 const CORE = 'core-' + VERSION;
 const RUNTIME = 'runtime-' + VERSION;
 
@@ -14,10 +14,11 @@ const RUNTIME = 'runtime-' + VERSION;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './styles.css?v=34',
-  './data.js?v=34',
-  './activity-media.js?v=34',
-  './app.js?v=34',
+  './styles.css?v=39',
+  './cent-cols-data.js?v=39',
+  './data.js?v=39',
+  './activity-media.js?v=39',
+  './app.js?v=39',
   './manifest.webmanifest',
   './assets/fonts/inter-latin.woff2',
   './assets/fonts/inter-latin-ext.woff2',

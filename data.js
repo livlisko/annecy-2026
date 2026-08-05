@@ -60,7 +60,12 @@ window.DATA = (function () {
     'glieres-sites':   { url: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/', type: 'Departmental', on: VERIFIED },
     'imperial-fest':   { url: 'https://en.lac-annecy.com/event/imperial-annecy-festival-2026-annecy/', type: 'Tourism office', on: '2026-08-04' },
     'cine-plein-air':  { url: 'https://www.lac-annecy.com/fete-et-manifestation/cinema-plein-air-a-annecy-annecy/', type: 'Tourism office', on: '2026-08-04' },
-    'bouquetin':       { url: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/agenda/27eme-grimpee-cycliste-le-bouquetin-le-grand-bornand-fr-4806997/', type: 'Tourism office', on: VERIFIED },
+    'bouquetin':       { url: 'https://www.legrandbornand.com/quoi-faire/evenements-et-animation/agenda/27eme-grimpee-cycliste-le-bouquetin-le-grand-bornand-fr-4806997/', type: 'Tourism office', on: '2026-08-04' },
+    'haute-savoie-sommet': { url: 'https://hautesavoie.fr/evenement/haute-savoie-au-sommet/', type: 'Haute-Savoie department', on: '2026-08-04' },
+    'bassachaux-race': { url: 'https://hautesavoiemontblanc-tourisme.com/offres/montee-du-col-du-bassachaux-chatel-fr-5865084/', type: 'Châtel Tourisme', on: '2026-08-04' },
+    'megeve-mont-blanc': { url: 'https://megeve-montblanc.com/', type: 'Event organizer', on: '2026-08-04' },
+    'cent-cols-route': { url: 'https://centcols.org/en/one-hundred-mountain-passes-in-savoie-mont-blanc/', type: 'Club des Cent Cols', on: '2026-08-04' },
+    'french-cols-tracker': { url: 'https://livlisko.github.io/french-cols-tracker/', type: 'Our verified col tracker', on: '2026-08-04' },
     'momes':           { url: 'https://en.legrandbornand.com/what-to-do/events-and-entertainment/highlights/au-bonheur-des-momes-festival/', type: 'Tourism office', on: '2026-08-04' },
     'morillon-uci':    { url: 'https://www.haut-giffre.fr/agenda/uci-enduro-world-cup/', type: 'Tourism office', on: '2026-08-04' },
     'mobilite':        { url: 'https://mobilites.grandannecy.fr/mobilete-1413', type: 'Transport authority', on: '2026-08-04' },
@@ -250,6 +255,11 @@ window.DATA = (function () {
       tourSrc: 'tdf-ramaz', summitSrc: 'ramaz-summit'
     }
   ];
+
+  // Dense map layer: the complete 113-point Savoie dataset from the
+  // separately maintained French Cols Tracker. Rich Tour stories stay in
+  // TOUR_COLS; these records intentionally contain only sourced map facts.
+  const CENT_COLS = window.CENT_COLS_DATA || [];
 
   /* ---------- AREAS (the mental map of the lake and its edges) -------- */
   const AREAS = [
@@ -1378,10 +1388,64 @@ window.DATA = (function () {
       base: 'lake', where: 'Le Grand-Bornand Village → Col de la Colombière',
       coords: [45.9400, 6.4270],
       why: '27th edition mass-start hill-climb: 12 km / 660 m up the Colombière. Race it (licence/medical + insurance) or just watch the field go up.',
-      booking: 'recommended', price: 'On-site registration 07:00–08:15; riders 15+.',
+      booking: 'yes', price: '€15 online / €20 on site · registration 07:00–08:15 · riders 15+.',
       impact: 'The Colombière road and Grand-Bornand centre are busy that morning. It falls on your Aug 15 changeover day — awkward to combine with the house move.',
       conflict: 'changeover-15', confidence: 'confirmed', src: 'bouquetin',
-      travel: { lake: { min: 50, mode: 'car' } }
+      travel: { lake: { min: 45, mode: 'car' } }, homepageRide: true,
+      homeSummary: 'A group-start race up the Colombière: 12 km and 660 m of climbing.',
+      homeMeta: '08:30 · €15 online'
+    },
+    {
+      id: 'col-cou-car-free', name: 'Col de Cou car-free morning', kind: 'ride',
+      start: '2026-08-18', end: '2026-08-18', datesLabel: 'Tue 18 Aug, 09:00–12:00',
+      base: 'lake', where: 'Col de Cou from Draillant (RD12) or steeper Fessy (RD235)',
+      coords: [46.2624, 6.4540],
+      why: 'The road is handed to cyclists for a relaxed morning on the col. Choose the Draillant approach or the steeper Fessy side; there is no timing, ranking or pressure.',
+      booking: 'no', price: 'Free · no signup or timing.',
+      impact: 'Road access is restricted for the event window; ride at your own pace and check the official start points before leaving.',
+      confidence: 'confirmed', src: 'haute-savoie-sommet',
+      travel: { lake: { min: 75, mode: 'car' } }, homepageRide: true,
+      homeSummary: 'A no-pressure, traffic-free climb with two approaches to choose from.',
+      homeMeta: '09:00–12:00 · Free'
+    },
+    {
+      id: 'bassachaux-climb', name: 'Timed climb of the Col de Bassachaux', kind: 'race',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug, bibs 16:30–17:45 · first rider 18:00',
+      base: 'lake', where: 'Pré-la-Joux, Châtel → Col de Bassachaux',
+      coords: [46.2225, 6.7722],
+      why: 'An evening individual time trial: riders leave Pré-la-Joux every 30 seconds for the climb to Bassachaux. Open from age 15.',
+      booking: 'yes', price: '€20.',
+      impact: 'The current Châtel listing and booking date are Sat 22 Aug. It is also your Veyrier changeover day, so this is possible only after the house move.',
+      conflict: 'changeover-22', confidence: 'confirmed', src: 'bassachaux-race',
+      travel: { lake: { min: 105, mode: 'car' } }, homepageRide: true,
+      homeSummary: 'An evening individual time trial from Pré-la-Joux to the col.',
+      homeMeta: '18:00 · €20'
+    },
+    {
+      id: 'megeve-mont-blanc', name: 'Megève Mont-Blanc sportive', kind: 'race',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug',
+      base: 'lake', where: 'Start and finish at Le Palais, Megève',
+      coords: [45.8567, 6.6178],
+      why: 'A legendary mountain sportive where riders choose their distance during the event. Three routes run from roughly 88 to 145 km and 2,400 to 4,300 m of climbing through the Beaufortain, with Arpettaz, Les Saisies, Mont Lachat and Bisanne depending on the loop.',
+      booking: 'yes', price: '€75 · registration open.',
+      impact: 'A genuinely big riding day. Check the current route files, start procedure and registration cutoff before committing.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'megeve-mont-blanc',
+      travel: { lake: { min: 70, mode: 'car' } }, homepageRide: true,
+      homeSummary: 'Pick your loop on the road through the Arpettaz, Saisies and Beaufortain.',
+      homeMeta: 'From 88 km · €75'
+    },
+    {
+      id: 'solaison-car-free', name: 'Plateau de Solaison car-free morning', kind: 'ride',
+      start: '2026-08-25', end: '2026-08-25', datesLabel: 'Tue 25 Aug, 09:00–12:00',
+      base: 'lake', where: 'Le Thuet → Plateau de Solaison via RD186 / RD186A',
+      coords: [46.028876, 6.425022],
+      why: 'A traffic-free morning on one of Haute-Savoie’s stoutest paved climbs: roughly 11 km at about 9%, finishing among the high pastures of Solaison. No timing or ranking.',
+      booking: 'no', price: 'Free · no signup or timing.',
+      impact: 'The road is reserved for cyclists during the event window. Use the official Le Thuet start point rather than driving to the summit.',
+      confidence: 'confirmed', src: 'haute-savoie-sommet',
+      travel: { lake: { min: 55, mode: 'car' } }, homepageRide: true,
+      homeSummary: 'A free, traffic-free morning on the steep road to Solaison.',
+      homeMeta: '09:00–12:00 · Free'
     },
     {
       id: 'veyrier-createurs', name: 'Marché des créateurs — Veyrier-du-Lac', kind: 'market',
@@ -1609,7 +1673,7 @@ window.DATA = (function () {
 
   return {
     VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT, PEOPLE,
-    TOUR_COLS,
+    TOUR_COLS, CENT_COLS,
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
     EVENTS, TRANSPORT_GUIDE,

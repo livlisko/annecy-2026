@@ -287,6 +287,17 @@
         <span><strong>${esc(cat.label)}</strong><small>${esc(regionCopy[cat.id])}</small></span>
         <span class="hm-region-go" aria-hidden="true">→</span>
       </a>`).join('');
+    const homeEvents = D.EVENTS.filter((event) => event.homepageRide)
+      .sort((a, b) => a.start.localeCompare(b.start));
+    const homeEventRows = homeEvents.map((event) => {
+      const [dow, day, month] = prettyDay(event.start).split(' ');
+      return `<a class="hm-event-row" href="#/event/${esc(event.id)}">
+        <time class="hm-event-date" datetime="${esc(event.start)}"><span>${esc(dow)}</span><strong>${esc(day)}</strong><small>${esc(month)}</small></time>
+        <span class="hm-event-copy"><strong>${esc(event.name)}</strong><span>${esc(event.homeSummary || event.why)}</span></span>
+        <span class="hm-event-meta">${esc(event.homeMeta || event.datesLabel)}</span>
+        <span class="hm-event-go" aria-hidden="true">→</span>
+      </a>`;
+    }).join('');
     return `
       <section class="hm-world">
         ${live}
@@ -329,6 +340,14 @@
         <a class="hm-ix" href="#/trip"><img src="assets/wiki/veyrier.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Trip details</strong><span>Stays, flights, the van, and essentials</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
         <a class="hm-ix" href="#/map"><img src="assets/wiki/duingt.jpg" alt="" loading="lazy" /><span class="hm-ix-b"><strong>Open the map</strong><span>See how the lake and mountains fit together</span></span><span class="hm-arr" aria-hidden="true">→</span></a>
       </nav>
+
+      <section class="hm-events" aria-labelledby="hm-events-title">
+        <div class="hm-events-head">
+          <div><p class="hm-events-kicker">While we’re there</p><h3 id="hm-events-title">Nearby events coming up</h3></div>
+          <p>Five rides worth knowing about, from traffic-free mornings to a proper mountain sportive.</p>
+        </div>
+        <div class="hm-event-list">${homeEventRows}</div>
+      </section>
 
       <section class="hm-place">
         <div class="hm-lab"><h3>Get a feel for the place</h3></div>
@@ -1027,9 +1046,47 @@
     });
     return points;
   }
+  function centColById(id) {
+    return (D.CENT_COLS || []).find((col) => col.id === id) || null;
+  }
+  function alpinePointById(id) {
+    const point = alpineMapPoints().find((item) => item.id === id);
+    if (point) return point;
+    const col = centColById(id);
+    return col ? { id: col.id, label: col.name, kind: 'col', coords: col.coords, elevation: col.elevation } : null;
+  }
+  function alpineColMode(route) {
+    return route.query.cols === 'all' ? 'all' : 'highlights';
+  }
+  function centColsGeoJSON() {
+    return {
+      type: 'FeatureCollection',
+      features: (D.CENT_COLS || []).map((col) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [col.coords[1], col.coords[0]] },
+        properties: {
+          id: col.id,
+          name: col.name,
+          region: col.region,
+          elevation: col.elevation,
+          tourId: col.tourId || ''
+        }
+      }))
+    };
+  }
   function alpineSelected(route) {
+    if (alpineColMode(route) === 'all') {
+      const valid = new Set((D.CENT_COLS || []).map((col) => col.id));
+      return valid.has(route.query.spot) ? route.query.spot : null;
+    }
     const valid = new Set(alpineMapPoints().map((point) => point.id));
     return valid.has(route.query.spot) ? route.query.spot : 'forclaz';
+  }
+  function alpineHref(id, mode) {
+    let href = '#/map?view=alpine';
+    if ((mode || (mapState && mapState.colMode)) === 'all') href += '&cols=all';
+    if (id) href += '&spot=' + encodeURIComponent(id);
+    return href;
   }
   function mapViewTabs(view) {
     return `<nav class="map-view-tabs" role="tablist" aria-label="Map view">
@@ -1050,26 +1107,54 @@
   function alpineDetail(id) {
     const col = (D.TOUR_COLS || []).find((c) => c.id === id);
     if (col) return tourColPanel(col);
+    const tracked = centColById(id);
+    if (tracked && tracked.tourId) {
+      const rich = (D.TOUR_COLS || []).find((c) => c.id === tracked.tourId);
+      if (rich) return tourColPanel(rich);
+    }
     const spot = ALPINE_SPOTS.find((s) => s.id === id);
     return spot ? alpinePlacePanel(spot) : alpinePlacePanel(ALPINE_SPOTS[0]);
   }
   function alpineInspectorDetail(id) {
-    const col = (D.TOUR_COLS || []).find((c) => c.id === id);
+    const tracked = centColById(id);
+    const directCol = (D.TOUR_COLS || []).find((c) => c.id === id);
+    const col = directCol || (tracked && tracked.tourId
+      ? (D.TOUR_COLS || []).find((c) => c.id === tracked.tourId)
+      : null);
     const spot = ALPINE_SPOTS.find((s) => s.id === id);
-    const point = alpineMapPoints().find((p) => p.id === id);
-    const coords = col ? col.coords : spot ? spot.coords : point ? point.coords : null;
-    const title = col ? col.name : spot ? spot.title : point ? point.label : 'The Alps';
-    const elevation = col ? col.elevation : point ? point.elevation : null;
-    const eyebrow = col ? col.region : spot ? spot.eyebrow : 'Haute-Savoie';
-    const summary = col ? col.iconic : spot ? spot.text : '';
+    const point = alpinePointById(id);
+    const trackerSource = D.SOURCES['french-cols-tracker'];
+    const challengeSource = D.SOURCES['cent-cols-route'];
+    const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>';
+    if (!id) {
+      const regionCount = new Set((D.CENT_COLS || []).map((item) => item.region)).size;
+      return `
+        <div class="alpine-inspector-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m3 19 6-10 3 5 2-3 7 8z"/><path d="m8 11 2 1 2-3"/></svg>
+        </div>
+        <div class="alpine-detail-head"><p>Savoie &amp; Haute-Savoie</p><h3>All ${D.CENT_COLS.length} tracked cols</h3></div>
+        <p class="alpine-inspector-summary">The full field from our French Cols Tracker, spread across ${regionCount} Alpine regions. Zoom into a cluster, search by name, or choose a col from the list.</p>
+        <div class="alpine-primary-actions">
+          ${trackerSource ? `<a class="is-primary" href="${esc(trackerSource.url)}" target="_blank" rel="noopener">Full tracker${chevron}</a>` : ''}
+          ${challengeSource ? `<a href="${esc(challengeSource.url)}" target="_blank" rel="noopener">Cent Cols route${chevron}</a>` : ''}
+        </div>
+        <p class="alpine-data-source">The map uses the tracker’s verified coordinates and elevations. The official challenge page describes 103 main and 18 optional passes; this layer is the tracker’s curated 113-col set.</p>`;
+    }
+    const coords = tracked ? tracked.coords : col ? col.coords : spot ? spot.coords : point ? point.coords : null;
+    const title = tracked ? tracked.name : col ? col.name : spot ? spot.title : point ? point.label : 'The Alps';
+    const elevation = tracked ? tracked.elevation : col ? col.elevation : point ? point.elevation : null;
+    const eyebrow = tracked ? tracked.region : col ? col.region : spot ? spot.eyebrow : 'Haute-Savoie';
+    const summary = col ? col.iconic : tracked
+      ? `A ${tracked.elevation.toLocaleString('en-US')} m pass in ${tracked.region}, mapped as part of the 113-col Savoie collection.`
+      : spot ? spot.text : '';
     const guideHref = col && col.ideaId && D.ACT_BY_ID[col.ideaId]
       ? `#/plan/${esc(col.ideaId)}`
       : spot && spot.route ? spot.route
         : col && D.SOURCES[col.summitSrc] ? D.SOURCES[col.summitSrc].url
-          : '';
+          : tracked && trackerSource ? trackerSource.url : '';
     const guideExternal = guideHref && guideHref[0] !== '#';
     const directions = coords ? `https://www.google.com/maps/dir/?api=1&destination=${coords.join(',')}` : '';
-    const chevron = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>';
+    const guideLabel = tracked && !col ? 'Full tracker' : 'Details';
     return `
       <div class="alpine-inspector-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="m3 19 6-10 3 5 2-3 7 8z"/><path d="m8 11 2 1 2-3"/></svg>
@@ -1077,30 +1162,52 @@
       <div class="alpine-detail-head"><p>${esc(eyebrow)}${elevation ? ` · ${elevation.toLocaleString('en-US')} m` : ''}</p><h3>${esc(title)}</h3></div>
       <p class="alpine-inspector-summary">${esc(summary)}</p>
       <div class="alpine-primary-actions">
-        ${guideHref ? `<a href="${esc(guideHref)}"${guideExternal ? ' target="_blank" rel="noopener"' : ''}>Details${chevron}</a>` : ''}
+        ${guideHref ? `<a href="${esc(guideHref)}"${guideExternal ? ' target="_blank" rel="noopener"' : ''}>${guideLabel}${chevron}</a>` : ''}
         ${directions ? `<a class="is-primary" href="${directions}" target="_blank" rel="noopener">Directions${chevron}</a>` : ''}
       </div>
-      ${col ? `<div class="alpine-inspector-more">${tourColFacts(col)}${tourColLinks(col, true)}</div>` : ''}`;
+      ${col ? `<div class="alpine-inspector-more">${tourColFacts(col)}${tourColLinks(col, true)}</div>` : tracked ? `<p class="alpine-data-source">Coordinates and elevation from our verified French Cols Tracker.</p>` : ''}`;
   }
   function alpineView(route) {
+    const mode = alpineColMode(route);
     const selected = alpineSelected(route);
     const pins = ALPINE_SPOTS.map((s) => `
       <button type="button" class="alpine-pin is-${esc(s.kind)}${s.edge ? ' edge' : ''}" style="--x:${s.x}%;--y:${s.y}%" data-alpine="${esc(s.colId || s.id)}" aria-pressed="${selected === (s.colId || s.id)}" aria-label="Open ${esc(s.label)}">
         <span class="alpine-pin-dot" aria-hidden="true"></span><span class="alpine-pin-label">${esc(s.label)}</span>
       </button>`).join('');
-    const index = (D.TOUR_COLS || []).map((c) => {
+    const highlightIndex = (D.TOUR_COLS || []).map((c) => {
       const inView = ALPINE_SPOTS.some((s) => s.colId === c.id);
       return `<button type="button" class="alpine-col-button" data-alpine="${esc(c.id)}" aria-pressed="${selected === c.id}">
         <span><strong>${esc(c.name)}</strong><small>${esc(c.region)} · ${c.elevation} m</small></span>
         ${inView ? '' : '<small class="beyond-view">Les Gets side</small>'}
       </button>`;
     }).join('');
+    const trackedIndex = (D.CENT_COLS || []).map((col) => `
+      <button type="button" class="alpine-col-button alpine-tracked-row" data-alpine="${esc(col.id)}" data-col-filter="${esc(`${col.name} ${col.region} ${col.elevation}`.toLowerCase())}" aria-pressed="${selected === col.id}">
+        <span><strong>${esc(col.name)}</strong><small>${esc(col.region)} · ${col.elevation.toLocaleString('en-US')} m</small></span>
+        ${col.tourId ? '<small class="beyond-view">Tour story</small>' : ''}
+      </button>`).join('');
+    const index = mode === 'all' ? `
+      <div class="alpine-index-head"><h3>All ${D.CENT_COLS.length} tracked cols</h3><a href="${esc(D.SOURCES['french-cols-tracker'].url)}" target="_blank" rel="noopener">Full tracker ↗</a></div>
+      <label class="alpine-col-search">
+        <span class="sr-only">Search tracked cols</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
+        <input id="alpine-col-search" type="search" autocomplete="off" placeholder="Find a col or region" />
+      </label>
+      <p class="alpine-result-count" id="alpine-result-count">${D.CENT_COLS.length} cols across ${new Set(D.CENT_COLS.map((col) => col.region)).size} regions</p>
+      <div class="alpine-col-buttons" id="alpine-col-buttons">${trackedIndex}</div>
+      <p class="alpine-index-source">Challenge context: <a href="${esc(D.SOURCES['cent-cols-route'].url)}" target="_blank" rel="noopener">Club des Cent Cols ↗</a></p>` : `
+      <div class="alpine-index-head"><h3>Tour cols worth knowing</h3><a href="${alpineHref(null, 'all')}">Map all ${D.CENT_COLS.length} →</a></div>
+      <div class="alpine-col-buttons">${highlightIndex}</div>`;
     return `
       <div class="alpine-layout" id="alpine-layout">
         <section class="alpine-map-wrap" aria-label="Interactive Alpine relief map">
           <div class="alpine-relief-stage" id="alpine-relief-stage">
-            <div id="alpine-relief-map" role="application" aria-label="Interactive 3D relief map from Lake Annecy to Mont Blanc"></div>
+            <div id="alpine-relief-map" role="application" aria-label="Interactive 3D relief map ${mode === 'all' ? `of ${D.CENT_COLS.length} Savoie and Haute-Savoie cols` : 'from Lake Annecy to Mont Blanc'}"></div>
             <div class="alpine-map-loading" id="alpine-map-loading" role="status"><span aria-hidden="true"></span>Loading relief</div>
+            <nav class="alpine-mode-tabs" aria-label="Alpine map layer">
+              <a href="${alpineHref(null, 'highlights')}" aria-current="${mode === 'highlights' ? 'page' : 'false'}">Highlights</a>
+              <a href="${alpineHref(null, 'all')}" aria-current="${mode === 'all' ? 'page' : 'false'}">All ${D.CENT_COLS.length} cols</a>
+            </nav>
             <button class="alpine-reset-view" id="alpine-reset-view" type="button" aria-label="Reset Alpine map view" title="Reset view">
               <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
             </button>
@@ -1111,7 +1218,7 @@
                   <img src="assets/orientation/orientation_relief.jpg" alt="Oblique relief map from Annecy across the Aravis to Mont Blanc" width="900" height="900" />
                   ${pins}
                 </div>
-                <figcaption>Lake Annecy in the foreground, the Aravis across the middle, Mont Blanc on the horizon.</figcaption>
+                <figcaption>${mode === 'all' ? `The searchable list still contains all ${D.CENT_COLS.length} cols; the live relief map needs a connection.` : 'Lake Annecy in the foreground, the Aravis across the middle, Mont Blanc on the horizon.'}</figcaption>
               </figure>
             </div>
           </div>
@@ -1122,8 +1229,7 @@
           </button>
           <div class="alpine-detail" id="alpine-detail" aria-live="polite">${alpineInspectorDetail(selected)}</div>
           <div class="alpine-index">
-            <div class="alpine-index-head"><h3>Tour cols worth knowing</h3><a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">All 113 ↗</a></div>
-            <div class="alpine-col-buttons">${index}</div>
+            ${index}
           </div>
         </aside>
       </div>`;
@@ -1131,13 +1237,16 @@
 
   Views.map = function (route) {
     const view = route.query.view === 'alpine' ? 'alpine' : 'places';
+    const mapCopy = view === 'alpine'
+      ? (alpineColMode(route) === 'all' ? `Interactive relief for all ${D.CENT_COLS.length} cols in our Savoie tracker.` : 'Interactive topography from Lake Annecy to Mont Blanc.')
+      : 'Activities, stays, and useful places around the lake and mountains.';
     const intro = `
       <div class="map-intro">
-        <div><h2>Map</h2><p>${view === 'alpine' ? 'Interactive topography from Lake Annecy to Mont Blanc.' : 'Activities, stays, and useful places around the lake and mountains.'}</p></div>
+        <div><h2>Map</h2><p>${mapCopy}</p></div>
         ${mapViewTabs(view)}
       </div>`;
     if (view === 'alpine') {
-      mapState = { view: 'alpine', focus: alpineSelected(route) };
+      mapState = { view: 'alpine', colMode: alpineColMode(route), focus: alpineSelected(route) };
       return intro + alpineView(route);
     }
     const places = mapPlaces();
@@ -1284,8 +1393,27 @@
     if (!mobile || compact || !side || side.hidden) return { top: 0, right: 0, bottom: 0, left: 0 };
     return { top: 0, right: 0, bottom: Math.round(Math.min(390, window.innerHeight * 0.43)), left: 0 };
   }
+  function fitCentColsBounds(duration) {
+    if (!alpineMapInstance || !(D.CENT_COLS || []).length) return;
+    const lngs = D.CENT_COLS.map((col) => col.coords[1]);
+    const lats = D.CENT_COLS.map((col) => col.coords[0]);
+    alpineMapInstance.fitBounds([
+      [Math.min(...lngs), Math.min(...lats)],
+      [Math.max(...lngs), Math.max(...lats)]
+    ], {
+      padding: alpineCameraPadding(),
+      maxZoom: 8.35,
+      pitch: window.matchMedia('(max-width: 700px)').matches ? 30 : 46,
+      bearing: 16,
+      duration: duration == null ? 1100 : duration
+    });
+  }
   function resetAlpineCamera() {
     if (!alpineMapInstance) return;
+    if (mapState && mapState.colMode === 'all') {
+      fitCentColsBounds(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1100);
+      return;
+    }
     const camera = alpineHomeCamera();
     alpineMapInstance.easeTo({
       ...camera,
@@ -1295,15 +1423,16 @@
   }
   function flyToAlpinePoint(id) {
     if (!alpineMapInstance) return;
-    const point = alpineMapPoints().find((item) => item.id === id);
+    const point = alpinePointById(id);
     if (!point) return;
     const mobile = window.matchMedia('(max-width: 700px)').matches;
+    const tracked = !!centColById(id);
     const far = ['joux-plane', 'ramaz', 'mont-blanc'].includes(id);
     alpineMapInstance.flyTo({
       center: [point.coords[1], point.coords[0]],
-      zoom: far ? (mobile ? 9.7 : 10.3) : (mobile ? 10.3 : 11.1),
-      pitch: mobile ? 56 : 66,
-      bearing: id === 'mont-blanc' ? 78 : 58,
+      zoom: tracked ? (mobile ? 10.8 : 11.45) : far ? (mobile ? 9.7 : 10.3) : (mobile ? 10.3 : 11.1),
+      pitch: mobile ? 52 : 64,
+      bearing: id === 'mont-blanc' ? 78 : tracked ? 34 : 58,
       offset: mobile ? [0, 0] : [-120, 0],
       padding: alpineCameraPadding(),
       duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1400,
@@ -1343,6 +1472,111 @@
           map.setPaintProperty(layer.id, 'fill-opacity', 0.48);
         }
       } catch (_) {}
+    });
+  }
+  function updateCentColSelection(map, id) {
+    if (!map || !map.getLayer('cent-cols-selected')) return;
+    map.setFilter('cent-cols-selected', ['==', ['get', 'id'], id || '']);
+  }
+  function addCentColsLayer(map, choose) {
+    map.addSource('cent-cols', {
+      type: 'geojson',
+      data: centColsGeoJSON(),
+      cluster: true,
+      clusterMaxZoom: 10,
+      clusterRadius: 46,
+      attribution: 'Cols: <a href="https://livlisko.github.io/french-cols-tracker/" target="_blank" rel="noopener">French Cols Tracker</a>'
+    });
+    map.addLayer({
+      id: 'cent-cols-clusters',
+      type: 'circle',
+      source: 'cent-cols',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': ['step', ['get', 'point_count'], '#6170c9', 10, '#4e65b5', 25, '#354986'],
+        'circle-radius': ['step', ['get', 'point_count'], 18, 10, 23, 25, 29],
+        'circle-stroke-width': 2.5,
+        'circle-stroke-color': 'rgba(255,255,255,0.92)',
+        'circle-opacity': 0.92
+      }
+    });
+    map.addLayer({
+      id: 'cent-cols-cluster-count',
+      type: 'symbol',
+      source: 'cent-cols',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': ['get', 'point_count_abbreviated'],
+        'text-font': ['Noto Sans Bold'],
+        'text-size': 11,
+        'text-allow-overlap': true
+      },
+      paint: {
+        'text-color': '#ffffff'
+      }
+    });
+    map.addLayer({
+      id: 'cent-cols-selected',
+      type: 'circle',
+      source: 'cent-cols',
+      filter: ['==', ['get', 'id'], mapState.focus || ''],
+      paint: {
+        'circle-radius': 13,
+        'circle-color': 'rgba(242,138,176,0.24)',
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
+    map.addLayer({
+      id: 'cent-cols-points',
+      type: 'circle',
+      source: 'cent-cols',
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 4.5, 12, 7],
+        'circle-color': ['case', ['!=', ['get', 'tourId'], ''], '#f28ab0', '#1f91a0'],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff',
+        'circle-opacity': 0.96
+      }
+    });
+    map.addLayer({
+      id: 'cent-cols-labels',
+      type: 'symbol',
+      source: 'cent-cols',
+      minzoom: 10.8,
+      filter: ['!', ['has', 'point_count']],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 10.5,
+        'text-offset': [0, 1.25],
+        'text-anchor': 'top',
+        'text-padding': 4,
+        'text-optional': true
+      },
+      paint: {
+        'text-color': '#103941',
+        'text-halo-color': 'rgba(255,255,255,0.96)',
+        'text-halo-width': 1.5
+      }
+    });
+    map.on('click', 'cent-cols-clusters', async (event) => {
+      const feature = event.features && event.features[0];
+      if (!feature) return;
+      const source = map.getSource('cent-cols');
+      try {
+        const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id);
+        map.easeTo({ center: feature.geometry.coordinates, zoom, duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650 });
+      } catch (_) {}
+    });
+    map.on('click', 'cent-cols-points', (event) => {
+      const feature = event.features && event.features[0];
+      if (feature && feature.properties && feature.properties.id) choose(feature.properties.id, true);
+    });
+    ['cent-cols-clusters', 'cent-cols-points'].forEach((layer) => {
+      map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; });
     });
   }
   function addAlpineMarker(map, point, choose) {
@@ -1400,10 +1634,10 @@
           style: 'https://tiles.openfreemap.org/styles/liberty',
           ...alpineHomeCamera(),
           padding: alpineCameraPadding(),
-          minZoom: 7.4,
+          minZoom: 6.8,
           maxZoom: 15.5,
           maxPitch: 80,
-          maxBounds: [[5.72, 45.50], [7.18, 46.43]],
+          maxBounds: [[5.52, 44.82], [7.22, 46.48]],
           attributionControl: false,
           cooperativeGestures: mobile,
           antialias: true,
@@ -1462,12 +1696,22 @@
           });
         } catch (_) {}
         alpineMapMarkers = {};
-        alpineMapPoints().forEach((point) => addAlpineMarker(map, point, choose));
+        if (mapState.colMode === 'all') {
+          try { addCentColsLayer(map, choose); } catch (_) {}
+        } else {
+          alpineMapPoints().forEach((point) => addAlpineMarker(map, point, choose));
+        }
         const loading = document.getElementById('alpine-map-loading');
         if (loading) loading.hidden = true;
         const reset = document.getElementById('alpine-reset-view');
         if (reset) reset.hidden = false;
-        if (mapState.focus && mapState.focus !== 'forclaz') {
+        if (mapState.colMode === 'all') {
+          setTimeout(() => {
+            if (generation !== mapGeneration) return;
+            if (mapState.focus) flyToAlpinePoint(mapState.focus);
+            else fitCentColsBounds(window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 800);
+          }, 260);
+        } else if (mapState.focus && mapState.focus !== 'forclaz') {
           setTimeout(() => {
             if (generation === mapGeneration) flyToAlpinePoint(mapState.focus);
           }, 350);
@@ -1481,15 +1725,19 @@
     const open = document.getElementById('alpine-guide-open');
     const detail = document.getElementById('alpine-detail');
     const showGuide = () => {
-      if (!layout || !side || !open) return;
+      if (!layout || !side || !open) return false;
+      const revealed = side.hidden;
       side.hidden = false;
       open.hidden = true;
       layout.classList.remove('is-guide-hidden');
-      setTimeout(() => {
-        if (!alpineMapInstance) return;
-        alpineMapInstance.resize();
-        alpineMapInstance.setPadding(alpineCameraPadding());
-      }, 40);
+      if (revealed) {
+        setTimeout(() => {
+          if (!alpineMapInstance) return;
+          alpineMapInstance.resize();
+          alpineMapInstance.setPadding(alpineCameraPadding());
+        }, 40);
+      }
+      return revealed;
     };
     const choose = (id, moveCamera) => {
       if (!detail) return;
@@ -1497,13 +1745,40 @@
       detail.innerHTML = alpineInspectorDetail(id);
       screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.alpine === id)));
       screenEl.querySelectorAll('.relief-marker-shell').forEach((marker) => marker.classList.toggle('is-selected', marker.dataset.alpine === id));
-      showGuide();
-      history.replaceState(null, '', '#/map?view=alpine&spot=' + encodeURIComponent(id));
-      if (moveCamera) flyToAlpinePoint(id);
-      const point = alpineMapPoints().find((item) => item.id === id);
+      updateCentColSelection(alpineMapInstance, id);
+      const revealed = showGuide();
+      if (side) side.scrollTop = 0;
+      history.replaceState(null, '', alpineHref(id, mapState.colMode));
+      if (moveCamera) {
+        if (revealed) setTimeout(() => flyToAlpinePoint(id), 80);
+        else flyToAlpinePoint(id);
+      }
+      const point = alpinePointById(id);
       announce('Showing ' + (point ? point.label : 'Alpine place'));
     };
     screenEl.querySelectorAll('[data-alpine]').forEach((b) => b.addEventListener('click', () => choose(b.dataset.alpine, true)));
+    const search = document.getElementById('alpine-col-search');
+    const resultCount = document.getElementById('alpine-result-count');
+    if (search) {
+      const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      const filterRows = () => {
+        const query = normalize(search.value);
+        let shown = 0;
+        screenEl.querySelectorAll('.alpine-tracked-row').forEach((row) => {
+          const matches = !query || normalize(row.dataset.colFilter || '').includes(query);
+          row.hidden = !matches;
+          if (matches) shown += 1;
+        });
+        if (resultCount) resultCount.textContent = query ? `${shown} ${shown === 1 ? 'match' : 'matches'}` : `${D.CENT_COLS.length} cols across ${new Set(D.CENT_COLS.map((col) => col.region)).size} regions`;
+      };
+      search.addEventListener('input', filterRows);
+      search.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && search.value) {
+          search.value = '';
+          filterRows();
+        }
+      });
+    }
     const close = document.getElementById('alpine-side-close');
     if (close && side && layout && open) close.addEventListener('click', () => {
       side.hidden = true;
