@@ -26,7 +26,7 @@ window.DATA = (function () {
     'tour-semnoz':     { url: 'https://hautesavoiemontblanc-tourisme.com/offres/tour-du-semnoz-itineraire-cyclo-annecy-fr-5835541/', type: 'Tourism office', on: VERIFIED },
     'lesgets-bikepark':{ url: 'https://pass.lesgets.com/en/summer-opening-dates-hours/', type: 'Resort operator', on: '2026-08-04' },
     'lesgets-tarifs':  { url: 'https://www.lesgets.com/en/', type: 'Resort operator', on: VERIFIED },
-    'lesgets-uci':     { url: 'https://www.lesgets.com/en/events-agenda/uci-mountain-bike-world-cup/', type: 'Organizer', on: '2026-08-04' },
+    'lesgets-uci':     { url: 'https://www.lesgets.com/en/events-agenda/uci-mountain-bike-world-cup/sports-programme/', type: 'Organizer programme', on: '2026-08-06' },
     'semnoz-bikepark': { url: 'https://www.semnoz.fr/vtt/', type: 'Resort operator', on: VERIFIED },
     'semnoz-station':  { url: 'https://www.semnoz.fr/activites-de-la-station/', type: 'Resort operator', on: VERIFIED },
     'laclusaz-bikepark':{ url: 'https://www.laclusaz.com/en/mountain-bike/bikepark/', type: 'Tourism office', on: VERIFIED },
@@ -138,6 +138,27 @@ window.DATA = (function () {
     'paccard-casting': { url: 'https://musee-paccard.com/horaires-acces-musee-paccard/', type: 'Musée Paccard', on: '2026-08-05' },
     'lorette-alpage':  { url: 'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/', type: 'La Clusaz Tourism', on: '2026-08-05' },
     'fete-guides':     { url: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/fete-des-guides-aux-gaillands', type: 'Chamonix Tourism', on: '2026-08-05' },
+    'yvoire-garden':   { url: 'https://www.jardin5sens.net/en/', type: 'Jardin des Cinq Sens', on: '2026-08-06' },
+    'smuggling-route': { url: 'https://www.chatel.com/en/entertainment-and-events/on-the-smuggling-route-chatel/', type: 'Châtel Tourism', on: '2026-08-06' },
+    'les-aubes':       { url: 'https://lesaubes.ch/', type: 'Festival organizer', on: '2026-08-06' },
+    'osr-lodger':      { url: 'https://www.osr.ch/en/concerts-tickets/concerts/detail-dun-evenement/event/the-lodger', type: 'Orchestre de la Suisse Romande', on: '2026-08-06' },
+    'musique-nature':  { url: 'https://www.musiqueetnature.fr/programme-musique-bauges-nature-festival/', type: 'Festival organizer', on: '2026-08-06' },
+    'roc-dusk':        { url: 'https://en.lac-annecy.com/event/a-la-tombee-de-la-nuit-au-roc-de-chere-talloires-montmin/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'imperial-program':{ url: 'https://www.imperial-annecy-festival.fr/artistes?p=23', type: 'Impérial Annecy Festival', on: '2026-08-06' },
+    'imperial-camille':{ url: 'https://www.imperial-annecy-festival.fr/artistes/camille-berthollet-253', type: 'Impérial Annecy Festival', on: '2026-08-06' },
+    'imperial-nemanja':{ url: 'https://www.imperial-annecy-festival.fr/artistes/nemanja-radulovic-double-sens-255', type: 'Impérial Annecy Festival', on: '2026-08-06' },
+    'imperial-pecheurs':{ url: 'https://www.imperial-annecy-festival.fr/artistes/les-deux-pecheurs-%F0%9F%92%9C-257', type: 'Impérial Annecy Festival', on: '2026-08-06' },
+    'veyrier-scenes':  { url: 'https://en.lac-annecy.com/event/plages-en-scene-au-plant-veyrier-du-lac/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'col-aulp-cinema': { url: 'https://en.lac-annecy.com/event/cine-plein-air-gratuit-a-la-montagne-talloires-montmin/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'hiphop-tour':     { url: 'https://en.lac-annecy.com/event/jeudi-des-rails-hip-hop-tour-2026-avec-la-mante-religieuz-annecy/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'duingt-magic':    { url: 'https://en.lac-annecy.com/event/soiree-magie-et-close-up-duingt-2/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'wildwood-laika':  { url: 'https://www.citeanimationannecy.com/fr/agenda/813ba834-4304-4528-82d8-174933b94d7a', type: 'Cité internationale du cinéma d’animation', on: '2026-08-06' },
+    'montrottier-medieval': { url: 'https://en.lac-annecy.com/event/reconstitution-medievale-lovagny/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'geneva-water':    { url: 'https://www.geneve.com/en/whats-on/geneva-dream-of-water-reve-deau', type: 'Geneva Tourism', on: '2026-08-06' },
+    'menthon-potters': { url: 'https://en.lac-annecy.com/event/marche-des-potiers-menthon-saint-bernard/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'hola-frida':      { url: 'https://www.annecy.fr/fileadmin/mediatheque_annecy/kiosque/Flyer_A5_ProgrammeSTC_cine.pdf', type: 'City of Annecy programme', on: '2026-08-06' },
+    'alby-markets':    { url: 'https://en.lac-annecy.com/event/les-marches-ambiances-alby-sur-cheran/', type: 'Lake Annecy Tourism', on: '2026-08-06' },
+    'picky-banshees':  { url: 'https://www.sources-lac-annecy.com/en/fete-manifestation/autour-des-cabanes-apero-concert-avec-picky-banshees/', type: 'Sources du lac d’Annecy Tourism', on: '2026-08-06' },
     'tdf-alpine-list': { url: 'https://fr.wikipedia.org/wiki/Liste_des_ascensions_du_Tour_de_France_dans_les_Alpes', type: 'Tour ascent index', on: '2026-08-05' },
     'tdf-croisette-2026': { url: 'https://www.letour.fr/en/heritage/stage-15/on-the-road', type: 'Tour de France', on: '2026-08-05' },
     // Iconic-col guide (official Tour and local tourism sources, checked 30 Jul)
@@ -1499,6 +1520,17 @@ window.DATA = (function () {
       booking: 'recommended', bookingUrl: 'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/', price: '€7.70 per person',
       scenic: 3, novelty: 2, group: 'all', access: 'Working farm terrain; closed shoes strongly preferred.',
       weather: { rain: 'ok', best: 'clear' }, status: 'open', availability: 'Weekday visits at 14:30; confirm the August schedule.', verifyBeforeGo: true, src: 'lorette-alpage', travel: { lake: { min: 45, mode: 'car', approx: true } }
+    },
+    {
+      id: 'yvoire-five-senses', title: 'Yvoire + the Garden of Five Senses', base: 'both', cat: 'village', subtype: 'Medieval Lake Geneva day trip',
+      areaId: 'chablais', where: 'Yvoire, on Lake Geneva', coords: [46.3708, 6.3276],
+      summary: 'Wander Yvoire’s fortified lanes and harbour, then disappear into the castle’s medieval-inspired sensory garden.',
+      why: 'A genuinely beautiful loose day out: lake, old stone, flowers, food and no demanding agenda.',
+      duration: 'full', effort: 'easy', transport: ['car'], themes: ['culture','food','views','recovery'],
+      booking: 'recommended', bookingUrl: 'https://www.jardin5sens.net/en/', price: 'Garden €8.50–15; village free',
+      scenic: 3, novelty: 2, group: 'all', access: 'The old village is pedestrian-only. Park outside the walls; the garden usually takes 1–2 hours.',
+      weather: { rain: 'ok', heat: 'mixed shade', best: 'clear' }, status: 'open', availability: 'Garden open daily in August 2026.', src: 'yvoire-garden',
+      travel: { lesgets: { min: 65, mode: 'car', approx: true }, lake: { min: 70, mode: 'car', approx: true } }
     }
   ];
   /* ---------- ACTIVITY MEDIA ----------------------------------------
@@ -1533,6 +1565,7 @@ window.DATA = (function () {
     reblochon: { photo: 'assets/activities/reblochon.jpg', alt: 'Reblochon cheeses ageing on wooden racks' },
     tamie: { photo: 'assets/activities/tamie-cheese.jpg', alt: 'Cheese from the Abbaye de Tamie' },
     jardins: { photo: 'assets/activities/jardins-secrets.jpg', alt: 'Carved wooden gallery inside the Jardins Secrets at Vaulx' },
+    yvoire: { photo: 'https://www.jardin5sens.net/en/wp-content/uploads/2023-07-07-JardinsDrone-11-1-1030x686.jpg', alt: 'The Garden of Five Senses inside medieval Yvoire', sourceUrl: 'https://www.jardin5sens.net/en/', credit: 'Jardin des Cinq Sens' },
     montrottier: { photo: 'assets/activities/montrottier.jpg', alt: 'Stone towers of the Chateau de Montrottier' },
     montChery: { photo: 'assets/activities/mont-chery.jpg', alt: 'Les Gets and the Chablais mountains from Mont Chery' },
     esperance: { photo: 'assets/activities/esperance-iii.jpg', alt: 'The restored sailing barge Esperance III at Annecy' },
@@ -1569,6 +1602,7 @@ window.DATA = (function () {
     [ACTIVITY_MEDIA.reblochon, ['pierre-gay', 'cave-tasting', 'savoyard-night', 'aravis-cheese']],
     [ACTIVITY_MEDIA.tamie, ['tamie-abbey']],
     [ACTIVITY_MEDIA.jardins, ['jardins-secrets']],
+    [ACTIVITY_MEDIA.yvoire, ['yvoire-five-senses']],
     [ACTIVITY_MEDIA.montrottier, ['montrottier']],
     [ACTIVITY_MEDIA.montChery, ['lesgets-lift-walk', 'lesgets-road-ride']],
     [ACTIVITY_MEDIA.esperance, ['esperance-barge']],
@@ -1589,6 +1623,46 @@ window.DATA = (function () {
   const ACT_BY_ID = Object.fromEntries(ACTIVITIES.map(a => [a.id, a]));
   // Back-compat alias so any older #/plan/:id deep links still resolve.
   const PLAN_BY_ID = ACT_BY_ID;
+
+  // The deliberately personal shortlist researched for Olivia, her brothers
+  // and Ian. This is a menu of possibilities, not a proposed itinerary.
+  // Event references resolve after EVENTS is initialized below.
+  const GREAT_FIT_PICKS = [
+    { type: 'activity', id: 'back-to-bones' },
+    { type: 'activity', id: 'lesgets-moto-trial' },
+    { type: 'activity', id: 'giant-paddle-xl' },
+    { type: 'activity', id: 'paragliding-forclaz' },
+    { type: 'activity', id: 'dranse-hydrospeed' },
+    { type: 'activity', id: 'veyrier-goboat' },
+    { type: 'activity', id: 'giffre-airyak' },
+    { type: 'activity', id: 'avokart' },
+    { type: 'event', id: 'fete-guides-chamonix' },
+    { type: 'activity', id: 'canyoning-montmin' },
+    { type: 'activity', id: 'fantasticable' },
+    { type: 'activity', id: 'caving-diau' },
+    { type: 'activity', id: 'alta-lumina' },
+    { type: 'activity', id: 'menthon-chateau' },
+    { type: 'activity', id: 'esperance-barge' },
+    { type: 'event', id: 'tractor-farm-academy' },
+    { type: 'activity', id: 'fer-cheval-floor' },
+    { type: 'activity', id: 'chamonix-day', title: 'Aiguille du Midi + Montenvers–Mer de Glace' },
+    { type: 'activity', id: 'lorette-alpage' },
+    { type: 'activity', id: 'transparent-kayak' },
+    { type: 'activity', id: 'veyrier-freediving' },
+    { type: 'event', id: 'medievaleries-aulps' },
+    { type: 'activity', id: 'lesgets-cani-hike' },
+    { type: 'activity', id: 'lesgets-luge' },
+    {
+      type: 'activity', id: 'gorges-fier', pairId: 'montrottier',
+      title: 'Gorges du Fier + Château de Montrottier',
+      summary: 'A dramatic gorge walkway and the wonderfully eccentric collector’s castle next door — one flexible half-day.'
+    },
+    { type: 'activity', id: 'music-mecanique' },
+    { type: 'activity', id: 'glieres-walk' },
+    { type: 'activity', id: 'jardins-secrets' },
+    { type: 'activity', id: 'yvoire-five-senses' },
+    { type: 'event', id: 'smuggling-route' }
+  ];
 
   /* ---------- EVENTS (date-aware layer) ------------------------------
      Each event carries exact dates, why-you'd-care, booking, transport
@@ -1628,7 +1702,7 @@ window.DATA = (function () {
       why: 'The lake’s legendary open-water race, 94th edition — and the 5 km start line is literally the beach below the house, the morning we arrive at the lake.',
       booking: 'yes', price: '1 km €25 · 2.4 km €30 · 5 km €40, plus any required day licence; confirm the registration cutoff',
       impact: 'It’s changeover morning: out of Les Gets by 10:00, Andrew lands at GVA, check-in 16:00. Racing it would take heroic logistics — watching the swimmers come into La Brune with coffee is the realistic (and great) plan.',
-      conflict: true, confidence: 'confirmed', verifyBeforeGo: true, src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }, homepageEvent: true,
+      conflict: true, confidence: 'confirmed', verifyBeforeGo: true, src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }, homepageEvent: true, seriesOverview: true,
       homeSummary: 'Annecy’s open-water classic, with the 5 km start on the beach below our house.',
       homeMeta: '1 / 2.4 / 5 km · €25–40',
       media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy', sourceUrl: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/traversee-du-lac-dannecy/', credit: 'Dauphins d’Annecy' }
@@ -1665,7 +1739,7 @@ window.DATA = (function () {
       why: 'The enduro World Cup final decides the overall title — and it lands during your Les Gets stay. Free to watch.',
       booking: 'no', price: 'Free spectator admission.',
       impact: 'Race-village crowds; Sat 15 overlaps your Les Gets → lake changeover if you linger. Detailed race times not yet published.',
-      conflict: 'changeover-15', confidence: 'confirmed', verifyBeforeGo: true, src: 'morillon-uci',
+      conflict: 'changeover-15', confidence: 'confirmed', verifyBeforeGo: true, src: 'morillon-uci', seriesOverview: true,
       travel: { lesgets: { min: 35, mode: 'car' }, lake: { min: 75, mode: 'car' } }
     },
     {
@@ -1703,7 +1777,7 @@ window.DATA = (function () {
       why: 'Turn a Chamonix day into something unexpected: public skating, then a summer exhibition hockey game beneath the Aiguilles.',
       booking: 'recommended', price: 'Public skate €6.80 + €4.50 skate hire; match ticket price to be confirmed.',
       impact: 'Check the day’s public-skate session and match ticketing before driving; the two game dates are separate options, not a week-long event.',
-      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true,
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true, seriesOverview: true,
       homeSummary: 'Public skating and an evening exhibition match under Mont Blanc.',
       homeMeta: '18 or 26 Aug · 20:00',
       media: { photo: 'https://en.chamonix.com/sites/default/files/styles/ogimage/public/sit/images/7440413/35912870.jpg?itok=22lFbtJc', alt: 'Ice hockey inside Chamonix’s Richard Bozon rink', sourceUrl: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/ice-hockey-games', credit: 'Chamonix Tourism' }
@@ -1792,7 +1866,7 @@ window.DATA = (function () {
       why: 'Jazz, classical and comedy on the lakefront — around twenty events, roughly half of them free (a free early-evening terrace concert, then a ticketed main show).',
       booking: 'recommended', price: 'Some events free; main shows ticketed.',
       impact: 'Busy lakefront and parking on show nights. The free/paid split and show times are from secondary sources — confirm the programme.',
-      confidence: 'confirmed', verifyBeforeGo: true, src: 'imperial-fest',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'imperial-fest', seriesOverview: true,
       travel: { lake: { min: 12, mode: 'car/bus' } }
     },
     {
@@ -1803,7 +1877,7 @@ window.DATA = (function () {
       why: 'World Cup downhill and cross-country back at Les Gets — free to spectate. You’ve left Les Gets by now, so it’s a day-trip from the lake.',
       booking: 'no', price: 'Free admission, 09:00–18:00.',
       impact: 'Heavy traffic, parking pressure and crowds in Les Gets, worst on DH Saturday (22 Aug — your Veyrier changeover day) and XCO Sunday. If day-tripping to watch, expect a long, busy drive.',
-      conflict: 'changeover-22', confidence: 'confirmed', src: 'lesgets-uci',
+      conflict: 'changeover-22', confidence: 'confirmed', src: 'lesgets-uci', seriesOverview: true,
       travel: { lake: { min: 75, mode: 'car' } }
     },
     {
@@ -1824,10 +1898,396 @@ window.DATA = (function () {
       why: 'Free after-dark screenings around Annecy all summer — a lovely cheap evening. Bring a blanket.',
       booking: 'no', price: 'Free; ~21:30 start, cancelled in bad weather.',
       impact: 'The advertised “Shaun le mouton” screening is the closing night, Sat 29 Aug — your departure day, so you’ll miss that one. Other films screen on other August nights: check the schedule for one during the stay.',
-      confidence: 'likely', verifyBeforeGo: true, src: 'cine-plein-air',
+      confidence: 'likely', verifyBeforeGo: true, src: 'cine-plein-air', seriesOverview: true,
       travel: { lake: { min: 12, mode: 'car/bus' } }
     }
   ];
+
+  /* ---------- AUGUST EVENT GUIDE ------------------------------------
+     The researched nearby-events addendum. Race weekends are represented
+     by their actual races/finals wherever the organizer has published a
+     timetable; overview records above remain useful for the map and home. */
+  const EXTRA_EVENTS = [
+    {
+      id: 'menthon-nocturne', name: 'Theatrical night visit at Château de Menthon', kind: 'theatre',
+      start: '2026-08-12', end: '2026-08-26', occurrences: ['2026-08-12','2026-08-19','2026-08-26'],
+      datesLabel: 'Wed 12, 19 or 26 Aug · entries 19:00–22:00', base: 'both',
+      where: 'Château de Menthon-Saint-Bernard', coords: [45.86397, 6.2036],
+      why: 'Costumed actors reveal the castle after dark, with the rooms, gardens and family stories taking on a completely different atmosphere.',
+      booking: 'yes', price: '€18 adult · timed entry',
+      impact: 'Doors open 18:30; visits leave every 30 minutes and last about 50 minutes. Choose one evening, not all three.',
+      confidence: 'confirmed', src: 'menthon-chateau', travel: { lesgets: { min: 75, mode: 'car', approx: true }, lake: { min: 10, mode: 'car/bike' } },
+      media: { photo: 'assets/wiki/menthon-chateau.jpg', alt: 'Château de Menthon-Saint-Bernard above Lake Annecy' }
+    },
+    {
+      id: 'smuggling-route', name: 'On the Smuggling Route in Châtel', kind: 'guided walk',
+      start: '2026-08-13', end: '2026-08-20', occurrences: ['2026-08-13','2026-08-20'],
+      datesLabel: 'Thu 13 or 20 Aug', base: 'both', where: 'Châtel, Portes du Soleil', coords: [46.2660, 6.8400],
+      why: 'A guided mountain walk through the valley’s customs posts, contraband routes and border stories — local history with actual terrain underfoot.',
+      booking: 'yes', price: 'Check the current guided-walk rate.',
+      impact: 'Confirm the meeting point, language and duration when booking.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'smuggling-route',
+      travel: { lesgets: { min: 45, mode: 'car', approx: true }, lake: { min: 95, mode: 'car', approx: true } },
+      media: { photo: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/images/154/91/41704346.jpg', alt: 'Walkers following the historic smuggling route above Châtel', sourceUrl: 'https://www.chatel.com/en/entertainment-and-events/on-the-smuggling-route-chatel/', credit: 'Châtel Tourism' }
+    },
+    {
+      id: 'aubes-japanese-day', name: 'Japanese Day at Les Aubes Musicales', kind: 'festival',
+      start: '2026-08-13', end: '2026-08-13', datesLabel: 'Thu 13 Aug · sunrise programme from 06:00',
+      base: 'lesgets', where: 'Bains des Pâquis, Geneva', coords: [46.2100, 6.1550],
+      why: 'A taiko sunrise concert followed by Japanese archery, origami and calligraphy on Geneva’s lakefront.',
+      booking: 'no', price: 'Low-cost festival admission; confirm at the entrance.',
+      impact: 'This is an extremely early start from Les Gets. Best only if the sunrise concert itself sounds irresistible.',
+      confidence: 'confirmed', src: 'les-aubes', travel: { lesgets: { min: 75, mode: 'car', approx: true } }
+    },
+    {
+      id: 'lodger-cine-concert', name: 'The Lodger — Hitchcock cine-concert', kind: 'cinema',
+      start: '2026-08-14', end: '2026-08-14', datesLabel: 'Fri 14 Aug · 21:15',
+      base: 'lesgets', where: 'Geneva', coords: [46.2044, 6.1432],
+      why: 'Hitchcock’s silent thriller with a live Orchestre de la Suisse Romande score — a proper one-night-only city option.',
+      booking: 'yes', price: 'Ticketed; check the current seating bands.',
+      impact: 'Allow for the late drive back to Les Gets after the performance.',
+      confidence: 'confirmed', src: 'osr-lodger', travel: { lesgets: { min: 75, mode: 'car', approx: true } },
+      media: { photo: 'https://www.osr.ch/fileadmin/_processed_/e/f/csm_OSR_TheLogder_IgorNovello_2526_9363de2d25.jpg', alt: 'Artwork for the OSR cine-concert of Hitchcock’s The Lodger', sourceUrl: 'https://www.osr.ch/en/concerts-tickets/concerts/detail-dun-evenement/event/the-lodger', credit: 'Orchestre de la Suisse Romande' }
+    },
+    {
+      id: 'morillon-amateur-enduro', name: 'Morillon Enduro Open — amateur race', kind: 'race',
+      start: '2026-08-14', end: '2026-08-16', datesLabel: '14–16 Aug · race timetable not yet published',
+      base: 'both', where: 'Morillon Enduro Bike Park and the Giffre valley', coords: [46.0850, 6.6900],
+      why: 'The amateur field is a real separate competition: around 350 riders racing the Morillon, La Rivière-Enverse and Samoëns trails.',
+      booking: 'no', price: 'Free to spectate.',
+      impact: 'The organizer has confirmed the amateur race and weekend, but not the 2026 day-by-day timetable. Check the programme before choosing a spectator zone.',
+      conflict: 'changeover-15', confidence: 'confirmed', verifyBeforeGo: true, src: 'morillon-uci', map: false, series: 'morillon-enduro',
+      travel: { lesgets: { min: 35, mode: 'car' }, lake: { min: 75, mode: 'car' } }
+    },
+    {
+      id: 'morillon-uci-final', name: 'UCI Enduro World Cup — professional final', kind: 'race',
+      start: '2026-08-14', end: '2026-08-16', datesLabel: '14–16 Aug · race timetable not yet published',
+      base: 'both', where: 'Morillon Enduro Bike Park and the Giffre valley', coords: [46.0850, 6.6900],
+      why: 'The professional race is the season finale: roughly 250 of the world’s best enduro riders, with the overall World Cup titles on the line.',
+      booking: 'no', price: 'Free to spectate.',
+      impact: 'The organizer has confirmed the professional final and weekend, but not the 2026 stage timetable. Check the final programme before driving.',
+      conflict: 'changeover-15', confidence: 'confirmed', verifyBeforeGo: true, src: 'morillon-uci', map: false, series: 'morillon-enduro',
+      travel: { lesgets: { min: 35, mode: 'car' }, lake: { min: 75, mode: 'car' } }
+    },
+    {
+      id: 'traversee-10k', name: 'Traversée du Lac — 10 km race', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug · 07:45 start',
+      base: 'lake', where: 'Ponton du Petit Port, Annecy-le-Vieux → Jardins de l’Europe', coords: [45.9110, 6.1510],
+      why: 'The championship-distance race of Annecy’s 94th open-water crossing, with national-level swimmers taking on the full 10 km.',
+      booking: 'yes', price: '€50 plus any required FFN day licence.',
+      impact: 'Entry requires qualifying reference times submitted by 30 June. Spectating is the realistic option now.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'traversee-lac', map: false, series: 'traversee-lac',
+      travel: { lake: { min: 12, mode: 'car/bike' } },
+      media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy' }
+    },
+    {
+      id: 'traversee-1k', name: 'Traversée du Lac — 1 km race', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug · 08:45 start',
+      base: 'lake', where: 'Plage de l’Impérial → Jardins de l’Europe', coords: [45.9050, 6.1440],
+      why: 'The most accessible version of the crossing, open to a broad field from age seven and finishing in central Annecy.',
+      booking: 'yes', price: '€25 plus any required FFN day licence.',
+      impact: 'It falls during the Les Gets-to-Veyrier house move; watching the finish is easier than racing it.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'traversee-lac', map: false, series: 'traversee-lac',
+      travel: { lake: { min: 12, mode: 'car/bike' } },
+      media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy' }
+    },
+    {
+      id: 'traversee-5k', name: 'Traversée du Lac — 5 km from our beach', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug · waves from 09:30',
+      base: 'lake', where: 'Plage de la Brune, Veyrier-du-Lac → Jardins de l’Europe', coords: [45.8865, 6.1782],
+      why: 'The race launches from the beach directly below the house — the most locally irresistible part of the whole crossing.',
+      booking: 'yes', price: '€40 plus any required FFN day licence.',
+      impact: 'You will still be changing houses that morning. If timing permits, the start-line atmosphere at La Brune is the move.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'traversee-lac', map: false, series: 'traversee-lac',
+      travel: { lake: { min: 5, mode: 'walk' } },
+      media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy' }
+    },
+    {
+      id: 'traversee-24k', name: 'Traversée du Lac — 2.4 km race', kind: 'race',
+      start: '2026-08-15', end: '2026-08-15', datesLabel: 'Sat 15 Aug · waves from 10:30',
+      base: 'lake', where: 'Ponton du Petit Port, Annecy-le-Vieux → Jardins de l’Europe', coords: [45.9110, 6.1510],
+      why: 'The classic middle-distance crossing, starting in waves from Petit Port and finishing beside old Annecy.',
+      booking: 'yes', price: '€30 plus any required FFN day licence.',
+      impact: 'It overlaps the house move and airport pickup. Keep it as a spectator option unless the logistics become unexpectedly easy.',
+      conflict: 'changeover-15', confidence: 'confirmed', src: 'traversee-lac', map: false, series: 'traversee-lac',
+      travel: { lake: { min: 12, mode: 'car/bike' } },
+      media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy' }
+    },
+    {
+      id: 'aubes-orchestre-nations', name: 'Orchestre des Nations — sunrise finale', kind: 'concert',
+      start: '2026-08-16', end: '2026-08-16', datesLabel: 'Sun 16 Aug · 06:00', base: 'lake',
+      where: 'Bains des Pâquis, Geneva', coords: [46.2100, 6.1550],
+      why: 'A full orchestra at sunrise on the Lake Geneva pier — unusually beautiful and just strange enough to be worth the alarm.',
+      booking: 'no', price: 'Low-cost festival admission; confirm at the entrance.',
+      impact: 'Leave extremely early from Veyrier and expect Geneva parking. This is for the committed morning people.',
+      confidence: 'confirmed', src: 'les-aubes', travel: { lake: { min: 50, mode: 'car', approx: true } }
+    },
+    {
+      id: 'super-heros-concerto', name: 'Les “Super Héros du concerto”', kind: 'concert',
+      start: '2026-08-16', end: '2026-08-16', datesLabel: 'Sun 16 Aug · 20:30', base: 'lake',
+      where: 'Arith, Massif des Bauges', coords: [45.7170, 6.0880],
+      why: 'A playful classical concert in a Bauges village, built around virtuoso concerto showpieces rather than solemn recital energy.',
+      booking: 'yes', price: 'Ticketed; check festival rates.',
+      impact: 'Allow about an hour each way on mountain roads.', confidence: 'confirmed', src: 'musique-nature',
+      travel: { lake: { min: 55, mode: 'car', approx: true } }
+    },
+    {
+      id: 'roc-dusk-walk', name: 'Roc de Chère at dusk', kind: 'guided walk',
+      start: '2026-08-17', end: '2026-08-17', datesLabel: 'Mon 17 Aug · 19:00–21:00', base: 'lake',
+      where: 'Roc de Chère nature reserve, Talloires-Montmin', coords: [45.8533, 6.2050],
+      why: 'A naturalist-led evening as the protected headland changes shift: bird calls fade, bats and nocturnal life take over.',
+      booking: 'yes', price: 'Check the current guided-visit rate.',
+      impact: 'Bring proper shoes and a layer; stay with the guide in the protected reserve.', confidence: 'confirmed', src: 'roc-dusk',
+      travel: { lake: { min: 15, mode: 'car' } }, media: { photo: 'assets/wiki/roc-de-chere.jpg', alt: 'The forested cliffs of the Roc de Chère reserve' }
+    },
+    {
+      id: 'o-solitude-bauges', name: 'O solitude — baroque music in the Bauges', kind: 'concert',
+      start: '2026-08-18', end: '2026-08-18', datesLabel: 'Tue 18 Aug · 20:30', base: 'lake',
+      where: 'Bellecombe-en-Bauges', coords: [45.7380, 6.1370],
+      why: 'An intimate baroque programme in a tiny mountain village — a calm counterweight to the trip’s louder options.',
+      booking: 'yes', price: 'Ticketed; check festival rates.',
+      impact: 'Allow about an hour each way on mountain roads.', confidence: 'confirmed', src: 'musique-nature',
+      travel: { lake: { min: 55, mode: 'car', approx: true } }
+    },
+    {
+      id: 'djoukil-jazz', name: 'Djoukil Jazz Band — free terrace set', kind: 'concert',
+      start: '2026-08-18', end: '2026-08-18', datesLabel: 'Tue 18 Aug · 18:00', base: 'lake',
+      where: 'Impérial Palace terrace, Annecy', coords: [45.9050, 6.1440],
+      why: 'A free early-evening gypsy-jazz set on the lakefront — easy to sample without making the whole evening a production.',
+      booking: 'no', price: 'Free.', impact: 'Arrive early for a terrace spot.', confidence: 'confirmed', src: 'imperial-program',
+      travel: { lake: { min: 12, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'benny-green-jazz', name: 'Benny Green — Impérial jazz concert', kind: 'concert',
+      start: '2026-08-18', end: '2026-08-18', datesLabel: 'Tue 18 Aug · 21:00', base: 'lake',
+      where: 'Impérial Palace, Annecy', coords: [45.9050, 6.1440],
+      why: 'A ticketed late set from one of modern jazz piano’s great straight-ahead players, after the free terrace concert.',
+      booking: 'yes', price: 'Ticketed; check current seating.', impact: 'Pair it with Djoukil at 18:00 or just arrive for the main show.',
+      confidence: 'confirmed', src: 'imperial-program', travel: { lake: { min: 12, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'hockey-chamonix-sierre', name: 'Chamonix vs Sierre — summer hockey', kind: 'sport',
+      start: '2026-08-18', end: '2026-08-18', datesLabel: 'Tue 18 Aug · 20:00–23:30', base: 'lake',
+      where: 'Patinoire Richard Bozon, Chamonix', coords: [45.9250, 6.8720],
+      why: 'A gloriously unexpected summer-night option: French alpine hockey against Swiss opposition beneath the Aiguilles.',
+      booking: 'recommended', price: 'Match ticket price to be confirmed.', impact: 'Late drive back; check ticket release before setting off.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', map: false, series: 'chamonix-ice-hockey',
+      travel: { lake: { min: 80, mode: 'car', approx: true } }
+    },
+    {
+      id: 'plages-en-scene', name: 'Plages en scène at Le Plant', kind: 'performance',
+      start: '2026-08-18', end: '2026-08-25', occurrences: ['2026-08-18','2026-08-25'], datesLabel: 'Tue 18 or 25 Aug · 20:30',
+      base: 'lake', where: 'Plage du Plant, Veyrier-du-Lac', coords: [45.8770, 6.1840],
+      why: 'A free performance on the home-village beach — walk down after dinner and see what the evening turns into.',
+      booking: 'no', price: 'Free.', impact: 'Outdoor event; check weather updates.', confidence: 'confirmed', src: 'veyrier-scenes',
+      travel: { lake: { min: 5, mode: 'walk' } }, media: { photo: 'assets/wiki/veyrier.jpg', alt: 'Lake Annecy at Veyrier-du-Lac' }
+    },
+    {
+      id: 'col-aulp-cinema', name: 'Open-air cinema at the Col de l’Aulp', kind: 'cinema',
+      start: '2026-08-19', end: '2026-08-19', datesLabel: 'Wed 19 Aug · 21:00–23:45', base: 'lake',
+      where: 'Col de l’Aulp above Talloires-Montmin', coords: [45.8340, 6.2750],
+      why: 'A free film projected at a mountain farm beneath La Tournette — more memorable than another indoor cinema night.',
+      booking: 'no', price: 'Free.', impact: 'Bring warm layers, a torch and something to sit on; cancelled or moved in bad weather.',
+      confidence: 'confirmed', src: 'col-aulp-cinema', travel: { lake: { min: 35, mode: 'car', approx: true } }
+    },
+    {
+      id: 'camille-berthollet', name: 'Camille Berthollet — Legends', kind: 'concert',
+      start: '2026-08-19', end: '2026-08-19', datesLabel: 'Wed 19 Aug · 21:00', base: 'lake',
+      where: 'Impérial Palace, Annecy', coords: [45.9050, 6.1440],
+      why: 'The local violin star brings a high-energy crossover programme to the lakefront festival.',
+      booking: 'yes', price: 'Ticketed; check current seating.', impact: 'It clashes with both the Menthon nocturne and Col de l’Aulp cinema — choose one.',
+      confidence: 'confirmed', src: 'imperial-camille', travel: { lake: { min: 12, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'hiphop-tour', name: 'Hip Hop Tour with La Mante Religieuz', kind: 'festival',
+      start: '2026-08-20', end: '2026-08-20', datesLabel: 'Thu 20 Aug · 17:30–22:00', base: 'lake',
+      where: 'Les Jeudis des Rails, Annecy', coords: [45.8992, 6.1294],
+      why: 'Dance battles, performance and a local hip-hop evening that feels much less generic than a tourist concert.',
+      booking: 'no', price: 'Free.', impact: 'Outdoor city event; expect a lively crowd.', confidence: 'confirmed', src: 'hiphop-tour',
+      travel: { lake: { min: 15, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'duingt-closeup', name: 'Magic and close-up evening in Duingt', kind: 'performance',
+      start: '2026-08-20', end: '2026-08-20', datesLabel: 'Thu 20 Aug · 18:30–20:30', base: 'lake',
+      where: 'Duingt', coords: [45.8086, 6.2051],
+      why: 'Roaming close-up magic in the village by the château — light, social and easy to combine with a swim or dinner.',
+      booking: 'no', price: 'Free.', impact: 'Check the precise village meeting point.', confidence: 'confirmed', src: 'duingt-magic',
+      travel: { lake: { min: 25, mode: 'car/bike' } }, media: { photo: 'assets/wiki/duingt.jpg', alt: 'Château de Duingt on Lake Annecy' }
+    },
+    {
+      id: 'wildwood-laika', name: 'Wildwood — LAIKA’s handmade worlds', kind: 'exhibition',
+      start: '2026-08-12', end: '2026-08-29',
+      occurrences: ['2026-08-12','2026-08-13','2026-08-14','2026-08-15','2026-08-16','2026-08-18','2026-08-19','2026-08-20','2026-08-21','2026-08-22','2026-08-23','2026-08-25','2026-08-26','2026-08-27','2026-08-28','2026-08-29'],
+      datesLabel: 'Tue–Sun through 27 Sep · 10:00–18:00', base: 'both',
+      where: 'Cité internationale du cinéma d’animation, Annecy', coords: [45.8992, 6.1294],
+      why: 'Original puppets, sets and hand-built craft from LAIKA’s stop-motion films — tactile, strange and an excellent rain-or-heat escape.',
+      booking: 'recommended', price: 'Check current museum admission.', impact: 'Closed Mondays; the trip-day occurrences are listed here explicitly.',
+      confidence: 'confirmed', src: 'wildwood-laika', travel: { lesgets: { min: 75, mode: 'car', approx: true }, lake: { min: 15, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'montrottier-medieval', name: 'Medieval reenactment at Montrottier', kind: 'festival',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 10:00–17:00', base: 'lake',
+      where: 'Château de Montrottier, Lovagny', coords: [45.89836, 6.03866],
+      why: 'Armour, demonstrations and living-history scenes in a real medieval castle, with the Gorges du Fier next door.',
+      booking: 'recommended', price: 'Castle admission; check event supplement.', impact: 'Pair it with the gorge, but expect a busier castle than on a normal visit.',
+      confidence: 'confirmed', src: 'montrottier-medieval', travel: { lake: { min: 25, mode: 'car' } },
+      media: { photo: 'assets/activities/montrottier.jpg', alt: 'Stone towers of Château de Montrottier' }
+    },
+    {
+      id: 'nemanja-double-sens', name: 'Nemanja Radulović & Double Sens', kind: 'concert',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 21:00', base: 'lake',
+      where: 'Impérial Palace, Annecy', coords: [45.9050, 6.1440],
+      why: 'A flamboyant violinist and string ensemble playing with far more electricity than a standard classical recital.',
+      booking: 'yes', price: 'Ticketed; check current seating.', impact: 'Book ahead if this is the festival concert you want.',
+      confidence: 'confirmed', src: 'imperial-nemanja', travel: { lake: { min: 12, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'geneva-dream-water', name: 'Geneva Dream of Water — show + DJ night', kind: 'festival',
+      start: '2026-08-21', end: '2026-08-22', occurrences: ['2026-08-21','2026-08-22'], datesLabel: 'Fri 21 or Sat 22 Aug · shows 21:30, 22:00 & 22:30',
+      base: 'lake', where: 'Geneva lakefront', coords: [46.2070, 6.1550],
+      why: 'Three short water-and-light shows followed by a DJ set on the Geneva waterfront — a bigger city-night option.',
+      booking: 'no', price: 'Free public show; confirm any ticketed DJ area.', impact: 'Saturday 22 is a house-change day. Friday is the cleaner option.',
+      conflict: 'changeover-22', confidence: 'confirmed', src: 'geneva-water', travel: { lake: { min: 50, mode: 'car', approx: true } }
+    },
+    {
+      id: 'bach-st-john', name: 'Bach: St John Passion', kind: 'concert',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug · 20:30', base: 'lake',
+      where: 'Le Châtelard, Massif des Bauges', coords: [45.6810, 6.1360],
+      why: 'A major choral work performed in a small Bauges setting — beautiful if one serious classical night appeals.',
+      booking: 'yes', price: 'Ticketed; check festival rates.', impact: 'It follows the early Veyrier checkout and house move, so only keep it if everyone still has energy.',
+      conflict: 'changeover-22', confidence: 'confirmed', src: 'musique-nature', travel: { lake: { min: 60, mode: 'car', approx: true } }
+    },
+    {
+      id: 'menthon-potters', name: 'Menthon potters market', kind: 'market',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug · 09:00–19:00', base: 'lake',
+      where: 'Menthon-Saint-Bernard', coords: [45.8615, 6.1965],
+      why: 'A full-day ceramics market in the next village — local makers, useful browsing and no commitment beyond wandering through.',
+      booking: 'no', price: 'Free.', impact: 'Easy to combine with Menthon beach or the château.', confidence: 'confirmed', src: 'menthon-potters',
+      travel: { lake: { min: 10, mode: 'car/bike' } }, media: { photo: 'assets/wiki/menthon-chateau.jpg', alt: 'Menthon-Saint-Bernard beside Lake Annecy' }
+    },
+    {
+      id: 'hola-frida-cinema', name: 'Hola Frida — open-air cinema', kind: 'cinema',
+      start: '2026-08-25', end: '2026-08-25', datesLabel: 'Tue 25 Aug · 21:30', base: 'lake',
+      where: 'Annecy outdoor cinema programme', coords: [45.8992, 6.1294],
+      why: 'A free outdoor animated film about Frida Kahlo — a charming low-stakes evening if the weather cooperates.',
+      booking: 'no', price: 'Free.', impact: 'Bring a blanket; outdoor screenings can move or cancel in poor weather.',
+      confidence: 'confirmed', src: 'hola-frida', travel: { lake: { min: 15, mode: 'car/bus/bike' } }
+    },
+    {
+      id: 'alby-ambiance-market', name: 'Alby atmospheric market + medieval village', kind: 'market',
+      start: '2026-08-25', end: '2026-08-25', datesLabel: 'Tue 25 Aug · 17:00–20:00', base: 'lake',
+      where: 'Alby-sur-Chéran', coords: [45.8154, 6.0181],
+      why: 'An evening market with Manomai dance, plus a 19:00 tour of the arcaded medieval village and shoemaking museum.',
+      booking: 'no', price: 'Free; confirm any tour capacity.', impact: 'Arrive before 19:00 if the heritage tour is the main draw.',
+      confidence: 'confirmed', src: 'alby-markets', travel: { lake: { min: 30, mode: 'car', approx: true } }
+    },
+    {
+      id: 'picky-banshees-cabanes', name: 'Picky Banshees at Festival des Cabanes', kind: 'concert',
+      start: '2026-08-25', end: '2026-08-25', datesLabel: 'Tue 25 Aug · 18:00–19:30', base: 'lake',
+      where: 'Sources du lac d’Annecy', coords: [45.7800, 6.2200],
+      why: 'A relaxed apéro-concert among the temporary architecture of the Festival des Cabanes at the south end of the lake.',
+      booking: 'no', price: 'Free.', impact: 'Check the exact cabane and parking location before leaving.',
+      confidence: 'confirmed', src: 'picky-banshees', travel: { lake: { min: 35, mode: 'car', approx: true } }
+    },
+    {
+      id: 'hockey-chamonix-aosta', name: 'Chamonix vs Aosta — summer hockey', kind: 'sport',
+      start: '2026-08-26', end: '2026-08-26', datesLabel: 'Wed 26 Aug · 20:00', base: 'lake',
+      where: 'Patinoire Richard Bozon, Chamonix', coords: [45.9250, 6.8720],
+      why: 'The second separate exhibition game, this time against Italian opposition from Aosta.',
+      booking: 'recommended', price: 'Match ticket price to be confirmed.', impact: 'Late drive back; choose this or the Aug 18 Sierre game, not both by default.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', map: false, series: 'chamonix-ice-hockey',
+      travel: { lake: { min: 80, mode: 'car', approx: true } }
+    },
+    {
+      id: 'deux-pecheurs', name: 'Les Deux Pêcheurs — Offenbach operetta', kind: 'performance',
+      start: '2026-08-27', end: '2026-08-27', datesLabel: 'Thu 27 Aug · 21:00', base: 'lake',
+      where: 'Impérial Palace, Annecy', coords: [45.9050, 6.1440],
+      why: 'A compact comic operetta by Offenbach — theatrical, ridiculous and a livelier final festival night than a formal recital.',
+      booking: 'yes', price: '€18–25.', impact: 'Book if this wins the group vote; otherwise keep the evening loose.',
+      confidence: 'confirmed', src: 'imperial-pecheurs', travel: { lake: { min: 12, mode: 'car/bus/bike' } }
+    },
+
+    /* Les Gets UCI MTB World Cup: each published final is its own event. */
+    {
+      id: 'lesgets-xcc-u23-women', name: 'UCI XCC — U23 women’s final', kind: 'race',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 10:35–11:00', base: 'lake', where: 'Les Gets', coords: [46.1558, 6.6697],
+      why: 'The first World Cup final of the weekend: a fast, tactical short-track race for the U23 women.', booking: 'no', price: 'Free.',
+      impact: 'Allow for World Cup traffic and parking.', confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xcc-u23-men', name: 'UCI XCC — U23 men’s final', kind: 'race',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 11:25–11:50', base: 'lake', where: 'Les Gets', coords: [46.1558, 6.6697],
+      why: 'Twenty-five minutes of flat-out U23 men’s short-track racing.', booking: 'no', price: 'Free.', impact: 'Pairs naturally with the women’s final immediately before it.',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xcc-elite-women', name: 'UCI XCC — elite women’s final', kind: 'race',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 17:15–17:40', base: 'lake', where: 'Les Gets', coords: [46.1558, 6.6697],
+      why: 'Elite women’s short track: compact, easy to follow and one of the weekend’s best first-time-spectator races.', booking: 'no', price: 'Free.',
+      impact: 'Stay for the elite men at 18:05.', confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xcc-elite-men', name: 'UCI XCC — elite men’s final', kind: 'race',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · 18:05–18:30', base: 'lake', where: 'Les Gets', coords: [46.1558, 6.6697],
+      why: 'The elite men close Friday with a 25-minute short-track final.', booking: 'no', price: 'Free.', impact: 'Late return to Veyrier after the awards.',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-dhi-junior-women', name: 'UCI Downhill — junior women’s final', kind: 'race',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug · 11:30–12:00', base: 'lake', where: 'Les Gets downhill track', coords: [46.1558, 6.6697],
+      why: 'The first timed downhill final on the mountain, with the junior women setting the pace.', booking: 'no', price: 'Free.',
+      impact: 'House-change day and the busiest World Cup traffic day. Only attempt this if the move is completely under control.', conflict: 'changeover-22',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-dhi-junior-men', name: 'UCI Downhill — junior men’s final', kind: 'race',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug · 12:00–12:45', base: 'lake', where: 'Les Gets downhill track', coords: [46.1558, 6.6697],
+      why: 'The junior men attack the Les Gets downhill course immediately after the women.', booking: 'no', price: 'Free.',
+      impact: 'House-change day and heavy traffic; this is included for completeness, not as a recommendation to overcomplicate the move.', conflict: 'changeover-22',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-dhi-elite-women', name: 'UCI Downhill — elite women’s final', kind: 'race',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug · 13:00–14:00', base: 'lake', where: 'Les Gets downhill track', coords: [46.1558, 6.6697],
+      why: 'One run each, no second chances: the elite women’s downhill World Cup final.', booking: 'no', price: 'Free.',
+      impact: 'This is the marquee Saturday session but lands squarely on the house move.', conflict: 'changeover-22',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-dhi-elite-men', name: 'UCI Downhill — elite men’s final', kind: 'race',
+      start: '2026-08-22', end: '2026-08-22', datesLabel: 'Sat 22 Aug · 14:10–15:45', base: 'lake', where: 'Les Gets downhill track', coords: [46.1558, 6.6697],
+      why: 'The weekend’s loudest race: the elite men decide the downhill World Cup on the Les Gets track.', booking: 'no', price: 'Free.',
+      impact: 'The marquee race overlaps your changeover. Watch only if the house logistics make it genuinely easy.', conflict: 'changeover-22',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xco-u23-women', name: 'UCI XCO — U23 women’s final', kind: 'race',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug · 09:00–10:20', base: 'lake', where: 'Les Gets cross-country course', coords: [46.1558, 6.6697],
+      why: 'Sunday opens with the U23 women on the full Olympic cross-country course.', booking: 'no', price: 'Free.', impact: 'Leave Veyrier very early for this one.',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xco-u23-men', name: 'UCI XCO — U23 men’s final', kind: 'race',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug · 11:00–12:20', base: 'lake', where: 'Les Gets cross-country course', coords: [46.1558, 6.6697],
+      why: 'The U23 men’s Olympic-distance World Cup final.', booking: 'no', price: 'Free.', impact: 'A useful bridge into the elite races after lunch.',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xco-elite-women', name: 'UCI XCO — elite women’s final', kind: 'race',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug · 13:30–15:00', base: 'lake', where: 'Les Gets cross-country course', coords: [46.1558, 6.6697],
+      why: 'The elite women’s full-length cross-country final: repeated viewing, tactical racing and a much easier first live MTB race to follow than enduro.',
+      booking: 'no', price: 'Free.', impact: 'Expect heavy Sunday traffic leaving Les Gets.',
+      confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup', travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    },
+    {
+      id: 'lesgets-xco-elite-men', name: 'UCI XCO — elite men’s final', kind: 'race',
+      start: '2026-08-23', end: '2026-08-23', datesLabel: 'Sun 23 Aug · 15:30–17:00', base: 'lake', where: 'Les Gets cross-country course', coords: [46.1558, 6.6697],
+      why: 'The final race of the Les Gets weekend: ninety minutes of elite men’s Olympic cross-country.', booking: 'no', price: 'Free.',
+      impact: 'The late finish means a slow, crowded drive back to Veyrier.', confidence: 'confirmed', src: 'lesgets-uci', map: false, series: 'lesgets-worldcup',
+      travel: { lake: { min: 75, mode: 'car' } }, media: { photo: 'assets/wiki/les-gets-mtb.jpg', alt: 'Mountain-bike racing in Les Gets' }
+    }
+  ];
+  EVENTS.push(...EXTRA_EVENTS);
 
   /* ---------- TRANSPORT GUIDANCE (getting around, no-car mode) -------- */
   const TRANSPORT_GUIDE = {
@@ -2003,7 +2463,7 @@ window.DATA = (function () {
     TOUR_COLS, CENT_COLS,
     AREAS, AREA_BY_ID,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
-    EVENTS, TRANSPORT_GUIDE,
+    EVENTS, GREAT_FIT_PICKS, TRANSPORT_GUIDE,
     STORY, HISTORY,
     MAP_POIS, ARCHIVE, FEATURED, LESGETS_TOP3, LAKE_EXCURSIONS, CREDITS
   };

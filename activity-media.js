@@ -587,6 +587,12 @@
       'A visit with cows at the working Ferme de Lorette alpage',
       'https://www.laclusaz.com/en/details/visit-to-the-ferme-de-lorette/',
       'La Clusaz Tourism'
+    ),
+    'yvoire-five-senses': official(
+      'https://www.jardin5sens.net/en/wp-content/uploads/2023-07-07-JardinsDrone-11-1-1030x686.jpg',
+      'The Garden of Five Senses inside medieval Yvoire',
+      'https://www.jardin5sens.net/en/',
+      'Jardin des Cinq Sens'
     )
   };
 

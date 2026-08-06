@@ -119,8 +119,17 @@
   }
   function eventOccursOn(e, dt) { return e.occurrences ? e.occurrences.includes(dt) : dt >= e.start && dt <= e.end; }
   function eventLastDate(e) { return e.occurrences ? e.occurrences[e.occurrences.length - 1] : e.end; }
-  function eventsOn(dt) { return D.EVENTS.filter((e) => eventOccursOn(e, dt)); }
-  function upcomingEvents(dt, baseId) { return D.EVENTS.filter((e) => eventLastDate(e) >= dt && (e.base === baseId || e.base === 'both')).sort((a, b) => a.start.localeCompare(b.start)); }
+  function nextEventDate(e, dt) {
+    if (e.occurrences) return e.occurrences.find((date) => date >= dt) || e.occurrences[e.occurrences.length - 1];
+    return e.start < dt && e.end >= dt ? dt : e.start;
+  }
+  function eventSortKey(e, dt) { return `${nextEventDate(e, dt)}|${e.datesLabel || ''}|${e.name}`; }
+  function eventsOn(dt) { return D.EVENTS.filter((e) => !e.seriesOverview && eventOccursOn(e, dt)).sort((a, b) => eventSortKey(a, dt).localeCompare(eventSortKey(b, dt))); }
+  function upcomingEvents(dt) {
+    return D.EVENTS
+      .filter((e) => !e.seriesOverview && eventLastDate(e) >= dt && !eventOccursOn(e, dt))
+      .sort((a, b) => eventSortKey(a, dt).localeCompare(eventSortKey(b, dt)));
+  }
 
   /* =========================== chrome =============================== */
   const PRIMARY = ['home', 'activities', 'ideas', 'trip', 'map'];
@@ -383,13 +392,17 @@
   Views.today = function () {
     const dt = activeDate(); const stay = activeStay(); const base = stay.baseId; const co = changeoverOn(dt);
     const T = D.TRANSPORT;
-    const todays = eventsOn(dt).filter((e) => e.base === base || e.base === 'both');
-    const upcoming = upcomingEvents(dt, base).filter((e) => e.start > dt).slice(0, 3);
+    const todays = eventsOn(dt);
+    const upcoming = upcomingEvents(dt).slice(0, 8);
     const p = activePerson();
     const ideaActs = Ideas.ids().map((id) => D.ACT_BY_ID[id]).filter(Boolean);
     const ideasBlock = ideaActs.length
       ? `<div class="section-head"><h2>${esc(p)}’s ideas</h2><a class="see-all" href="#/ideas">All boards (${ideaActs.length})</a></div><div class="cards">${ideaActs.slice(0, 4).map((a) => activityCard(a)).join('')}</div>`
-      : `<div class="section-head"><h2>Featured</h2></div><div class="cards">${D.FEATURED.map((id) => D.ACT_BY_ID[id]).filter(Boolean).slice(0, 4).map((a) => activityCard(a)).join('')}</div>`;
+      : '';
+    const fitCards = D.GREAT_FIT_PICKS.map(greatFitCard).filter(Boolean);
+    const calendarEvents = D.EVENTS
+      .filter((e) => !e.seriesOverview && eventLastDate(e) >= D.TRIP.window.start && e.start <= D.TRIP.window.end)
+      .sort((a, b) => eventSortKey(a, D.TRIP.window.start).localeCompare(eventSortKey(b, D.TRIP.window.start)));
 
     // Gentle nudges, only on the days that genuinely need them.
     const notes = [];
@@ -426,23 +439,97 @@
         <a class="action-tile" href="#/activities?booking=required">Must book</a>
       </div>
 
-      <div class="section-head"><h2>Today &amp; next up</h2></div>
-      ${todays.length ? `<p class="intro">On today near you:</p>` + todays.map(eventRow).join('') : `<p class="intro">Nothing fixed today — a blank canvas. ${upcoming.length ? 'Coming up:' : ''}</p>`}
-      ${upcoming.map(eventRow).join('')}
-      <a class="see-all block" href="#/trip">Open trip details →</a>
+      <section class="today-agenda" aria-labelledby="today-agenda-title">
+        <header class="today-section-head">
+          <p class="page-kicker">Dated things nearby</p>
+          <h2 id="today-agenda-title">Today &amp; next up</h2>
+          <p>Specific events worth knowing about, not a schedule we have to obey.</p>
+        </header>
+        <div class="today-event-block">
+          <div class="today-event-label"><span>On this day</span><strong>${esc(prettyDay(dt))}</strong></div>
+          <div class="today-event-list">
+            ${todays.length ? todays.map(eventRow).join('') : `<p class="today-empty">No fixed event on this date. The day is still ours.</p>`}
+          </div>
+        </div>
+        ${upcoming.length ? `<div class="today-event-block next">
+          <div class="today-event-label"><span>Coming up</span><strong>Next nearby</strong></div>
+          <div class="today-event-list">${upcoming.map(eventRow).join('')}</div>
+        </div>` : ''}
+        <details class="today-library">
+          <summary><span>Full August calendar</span><strong>${calendarEvents.length} events &amp; individual race sessions</strong></summary>
+          <div class="today-calendar">${eventCalendar(calendarEvents)}</div>
+        </details>
+      </section>
+
+      <section class="today-fits" aria-labelledby="today-fits-title">
+        <header class="today-section-head">
+          <p class="page-kicker">The researched shortlist</p>
+          <h2 id="today-fits-title">Thirty things we’d actually love</h2>
+          <p>An anytime menu for the four of us. Save whatever sounds good; nobody is assigning it to a day.</p>
+        </header>
+        <div class="fit-grid">${fitCards.slice(0, 6).join('')}</div>
+        <details class="today-library fit-library">
+          <summary><span>See the complete shortlist</span><strong>All 30 recommendations</strong></summary>
+          <div class="fit-grid">${fitCards.slice(6).join('')}</div>
+        </details>
+      </section>
 
       ${ideasBlock}
     `;
   };
 
+  function shortEventDate(e) {
+    return (e.datesLabel || prettyDay(e.start)).split('·')[0].split(',')[0].trim();
+  }
+
+  function eventSeriesName(e) {
+    if (!e.series) return '';
+    const parent = D.EVENTS.find((item) => item.id === e.series);
+    return parent ? parent.name : '';
+  }
+
   function eventRow(e) {
     const base = activeBase(); const dd = travelFromBase(e, base);
     const conflict = e.conflict ? `<span class="ev-conflict">changeover clash</span>` : '';
+    const series = eventSeriesName(e);
     return `<a class="event-row" href="#/event/${esc(e.id)}">
-      <div class="er-date">${esc(e.datesLabel.split(',')[0])}</div>
-      <div class="er-body"><h3>${esc(e.name)} ${conflict}</h3><p>${esc(e.where)}${dd ? ` · ${dd.approx ? '≈' : ''}${dd.min}′` : ''}</p></div>
+      <time class="er-date" datetime="${esc(e.start)}">${esc(shortEventDate(e))}</time>
+      <div class="er-body">${series ? `<span class="er-series">${esc(series)}</span>` : ''}<h3>${esc(e.name)} ${conflict}</h3><p>${esc(e.datesLabel)} · ${esc(e.where)}${dd ? ` · ${dd.approx ? '≈' : ''}${dd.min}′` : ''}</p></div>
       <span class="er-go" aria-hidden="true">›</span>
     </a>`;
+  }
+
+  function eventCalendar(events) {
+    const groups = new Map();
+    events.forEach((event) => {
+      const date = event.start < D.TRIP.window.start ? D.TRIP.window.start : event.start;
+      if (!groups.has(date)) groups.set(date, []);
+      groups.get(date).push(event);
+    });
+    return Array.from(groups.entries()).map(([date, rows]) => `<section class="calendar-day" aria-labelledby="calendar-${esc(date)}">
+      <h3 id="calendar-${esc(date)}">${esc(prettyDay(date))}</h3>
+      <div>${rows.map(eventRow).join('')}</div>
+    </section>`).join('');
+  }
+
+  function greatFitCard(pick, index) {
+    const item = pick.type === 'event' ? D.EVENTS.find((event) => event.id === pick.id) : D.ACT_BY_ID[pick.id];
+    if (!item) return '';
+    const isEvent = pick.type === 'event';
+    const href = isEvent ? `#/event/${item.id}` : `#/plan/${item.id}`;
+    const title = pick.title || (isEvent ? item.name : item.title);
+    const summary = pick.summary || item.why || item.summary || '';
+    const media = isEvent ? coverOf(item) : actCover(item);
+    const place = isEvent ? item.where : ((D.AREA_BY_ID[item.areaId] || {}).name || item.where || 'Haute-Savoie');
+    const meta = isEvent ? item.datesLabel : pinMeta(item);
+    const pair = pick.pairId ? D.ACT_BY_ID[pick.pairId] : null;
+    return `<article class="fit-card">
+      <a class="fit-hit" href="${esc(href)}">
+        <div class="fit-media">${cover(media, { cls: 'fit-image', alt: title, tint: isEvent ? 'purple' : catTint(item.cat) })}<span class="fit-rank">${String(index + 1).padStart(2, '0')}</span></div>
+        <div class="fit-copy"><span class="fit-place">${esc(place)}</span><h3>${esc(title)}</h3><p>${esc(summary)}</p><small>${esc(meta)}</small></div>
+      </a>
+      <div class="fit-actions">${saveBtn(item.id)}${pair ? `<a href="#/plan/${esc(pair.id)}">Also open ${esc(pair.title)} →</a>` : `<a href="${esc(href)}">Details →</a>`}</div>
+    </article>`;
   }
 
   /* ---------- ACTIVITIES (the guidebook: browse everything) ---------
@@ -697,7 +784,7 @@
     return days.map((dt) => {
       const stay = stayForDate(dt); const co = changeoverOn(dt);
       // show each event once, on its first day inside the trip window
-      const evs = D.EVENTS.filter((e) => e.occurrences ? e.occurrences.includes(dt) : firstInWindow(e) === dt);
+      const evs = D.EVENTS.filter((e) => !e.seriesOverview && (e.occurrences ? e.occurrences.includes(dt) : firstInWindow(e) === dt));
       const isNow = dt === today;
       const flags = [];
       if (co) flags.push(`<span class="tl-flag change">Base change → ${esc(co.inn.village)}</span>`);
@@ -987,7 +1074,7 @@
     D.STAYS.forEach((s) => out.push({ id: s.id, cat: 'stay', name: s.name, coords: s.coords.slice(), blurb: `${s.village} · ${s.dates}`, sub: s.address, route: '#/trip', dir: s.coords }));
     D.ACTIVITIES.forEach((a) => { if (a.coords) out.push({ id: 'act-' + a.id, cat: mapCatOf(a), name: a.title, coords: a.coords.slice(), blurb: a.summary, route: '#/plan/' + a.id, dir: a.coords, verify: !!a.verifyBeforeGo }); });
     (D.MAP_POIS || []).forEach((p) => out.push({ id: 'poi-' + p.id, cat: mapPoiCat(p), name: p.name, coords: p.coords.slice(), blurb: p.blurb, sub: p.note, route: p.route || null, href: p.href || null, dir: p.coords, verify: !!p.verify, closed: !!p.closed }));
-    D.EVENTS.forEach((e) => { if (e.coords) out.push({ id: 'ev-' + e.id, cat: 'event', name: e.name, coords: e.coords.slice(), blurb: e.datesLabel, route: '#/event/' + e.id, dir: e.coords }); });
+    D.EVENTS.forEach((e) => { if (e.coords && e.map !== false) out.push({ id: 'ev-' + e.id, cat: 'event', name: e.name, coords: e.coords.slice(), blurb: e.datesLabel, route: '#/event/' + e.id, dir: e.coords }); });
     D.AREAS.forEach((a) => out.push({ id: 'area-' + a.id, cat: 'place', name: a.name, coords: a.coords.slice(), blurb: a.zone, route: '#/areas/' + a.id, dir: a.coords }));
     return deoverlap(out);
   }
