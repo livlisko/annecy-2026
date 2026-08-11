@@ -130,11 +130,16 @@
       .filter((e) => !e.seriesOverview && eventLastDate(e) >= dt && !eventOccursOn(e, dt))
       .sort((a, b) => eventSortKey(a, dt).localeCompare(eventSortKey(b, dt)));
   }
+  function tripCalendarEvents() {
+    return D.EVENTS
+      .filter((e) => !e.seriesOverview && ((eventLastDate(e) >= D.TRIP.window.start && e.start <= D.TRIP.window.end) || e.calendarContext))
+      .sort((a, b) => eventSortKey(a, D.TRIP.window.start).localeCompare(eventSortKey(b, D.TRIP.window.start)));
+  }
 
   /* =========================== chrome =============================== */
   const PRIMARY = ['home', 'activities', 'ideas', 'trip', 'map'];
-  const NAV_FOR = { home: 'home', today: 'home', activities: 'activities', plan: 'activities', bike: 'activities', ideas: 'ideas', trip: 'trip', event: 'trip', map: 'map', areas: 'map', archive: 'map' };
-  const TITLES = { home: 'Annecy & Les Gets', today: 'Today', activities: 'Activities', ideas: 'Ideas', bike: 'Cycling', map: 'Map', trip: 'Trip', areas: 'Areas', archive: 'The cut list' };
+  const NAV_FOR = { home: 'home', today: 'home', events: 'home', activities: 'activities', plan: 'activities', bike: 'activities', ideas: 'ideas', trip: 'trip', event: 'trip', map: 'map', areas: 'map', archive: 'map' };
+  const TITLES = { home: 'Annecy & Les Gets', today: 'Today', events: 'Events', activities: 'Activities', ideas: 'Ideas', bike: 'Cycling', map: 'Map', trip: 'Trip', areas: 'Areas', archive: 'The cut list' };
 
   function setChrome(route) {
     const isPrimary = PRIMARY.includes(route.name) && route.parts.length === 0;
@@ -299,8 +304,8 @@
         <span><strong>${esc(cat.label)}</strong><small>${esc(regionCopy[cat.id])}</small></span>
         <span class="hm-region-go" aria-hidden="true">→</span>
       </a>`).join('');
-    const homeEvents = D.EVENTS.filter((event) => event.homepageRide || event.homepageEvent)
-      .sort((a, b) => a.start.localeCompare(b.start));
+    const calendarEvents = tripCalendarEvents();
+    const homeEvents = calendarEvents.filter((event) => event.homepageRide || event.homepageEvent);
     const homeEventRows = homeEvents.map((event) => {
       const [dow, day, month] = prettyDay(event.start).split(' ');
       return `<a class="hm-event-row" href="#/event/${esc(event.id)}">
@@ -311,6 +316,12 @@
         <span class="hm-event-go" aria-hidden="true">→</span>
       </a>`;
     }).join('');
+    const specialtyRows = (D.SPECIALTIES || []).map((item, index) => `
+      <article class="hm-specialty-item">
+        <span>${String(index + 1).padStart(2, '0')}</span>
+        <div><h4>${esc(item.name)}</h4><p>${esc(item.note)}</p></div>
+      </article>`).join('');
+    const feteReblochon = D.EVENTS.find((event) => event.id === 'fete-reblochon-2026');
     return `
       <section class="hm-world">
         ${live}
@@ -357,9 +368,37 @@
       <section class="hm-events" aria-labelledby="hm-events-title">
         <div class="hm-events-head">
           <div><p class="hm-events-kicker">While we’re there</p><h3 id="hm-events-title">Nearby events coming up</h3></div>
-        <p>The races, festivals, lake oddities and one very local tractor competition that land during the trip.</p>
+          <p>A short edit from the shared trip calendar: races, festivals, lake oddities and one very local tractor competition.</p>
         </div>
         <div class="hm-event-list">${homeEventRows}</div>
+        <div class="hm-events-foot"><span>Every row above is also in the dated calendar.</span><a href="#/events">See all ${calendarEvents.length} events &amp; race sessions →</a></div>
+      </section>
+
+      <section class="hm-specialties" aria-labelledby="hm-specialties-title">
+        <div class="hm-specialties-head">
+          <div><p class="hm-specialties-kicker">Taste the region</p><h3 id="hm-specialties-title">Haute-Savoie on a plate</h3></div>
+          <p>Cheese is the headline, but the lake fish, little square pastas, mountain pastries and local bottles deserve room too.</p>
+        </div>
+        <div class="hm-specialties-layout">
+          <a class="hm-specialty-feature" href="#/plan/savoyard-night">
+            <img src="assets/activities/le-freti.jpg" alt="A Le Fréti cheese dish with charcuterie, potatoes, cornichons and wine" loading="lazy" />
+            <span class="hm-specialty-feature-copy">
+              <small>Start here · old Annecy</small>
+              <strong>Le Fréti</strong>
+              <span>A dairy shop opened here in 1973; one year later it became the old town’s cheese institution. Fondue, wheel-scraped raclette and bubbling hot boxes, right where they belong.</span>
+              <b>Open the dinner idea →</b>
+            </span>
+          </a>
+          <div class="hm-specialty-menu" aria-label="Haute-Savoie specialties to try">${specialtyRows}</div>
+        </div>
+        <div class="hm-specialty-foot">
+          ${feteReblochon ? `<p class="hm-fete-note"><strong>Just missed in 2026:</strong> <a href="#/event/${esc(feteReblochon.id)}">La Fête du Reblochon</a> filled La Clusaz with herds, decorated floats, folk dancing and a farmhouse-cheese demonstration on Sunday 9 August.</p>` : ''}
+          <nav class="hm-specialty-links" aria-label="Explore local food">
+            <a href="#/activities?cat=food">Browse food ideas →</a>
+            <a href="#/plan/aravis-cheese">Go into Reblochon country →</a>
+            <a href="${esc(D.SOURCES['haute-savoie-food'].url)}" target="_blank" rel="noopener">Local food guide ↗</a>
+          </nav>
+        </div>
       </section>
 
       <section class="hm-place">
@@ -400,9 +439,7 @@
       ? `<div class="section-head"><h2>${esc(p)}’s ideas</h2><a class="see-all" href="#/ideas">All boards (${ideaActs.length})</a></div><div class="cards">${ideaActs.slice(0, 4).map((a) => activityCard(a)).join('')}</div>`
       : '';
     const fitCards = D.GREAT_FIT_PICKS.map(greatFitCard).filter(Boolean);
-    const calendarEvents = D.EVENTS
-      .filter((e) => !e.seriesOverview && eventLastDate(e) >= D.TRIP.window.start && e.start <= D.TRIP.window.end)
-      .sort((a, b) => eventSortKey(a, D.TRIP.window.start).localeCompare(eventSortKey(b, D.TRIP.window.start)));
+    const calendarCount = tripCalendarEvents().length;
 
     // Gentle nudges, only on the days that genuinely need them.
     const notes = [];
@@ -455,10 +492,7 @@
           <div class="today-event-label"><span>Coming up</span><strong>Next nearby</strong></div>
           <div class="today-event-list">${upcoming.map(eventRow).join('')}</div>
         </div>` : ''}
-        <details class="today-library">
-          <summary><span>Full August calendar</span><strong>${calendarEvents.length} events &amp; individual race sessions</strong></summary>
-          <div class="today-calendar">${eventCalendar(calendarEvents)}</div>
-        </details>
+        <a class="today-calendar-link" href="#/events"><span>Open the full August calendar</span><strong>${calendarCount} events &amp; individual race sessions →</strong></a>
       </section>
 
       <section class="today-fits" aria-labelledby="today-fits-title">
@@ -502,7 +536,7 @@
   function eventCalendar(events) {
     const groups = new Map();
     events.forEach((event) => {
-      const date = event.start < D.TRIP.window.start ? D.TRIP.window.start : event.start;
+      const date = event.calendarContext ? event.start : (event.start < D.TRIP.window.start ? D.TRIP.window.start : event.start);
       if (!groups.has(date)) groups.set(date, []);
       groups.get(date).push(event);
     });
@@ -511,6 +545,20 @@
       <div>${rows.map(eventRow).join('')}</div>
     </section>`).join('');
   }
+
+  Views.events = function () {
+    const events = tripCalendarEvents();
+    const featured = events.filter((event) => event.homepageRide || event.homepageEvent).length;
+    return `<section class="event-guide wrap">
+      <header class="event-guide-head">
+        <p class="page-kicker">Everything with a date</p>
+        <h2>August event calendar</h2>
+        <p>Festivals, one-off oddities and every individual race session in one place. The homepage highlights ${featured} favourites; this is the complete list.</p>
+        <div class="event-guide-count"><strong>${events.length}</strong><span>events &amp; sessions</span></div>
+      </header>
+      <div class="today-calendar event-guide-calendar">${eventCalendar(events)}</div>
+    </section>`;
+  };
 
   function greatFitCard(pick, index) {
     const item = pick.type === 'event' ? D.EVENTS.find((event) => event.id === pick.id) : D.ACT_BY_ID[pick.id];
@@ -2005,8 +2053,8 @@
     return { name: parts[0] || 'today', parts: parts.slice(1), query };
   }
   // Old routes keep working: every retired screen forwards to its new home.
-  const ALIAS = { day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip', events: 'trip' };
-  const ROUTES = new Set(['home', 'today', 'activities', 'ideas', 'trip', 'map', 'plan', 'bike', 'event', 'areas', 'archive']);
+  const ALIAS = { day: 'activities', discover: 'activities', browse: 'activities', search: 'activities', build: 'activities', saved: 'ideas', compare: 'ideas', timeline: 'trip' };
+  const ROUTES = new Set(['home', 'today', 'events', 'activities', 'ideas', 'trip', 'map', 'plan', 'bike', 'event', 'areas', 'archive']);
   function render() {
     let route = parse();
     if (ALIAS[route.name]) route.name = ALIAS[route.name];

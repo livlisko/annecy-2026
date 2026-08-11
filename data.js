@@ -55,6 +55,9 @@ window.DATA = (function () {
     'annecy-market':   { url: 'https://www.annecy.fr/annuaires/agendas/detail/marche-de-la-vieille-ville', type: 'Municipal', on: VERIFIED },
     'pierre-gay':      { url: 'https://www.haute-savoie-tourisme.org/commerces/alimentaire/fromageries/764734-fromagerie-pierre-gay', type: 'Tourism office', on: VERIFIED },
     'cave-michel':     { url: 'https://www.lac-annecy.com/alti_alliance_post/visite-de-cave-et-atelier-degustation/', type: 'Tourism office', on: VERIFIED },
+    'le-freti':        { url: 'https://www.lefreti.fr/', type: 'Le Fréti', on: '2026-08-11' },
+    'haute-savoie-food': { url: 'https://hautesavoiemontblanc-tourisme.com/en/your-trip/your-culinary-experiences/local-produce/', type: 'Haute-Savoie tourism', on: '2026-08-11' },
+    'fete-reblochon':  { url: 'https://www.laclusaz.com/agenda/fete-du-reblochon-et-de-lartisanat/', type: 'La Clusaz Tourism', on: '2026-08-11' },
     'veyrier-market':  { url: 'https://www.veyrier-du-lac.fr/index.php/marches-et-commerces/', type: 'Municipal', on: VERIFIED },
     'veyrier-crea':    { url: 'https://www.veyrier-du-lac.fr/agenda/', type: 'Municipal', on: '2026-08-04' },
     'glieres-sites':   { url: 'https://hautesavoie.fr/evenement/sites-des-glieres-maquis-et-morette/', type: 'Departmental', on: VERIFIED },
@@ -352,6 +355,20 @@ window.DATA = (function () {
       why: 'Where the trip starts: a 128 km bike park across two mountains, a walkable village, and the mountain air before the lake.' }
   ];
   const AREA_BY_ID = Object.fromEntries(AREAS.map(a => [a.id, a]));
+
+  /* ---------- SPECIALTIES ------------------------------------------
+     A compact regional food primer for the home page. This is a hit
+     list, not another itinerary or a checklist to complete. */
+  const SPECIALTIES = [
+    { name: 'Fondue savoyarde', note: 'Mountain cheeses melted with local white wine, with bread and cornichons doing the rest.' },
+    { name: 'Raclette', note: 'The wheel warmed and scraped at the table: simple, salty and best earned by a day outside.' },
+    { name: 'Tartiflette & reblochonnade', note: 'Reblochon with potatoes, onions and lardons, baked or melted until resistance is pointless.' },
+    { name: 'Reblochon, Abondance & Tome des Bauges', note: 'The essential local cheese board, ideally bought from a farm, affineur or village market.' },
+    { name: 'Féra & omble chevalier', note: 'The lake specialties: delicate white fish, often served simply with butter, herbs or seasonal vegetables.' },
+    { name: 'Crozets & diots', note: 'Tiny square buckwheat pasta and Savoy sausages: excellent mountain-food territory beyond melted cheese.' },
+    { name: 'Tarte aux myrtilles & rissoles', note: 'Wild-blueberry tart and little pear-filled pastries for the sweet end of the regional syllabus.' },
+    { name: 'Roussette, Mondeuse & génépi', note: 'A white, a red and the herbal mountain digestif; one designated driver remains non-negotiable.' }
+  ];
 
   /* ---------- ACTIVITIES (the ranked catalogue) ----------------------
      base: 'lake' | 'lesgets' | 'both'  (hard: must match the active base)
@@ -868,13 +885,17 @@ window.DATA = (function () {
       status: 'open', src: 'veyrier-market', travel: { lake: { min: 3, mode: 'walk' } }
     },
     {
-      id: 'savoyard-night', title: 'One Savoyard cheese night', base: 'lake', cat: 'food', subtype: 'Evening',
-      areaId: 'veyrier', coords: [45.8830, 6.1717],
-      summary: 'Tartiflette, raclette or fondue — once, on a cooler evening, ideally after a big day out.',
-      duration: 'evening', effort: 'recovery', transport: ['walk','car'], themes: ['food','recovery'],
-      scenic: 1, novelty: 1, group: 'all',
-      weather: { rain: 'good', best: 'any', note: 'Save it for a grey or post-ride evening — heavy in the heat.' },
-      status: 'open', src: 'lac-annecy', travel: { lake: { min: 0, mode: 'at home / in the village' } }
+      id: 'savoyard-night', title: 'Fondue night at Le Fréti', base: 'lake', cat: 'food', subtype: 'Old-town cheese institution',
+      areaId: 'annecy', coords: [45.89855, 6.12493],
+      summary: 'Annecy’s unabashed temple to cheese: fondue, raclette from the wheel, tartiflette and bubbling hot boxes in the old town.',
+      why: '“Fréti” is Savoyard patois for the cheesemaker in a village fruitière. The place began as a dairy shop in 1973 and became a restaurant one year later.',
+      duration: 'evening', effort: 'recovery', transport: ['bike','busboat','car'], themes: ['food','culture','recovery'],
+      scenic: 1, novelty: 2, group: 'all',
+      booking: 'recommended', bookingUrl: 'https://www.lefreti.fr/reserver-une-table', price: 'À la carte; check the current menu.',
+      access: '12 rue Sainte-Claire in the old town. The restaurant currently lists lunch and dinner service seven days a week; reserve for an August evening.',
+      weather: { rain: 'good', best: 'any', note: 'Especially convincing after a ride, on a grey evening or whenever the cheese vote wins.' },
+      pairWith: ['annecy-market','pierre-gay'], status: 'open', src: 'le-freti',
+      travel: { lake: { min: 12, mode: 'bike/bus' } }
     },
     {
       id: 'pool-bbq', title: 'Pool + BBQ at Casa Elisa', base: 'lake', cat: 'recovery', subtype: 'Rest day · week 3 only',
@@ -1564,6 +1585,7 @@ window.DATA = (function () {
     semnozLuge: { photo: 'assets/activities/semnoz-luge.jpg', alt: 'Summer luge track on the Semnoz' },
     haras: { photo: 'assets/activities/haras-annecy.jpg', alt: 'Historic Haras buildings in Annecy' },
     reblochon: { photo: 'assets/activities/reblochon.jpg', alt: 'Reblochon cheeses ageing on wooden racks' },
+    leFreti: { photo: 'assets/activities/le-freti.jpg', alt: 'A Le Fréti cheese dish with charcuterie, potatoes, cornichons and wine', sourceUrl: 'https://www.lefreti.fr/', credit: 'Le Fréti' },
     tamie: { photo: 'assets/activities/tamie-cheese.jpg', alt: 'Cheese from the Abbaye de Tamie' },
     jardins: { photo: 'assets/activities/jardins-secrets.jpg', alt: 'Carved wooden gallery inside the Jardins Secrets at Vaulx' },
     yvoire: { photo: 'https://www.jardin5sens.net/en/wp-content/uploads/2023-07-07-JardinsDrone-11-1-1030x686.jpg', alt: 'The Garden of Five Senses inside medieval Yvoire', sourceUrl: 'https://www.jardin5sens.net/en/', credit: 'Jardin des Cinq Sens' },
@@ -1600,7 +1622,8 @@ window.DATA = (function () {
     [ACTIVITY_MEDIA.montVeyrier, ['mont-veyrier-baron']],
     [ACTIVITY_MEDIA.semnozLuge, ['semnoz-luge']],
     [ACTIVITY_MEDIA.haras, ['halles-haras']],
-    [ACTIVITY_MEDIA.reblochon, ['pierre-gay', 'cave-tasting', 'savoyard-night', 'aravis-cheese']],
+    [ACTIVITY_MEDIA.reblochon, ['pierre-gay', 'cave-tasting', 'aravis-cheese']],
+    [ACTIVITY_MEDIA.leFreti, ['savoyard-night']],
     [ACTIVITY_MEDIA.tamie, ['tamie-abbey']],
     [ACTIVITY_MEDIA.jardins, ['jardins-secrets']],
     [ACTIVITY_MEDIA.yvoire, ['yvoire-five-senses']],
@@ -1703,7 +1726,7 @@ window.DATA = (function () {
       why: 'The lake’s legendary open-water race, 94th edition — and the 5 km start line is literally the beach below the house, the morning we arrive at the lake.',
       booking: 'yes', price: '1 km €25 · 2.4 km €30 · 5 km €40, plus any required day licence; confirm the registration cutoff',
       impact: 'It’s changeover morning: out of Les Gets by 10:00, Andrew lands at GVA, check-in 16:00. Racing it would take heroic logistics — watching the swimmers come into La Brune with coffee is the realistic (and great) plan.',
-      conflict: true, confidence: 'confirmed', verifyBeforeGo: true, src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }, homepageEvent: true, seriesOverview: true,
+      conflict: true, confidence: 'confirmed', verifyBeforeGo: true, src: 'traversee-lac', travel: { lake: { min: 3, mode: 'walk' } }, seriesOverview: true,
       homeSummary: 'Annecy’s open-water classic, with the 5 km start on the beach below our house.',
       homeMeta: '1 / 2.4 / 5 km · €25–40',
       media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy', sourceUrl: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/traversee-du-lac-dannecy/', credit: 'Dauphins d’Annecy' }
@@ -1778,7 +1801,7 @@ window.DATA = (function () {
       why: 'Turn a Chamonix day into something unexpected: public skating, then a summer exhibition hockey game beneath the Aiguilles.',
       booking: 'recommended', price: 'Public skate €6.80 + €4.50 skate hire; match ticket price to be confirmed.',
       impact: 'Check the day’s public-skate session and match ticketing before driving; the two game dates are separate options, not a week-long event.',
-      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true, seriesOverview: true,
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', travel: { lake: { min: 80, mode: 'car', approx: true } }, seriesOverview: true,
       homeSummary: 'Public skating and an evening exhibition match under Mont Blanc.',
       homeMeta: '18 or 26 Aug · 20:00',
       media: { photo: 'https://en.chamonix.com/sites/default/files/styles/ogimage/public/sit/images/7440413/35912870.jpg?itok=22lFbtJc', alt: 'Ice hockey inside Chamonix’s Richard Bozon rink', sourceUrl: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/ice-hockey-games', credit: 'Chamonix Tourism' }
@@ -1910,6 +1933,22 @@ window.DATA = (function () {
      timetable; overview records above remain useful for the map and home. */
   const EXTRA_EVENTS = [
     {
+      id: 'fete-reblochon-2026', name: 'Fête du Reblochon et de l’Artisanat', kind: 'tradition',
+      start: '2026-08-09', end: '2026-08-09', datesLabel: 'Sun 9 Aug · 10:00–midnight', base: 'both',
+      where: 'Le Bossonnet, La Clusaz', coords: [45.9048, 6.4238],
+      why: 'La Clusaz’s full celebration of Reblochon country: open-air mass, a Savoyard lunch, herds and decorated floats through the village, folk dancing and a live farmhouse-cheese demonstration.',
+      booking: 'no', price: 'Free; food and drink sold separately.',
+      impact: 'The 2026 edition fell three days before Day 1, so we just missed it. Keep it here as a very good explanation of the culture around the cheese — and one to remember for another year.',
+      confidence: 'confirmed', src: 'fete-reblochon', calendarContext: true,
+      travel: { lesgets: { min: 70, mode: 'car', approx: true }, lake: { min: 50, mode: 'car', approx: true } },
+      media: {
+        photo: 'assets/activities/fete-reblochon.jpg',
+        alt: 'Decorated parade float and crowds at the Fête du Reblochon in La Clusaz',
+        sourceUrl: 'https://www.laclusaz.com/agenda/fete-du-reblochon-et-de-lartisanat/',
+        credit: 'La Clusaz Tourism'
+      }
+    },
+    {
       id: 'menthon-nocturne', name: 'Theatrical night visit at Château de Menthon', kind: 'theatre',
       start: '2026-08-12', end: '2026-08-26', occurrences: ['2026-08-12','2026-08-19','2026-08-26'],
       datesLabel: 'Wed 12, 19 or 26 Aug · entries 19:00–22:00', base: 'both',
@@ -2001,6 +2040,9 @@ window.DATA = (function () {
       impact: 'You will still be changing houses that morning. If timing permits, the start-line atmosphere at La Brune is the move.',
       conflict: 'changeover-15', confidence: 'confirmed', src: 'traversee-lac', map: false, series: 'traversee-lac',
       travel: { lake: { min: 5, mode: 'walk' } },
+      homepageEvent: true,
+      homeSummary: 'Annecy’s open-water classic, with the 5 km race launching from the beach below our house.',
+      homeMeta: '5 km · 09:30 · €40',
       media: { photo: 'https://dauphins-annecy.auvergnerhonealpes-natation.fr/wp-content/uploads/sites/10/2025/05/evenements-1000.jpg', alt: 'Open-water swimmers racing across Lake Annecy' }
     },
     {
@@ -2073,7 +2115,9 @@ window.DATA = (function () {
       why: 'A gloriously unexpected summer-night option: French alpine hockey against Swiss opposition beneath the Aiguilles.',
       booking: 'recommended', price: 'Match ticket price to be confirmed.', impact: 'Late drive back; check ticket release before setting off.',
       confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', map: false, series: 'chamonix-ice-hockey',
-      travel: { lake: { min: 80, mode: 'car', approx: true } }
+      travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'French alpine hockey against Swiss opposition beneath the Aiguilles.',
+      homeMeta: '20:00 · Tickets TBC'
     },
     {
       id: 'plages-en-scene', name: 'Plages en scène at Le Plant', kind: 'performance',
@@ -2143,6 +2187,9 @@ window.DATA = (function () {
       impact: 'The partner village opens at 16:30. The stadium is currently sold out, so use only the official Athletissima/Ticketcorner portal for returned seats; local Mobilis transit is included from 15:00.',
       confidence: 'confirmed', verifyBeforeGo: true, src: 'athletissima',
       travel: { lesgets: { min: 90, mode: 'car', approx: true }, lake: { min: 80, mode: 'car', approx: true } },
+      homepageEvent: true,
+      homeSummary: 'World-class sprinting, middle distance and field events under the lights in Lausanne.',
+      homeMeta: '19:45–22:00 · Sold out',
       media: {
         photo: 'https://lausanne.diamondleague.com/wp-content/uploads/sites/12/2026/06/20240822215837485-1024x683.jpg',
         alt: 'Elite sprinters racing the 200 metres at Athletissima in Lausanne',
@@ -2213,7 +2260,9 @@ window.DATA = (function () {
       why: 'The second separate exhibition game, this time against Italian opposition from Aosta.',
       booking: 'recommended', price: 'Match ticket price to be confirmed.', impact: 'Late drive back; choose this or the Aug 18 Sierre game, not both by default.',
       confidence: 'confirmed', verifyBeforeGo: true, src: 'chamonix-rink', map: false, series: 'chamonix-ice-hockey',
-      travel: { lake: { min: 80, mode: 'car', approx: true } }
+      travel: { lake: { min: 80, mode: 'car', approx: true } }, homepageEvent: true,
+      homeSummary: 'The second summer exhibition game, this time against Italian opposition.',
+      homeMeta: '20:00 · Tickets TBC'
     },
     {
       id: 'deux-pecheurs', name: 'Les Deux Pêcheurs — Offenbach operetta', kind: 'performance',
@@ -2363,7 +2412,6 @@ window.DATA = (function () {
     // Food & treats
     { id: 'poisson-rouge', cat: 'food', em: '🐟', name: 'Le Poisson Rouge (Sévrier)', coords: [45.86766, 6.14353], blurb: 'Feet-in-the-water lakefront classic — fried perch and féra. Book ahead in August.', verify: true },
     { id: 'charbonniere', cat: 'food', em: '🧀', name: 'Ferme de la Charbonnière (Menthon)', coords: [45.86991, 6.20702], blurb: 'Ferme-auberge above the cow stable — cheese made on site, Reblochonnade, raclette. The real Savoie, five minutes from home.', verify: true },
-    { id: 'le-freti', cat: 'food', em: '🫕', name: 'Le Fréti (old town)', coords: [45.89855, 6.12493], blurb: 'Fondue institution since 1974, cheese aged in its own caves. No summer reservations — go early.', verify: true },
     { id: 'chez-ma-cousine', cat: 'food', em: '🍽️', name: 'Chez ma Cousine (Doussard)', coords: [45.79520, 6.21333], blurb: 'Refined guinguette on the south shore with its own pontoon — arrive by boat if you can. Reserve.', verify: true },
     { id: 'le-denti', cat: 'food', em: '🐟', name: 'Le Denti (Annecy)', coords: [45.89642, 6.12066], blurb: 'Fifteen seats, superb fish, zero fuss — the locals’ secret. Reservations essential.', verify: true },
     { id: 'glacier-des-alpes', cat: 'food', em: '🍦', name: 'Glacier des Alpes', coords: [45.89803, 6.12740], blurb: 'Thirty-year family gelato on rue Perrière — lavender-honey, violet, salted caramel.', verify: true },
@@ -2478,7 +2526,7 @@ window.DATA = (function () {
   return {
     VERIFIED, SOURCES, BASES, TRIP, STAYS, TRANSPORT, PEOPLE,
     TOUR_COLS, CENT_COLS,
-    AREAS, AREA_BY_ID,
+    AREAS, AREA_BY_ID, SPECIALTIES,
     ACTIVITIES, ACT_BY_ID, PLAN_BY_ID,
     EVENTS, GREAT_FIT_PICKS, TRANSPORT_GUIDE,
     STORY, HISTORY,

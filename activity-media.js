@@ -247,10 +247,10 @@
       'Lake Annecy Tourist Office'
     ),
     'savoyard-night': official(
-      'https://www.lafermedelaforclaz.com/wp-content/uploads/2024/02/fondue-e1709121565906.jpg',
-      'A Savoyard fondue served at La Ferme de la Forclaz',
-      'https://www.lafermedelaforclaz.com/restaurant-col-de-la-forclaz/',
-      'La Ferme de la Forclaz'
+      'assets/activities/le-freti.jpg',
+      'A Le Fréti cheese dish with charcuterie, potatoes, cornichons and wine',
+      'https://www.lefreti.fr/',
+      'Le Fréti'
     ),
     'semnoz-picnic': local(
       'assets/wiki/semnoz.jpg',
