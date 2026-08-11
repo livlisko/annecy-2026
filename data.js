@@ -176,6 +176,7 @@ window.DATA = (function () {
     'aravis-summit':   { url: 'https://www.haute-savoie-tourisme.org/nature/cols-montagnes/209204-col-des-aravis', type: 'Tourism office', on: '2026-07-30' },
     'colombiere-summit': { url: 'https://en.legrandbornand.com/le-col-de-la-colombiere-colombiere-pass.html', type: 'Tourism office', on: '2026-07-30' },
     'joux-plane-summit': { url: 'https://www.haut-giffre.fr/equipements/peche-au-lac-de-joux-plane/', type: 'Tourism office', on: '2026-07-30' },
+    'joux-plane-viewpoint': { url: 'https://www.samoens.com/lac-de-joux-plane/', type: 'Samoëns Tourist Office', on: '2026-08-11' },
     'ramaz-summit':    { url: 'https://en.prazdelys-sommand.com/equipement/col-de-la-ramaz-tourist-route/', type: 'Tourism office', on: '2026-07-30' }
   };
 
@@ -298,7 +299,7 @@ window.DATA = (function () {
       iconic: 'The brutal final wall before the descent to Morzine: a name cycling fans immediately recognize.',
       tour: 'In 2023 it became the Tour’s 250th hors-catégorie climb, with Vingegaard and Pogačar duelling over the summit before Carlos Rodríguez won in Morzine.',
       summit: 'Lac de Joux Plane, easy lake walks, summer trout fishing and Le Relais des Vallées restaurant facing the water.',
-      tourSrc: 'tdf-joux-plane', summitSrc: 'joux-plane-summit'
+      tourSrc: 'tdf-joux-plane', summitSrc: 'joux-plane-summit', ideaId: 'joux-plane-overlook'
     },
     {
       id: 'ramaz', name: 'Col de la Ramaz', elevation: 1619,
@@ -1051,8 +1052,22 @@ window.DATA = (function () {
       weather: { rain: 'ok', storm: 'avoid-pm', best: 'clear' },
       status: 'open', availability: 'Roads open in summer; confirm the specific col/route yourself.', verifyBeforeGo: true, src: 'lesgets-tarifs',
       travel: { lesgets: { min: 2, mode: 'from the door' } }
-    }
-,
+    },
+    {
+      id: 'joux-plane-overlook', title: 'Mont Blanc overlook at Lac de Joux Plane', base: 'lesgets', cat: 'walk', subtype: 'Roadside viewpoint · optional easy walk',
+      areaId: 'les-gets', coords: [46.1306, 6.7077],
+      summary: 'The exact roadside Mont Blanc overlook from the Stage 5 photos, beside Lac de Joux Plane: a brilliant group stop even if nobody wants to ride the col.',
+      why: 'The TT GPX passes almost directly through the viewpoint at about km 39.7. Stop at the roadside meadow, continue to the lake, or add the easy La Bourgeoise walk for the full 360-degree panorama.',
+      duration: '2h', effort: 'easy', transport: ['car','bike'], themes: ['views','walks','bikes'],
+      scenic: 3, novelty: 2, group: 'all', booking: 'no', price: 'Free.',
+      access: 'Best pin: 46.1306, 6.7077 at roughly 1,755 m. The optional La Bourgeoise walk starts at the Lac de Joux Plane parking: 5 km round trip, about 1h15 and +70 m. Check the pass road and visibility before leaving.',
+      weather: { rain: 'poor', storm: 'avoid-pm', best: 'clear', note: 'The Mont Blanc view is the point. Save this for a clear day and skip exposed high ground in storms.' },
+      pairWith: ['lesgets-road-ride'], status: 'open', verifyBeforeGo: true, src: 'joux-plane-viewpoint',
+      travel: { lesgets: { min: 30, mode: 'car', approx: true }, lake: { min: 85, mode: 'car', approx: true } },
+      homepageActivity: true,
+      homeSummary: 'The exact roadside Mont Blanc viewpoint from the Stage 5 photos, with Lac de Joux Plane just below.',
+      homeMeta: 'GPX km 39.7 · 1,755 m · Free'
+    },
 
     /* ===== EXPANSION SWEEP (researched + verified 2026-07-26) ===== */
     {

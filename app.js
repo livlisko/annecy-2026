@@ -316,6 +316,14 @@
         <span class="hm-event-go" aria-hidden="true">→</span>
       </a>`;
     }).join('');
+    const homeActivityRows = D.ACTIVITIES.filter((activity) => activity.homepageActivity).map((activity) => `
+      <a class="hm-event-row hm-anytime-row" href="#/plan/${esc(activity.id)}">
+        <span class="hm-event-date hm-anytime-date"><span>Activity</span><strong>Any</strong><small>time</small></span>
+        <span class="hm-event-media">${cover(actCover(activity), { cls: 'hm-event-image', alt: activity.title })}</span>
+        <span class="hm-event-copy"><strong>${esc(activity.title)}</strong><span>${esc(activity.homeSummary || activity.summary)}</span></span>
+        <span class="hm-event-meta">${esc(activity.homeMeta || 'Dateless idea')}</span>
+        <span class="hm-event-go" aria-hidden="true">→</span>
+      </a>`).join('');
     const specialtyRows = (D.SPECIALTIES || []).map((item, index) => `
       <article class="hm-specialty-item">
         <span>${String(index + 1).padStart(2, '0')}</span>
@@ -368,10 +376,10 @@
       <section class="hm-events" aria-labelledby="hm-events-title">
         <div class="hm-events-head">
           <div><p class="hm-events-kicker">While we’re there</p><h3 id="hm-events-title">Nearby events coming up</h3></div>
-          <p>A short edit from the shared trip calendar: races, festivals, lake oddities and one very local tractor competition.</p>
+          <p>A short edit from the shared trip calendar, plus one dateless detour worth pinning.</p>
         </div>
-        <div class="hm-event-list">${homeEventRows}</div>
-        <div class="hm-events-foot"><span>Every row above is also in the dated calendar.</span><a href="#/events">See all ${calendarEvents.length} events &amp; race sessions →</a></div>
+        <div class="hm-event-list">${homeEventRows}${homeActivityRows}</div>
+        <div class="hm-events-foot"><span>Dated rows share one calendar; the Joux Plane stop lives in Activities.</span><a href="#/events">See all ${calendarEvents.length} events &amp; race sessions →</a></div>
       </section>
 
       <section class="hm-specialties" aria-labelledby="hm-specialties-title">

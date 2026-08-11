@@ -320,6 +320,12 @@
       'https://www.lesgets.com/en/bike-3/road-bike-les-gets/itineraries-and-mountain-bike-passes-les-gets/joux-plane-via-morzine/',
       'Les Gets Tourism'
     ),
+    'joux-plane-overlook': official(
+      'assets/activities/joux-plane-overlook.jpg',
+      'Aerial view of Lac de Joux Plane, its mountain road and Mont Blanc',
+      'https://www.samoens.com/lac-de-joux-plane/',
+      'Samoëns Tourist Office'
+    ),
     'esperance-barge': local(
       'assets/activities/esperance-iii.jpg',
       'The restored sailing barge Esperance III on Lake Annecy'
