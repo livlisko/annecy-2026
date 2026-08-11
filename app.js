@@ -815,7 +815,7 @@
         <dt>When</dt><dd>${esc(e.datesLabel)}</dd>
         <dt>Where</dt><dd>${esc(e.where)}</dd>
         ${dd ? `<dt>From here</dt><dd>${dd.approx ? '≈' : ''}${dd.min} min ${esc(dd.mode)} from ${esc(D.BASES[base].label)}</dd>` : ''}
-        <dt>Tickets</dt><dd>${e.booking === 'no' ? 'Free / no ticket' : e.booking === 'yes' ? 'Ticketed — book' : 'Some free, some ticketed'}${e.price ? ' · ' + esc(e.price) : ''}</dd>
+        <dt>Tickets</dt><dd>${e.booking === 'no' ? 'Free / no ticket' : e.booking === 'yes' ? 'Ticketed — book' : e.booking === 'sold-out' ? 'Currently sold out' : 'Some free, some ticketed'}${e.price ? ' · ' + esc(e.price) : ''}</dd>
       </dl>
       <p class="detail-why">${esc(e.why)}</p>
       ${e.impact ? `<div class="note-box${e.conflict ? ' warn' : ''}">${esc(e.impact)}</div>` : ''}

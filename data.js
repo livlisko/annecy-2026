@@ -140,6 +140,7 @@ window.DATA = (function () {
     'fete-guides':     { url: 'https://en.chamonix.com/animations-et-evenements-chamonix-et-argentiere/fete-des-guides-aux-gaillands', type: 'Chamonix Tourism', on: '2026-08-05' },
     'yvoire-garden':   { url: 'https://www.jardin5sens.net/en/', type: 'Jardin des Cinq Sens', on: '2026-08-06' },
     'smuggling-route': { url: 'https://www.chatel.com/en/entertainment-and-events/on-the-smuggling-route-chatel/', type: 'Châtel Tourism', on: '2026-08-06' },
+    'athletissima':    { url: 'https://athletissima.ch/en/ticketing/', type: 'Athletissima organizer', on: '2026-08-11' },
     'les-aubes':       { url: 'https://lesaubes.ch/', type: 'Festival organizer', on: '2026-08-06' },
     'osr-lodger':      { url: 'https://www.osr.ch/en/concerts-tickets/concerts/detail-dun-evenement/event/the-lodger', type: 'Orchestre de la Suisse Romande', on: '2026-08-06' },
     'musique-nature':  { url: 'https://www.musiqueetnature.fr/programme-musique-bauges-nature-festival/', type: 'Festival organizer', on: '2026-08-06' },
@@ -2132,6 +2133,22 @@ window.DATA = (function () {
       booking: 'recommended', price: 'Castle admission; check event supplement.', impact: 'Pair it with the gorge, but expect a busier castle than on a normal visit.',
       confidence: 'confirmed', src: 'montrottier-medieval', travel: { lake: { min: 25, mode: 'car' } },
       media: { photo: 'assets/activities/montrottier.jpg', alt: 'Stone towers of Château de Montrottier' }
+    },
+    {
+      id: 'athletissima-lausanne', name: 'Athletissima — Lausanne Diamond League', kind: 'sport',
+      start: '2026-08-21', end: '2026-08-21', datesLabel: 'Fri 21 Aug · pre-programme 18:00 · main meeting 19:45–22:00',
+      base: 'lake', where: 'Stade Olympique de la Pontaise, Lausanne', coords: [46.5333, 6.6243],
+      why: 'One of Europe’s great track meets: Gout Gout versus Letsile Tebogo over 200 m, Audrey Werro’s home 800 m, Ditaji Kambundji in the hurdles, plus world-class jumps and javelin.',
+      booking: 'sold-out', price: 'Official returns may reappear in the Athletissima ticket portal.',
+      impact: 'The partner village opens at 16:30. The stadium is currently sold out, so use only the official Athletissima/Ticketcorner portal for returned seats; local Mobilis transit is included from 15:00.',
+      confidence: 'confirmed', verifyBeforeGo: true, src: 'athletissima',
+      travel: { lesgets: { min: 90, mode: 'car', approx: true }, lake: { min: 80, mode: 'car', approx: true } },
+      media: {
+        photo: 'https://lausanne.diamondleague.com/wp-content/uploads/sites/12/2026/06/20240822215837485-1024x683.jpg',
+        alt: 'Elite sprinters racing the 200 metres at Athletissima in Lausanne',
+        sourceUrl: 'https://lausanne.diamondleague.com/en/gout-gout-takes-on-tebogo-in-an-explosive-showdown-in-lausanne/',
+        credit: 'Athletissima / KEYSTONE'
+      }
     },
     {
       id: 'nemanja-double-sens', name: 'Nemanja Radulović & Double Sens', kind: 'concert',
